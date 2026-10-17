@@ -1,13 +1,11 @@
 use std::net::{Ipv4Addr, SocketAddr};
 use std::path::PathBuf;
 use std::sync::Mutex;
-use std::time::Duration;
 
 use tauri::{AppHandle, Manager, RunEvent};
 use watchit_server::{Config, Server};
 
 const DEFAULT_PORT: u16 = 7171;
-const SHUTDOWN_TIMEOUT: Duration = Duration::from_secs(5);
 
 pub struct EmbeddedServer {
     server: Mutex<Option<Server>>,
@@ -17,7 +15,7 @@ impl EmbeddedServer {
     pub async fn stop(&self) {
         let server = self.server.lock().unwrap().take();
         if let Some(server) = server {
-            let _ = tokio::time::timeout(SHUTDOWN_TIMEOUT, server.shutdown()).await;
+            server.shutdown().await;
         }
     }
 }
