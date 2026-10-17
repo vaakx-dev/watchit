@@ -9,4 +9,5 @@ export type { Transfer } from '../generated/torrents/Transfer';
 export type { TransferFile } from '../generated/torrents/TransferFile';
 export type { TransferKind } from '../generated/torrents/TransferKind';
 export type { TransferList } from '../generated/torrents/TransferList';
+export type { TransferPatch } from '../generated/torrents/TransferPatch';
 export type { TransferState } from '../generated/torrents/TransferState';

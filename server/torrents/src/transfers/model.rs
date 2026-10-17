@@ -67,4 +67,5 @@ pub struct Transfer {
     pub eta_seconds: Option<u64>,
     pub added_at: i64,
     pub readiness: Readiness,
+    pub queue_position: Option<u32>,
 }

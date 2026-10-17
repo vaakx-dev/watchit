@@ -5,6 +5,7 @@ import type { Transfer } from '../torrents/types';
 import { Choices } from '../ui/choices';
 import { EmptyState } from '../ui/empty_state';
 import { Page } from '../ui/page';
+import { QueueSection } from './queue/queue_section';
 import { RemoveDialog } from './remove_dialog';
 import { SettingsSection } from './settings/settings_section';
 import { FILTER_LABELS, FILTERS, matches, type Filter } from './states';
@@ -33,6 +34,7 @@ export function DownloadsPage() {
     <div className="downloads">
       <Summary transfers={transfers} disk={disk} />
       <Notice live={live} error={error} />
+      <QueueSection transfers={transfers} />
       <Choices label="Show downloads" options={options} value={filter} on_change={set_filter} />
       {shown.length ? groups(shown).map(([id, list]) => <TransferGroup key={id} id={id} transfers={list} on_remove={set_removing} />)
         : <EmptyState icon={Download} title={filter === 'all' ? 'Nothing downloaded yet.' : `No ${FILTER_LABELS[filter].toLowerCase()} downloads.`}>

@@ -53,6 +53,9 @@ pub struct TransferPatch {
     #[serde(default)]
     #[ts(optional, type = "'download'")]
     kind: Option<Kind>,
+    #[serde(default)]
+    #[ts(optional)]
+    queue_position: Option<u32>,
 }
 
 #[derive(Deserialize)]
@@ -94,7 +97,7 @@ pub async fn update(
         return Err(AppError::bad_request("A transfer can only be changed into a download."));
     }
     let transfers = torrents.transfers().await?;
-    transfers.change(&id, Change { paused: body.paused, kind: body.kind }).await.map(Json)
+    transfers.change(&id, Change { paused: body.paused, kind: body.kind, queue_position: body.queue_position }).await.map(Json)
 }
 
 pub async fn remove(State(torrents): State<Torrents>, Path(id): Path<String>, Query(query): Query<DeleteQuery>) -> AppResult<StatusCode> {

@@ -9,6 +9,7 @@ use super::pick;
 use super::record::{Pick, Record};
 use super::{Transfers, now};
 use crate::engine::{self, AddRequest, Metadata};
+use crate::queue;
 
 pub fn valid_info_hash(value: &str) -> AppResult<String> {
     let hash = value.to_ascii_lowercase();
@@ -66,7 +67,9 @@ impl Transfers {
                         error: None,
                         picks: vec![pick],
                     };
-                    entries.insert(info_hash.clone(), Entry::new(record, Vec::new()));
+                    let mut entry = Entry::new(record, Vec::new());
+                    entry.queue_rank = queue::next_rank(&entries);
+                    entries.insert(info_hash.clone(), entry);
                     false
                 }
             }

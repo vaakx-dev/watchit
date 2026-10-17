@@ -22,7 +22,8 @@ use librqbit::Session;
 use tokio::sync::{Notify, broadcast};
 use watchit_core::{AppResult, Db};
 
-pub use disk::Disk;
+pub use add::valid_info_hash;
+pub use disk::{Disk, free_bytes};
 pub use entry::{Entry, Progress};
 pub use events::TransferEvent;
 pub use record::{Choice, Pick};
@@ -82,9 +83,14 @@ impl Transfers {
     }
 
     pub async fn persist(&self, info_hash: &str) -> AppResult<()> {
-        let saved = self.entries().get(info_hash).map(|entry| (entry.record.clone(), entry.files.clone()));
-        let Some((record, files)) = saved else { return Ok(()) };
-        self.db.run(move |conn| store::save(conn, &record, &files)).await
+        let saved = self.entries().get(info_hash).map(|entry| (entry.record.clone(), entry.files.clone(), entry.queue_rank));
+        let Some((record, files, rank)) = saved else { return Ok(()) };
+        self.db
+            .run(move |conn| {
+                store::save(conn, &record, &files)?;
+                crate::queue::save_rank(conn, &record.info_hash, rank)
+            })
+            .await
     }
 
     pub async fn update_settings(&self, settings: Settings) -> AppResult<Settings> {

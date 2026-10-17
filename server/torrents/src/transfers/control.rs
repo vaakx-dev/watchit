@@ -10,6 +10,7 @@ use super::model::{Kind, Transfer};
 pub struct Change {
     pub paused: Option<bool>,
     pub kind: Option<Kind>,
+    pub queue_position: Option<u32>,
 }
 
 impl Transfers {
@@ -33,6 +34,9 @@ impl Transfers {
             (refetch, restart)
         };
         self.persist(&info_hash).await?;
+        if let Some(position) = change.queue_position {
+            self.move_in_queue(&info_hash, position).await?;
+        }
         if refetch {
             self.fetch_metadata(&info_hash);
         }
@@ -62,7 +66,7 @@ impl Transfers {
     pub async fn resume_for_playback(self: &Arc<Self>, info_hash: &str) -> AppResult<()> {
         let paused = self.entries().get(info_hash).is_some_and(|entry| entry.record.paused);
         if paused {
-            self.change(info_hash, Change { paused: Some(false), kind: None }).await?;
+            self.change(info_hash, Change { paused: Some(false), kind: None, queue_position: None }).await?;
         }
         Ok(())
     }
