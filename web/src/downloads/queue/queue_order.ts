@@ -1,11 +1,6 @@
 import { update_transfer } from '../../torrents/api';
 import type { Transfer } from '../../torrents/types';
 
-export function queued(transfers: readonly Transfer[]) {
-  return transfers.filter(transfer => transfer.queue_position !== null)
-    .sort((a, b) => (a.queue_position ?? 0) - (b.queue_position ?? 0));
-}
-
 export function moved<T>(list: readonly T[], from: number, to: number) {
   const next = [...list];
   const [item] = next.splice(from, 1);
