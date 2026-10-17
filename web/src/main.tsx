@@ -22,6 +22,8 @@ import './styles/rankings.css';
 import './styles/settings.css';
 import './styles/downloads.css';
 import './downloads/locations/locations.css';
+import './downloads/picker/picker.css';
+import './torrents/filters/filters.css';
 import './remote/remote.css';
 import './styles/profiles.css';
 import './styles/loading.css';
