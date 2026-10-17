@@ -77,13 +77,13 @@ impl Meta {
         Some(unique)
     }
 
-    pub fn countries(&self) -> Vec<String> {
-        let values = match self.fields.value("country") {
-            Some(Value::Array(values)) => values.iter().filter_map(Value::as_str).map(str::to_owned).collect(),
-            Some(Value::String(text)) => text.split(',').map(str::to_owned).collect(),
-            _ => Vec::new(),
+    pub fn primary_country(&self) -> Option<String> {
+        let first = match self.fields.value("country") {
+            Some(Value::Array(values)) => values.iter().find_map(Value::as_str),
+            Some(Value::String(text)) => text.split(',').next(),
+            _ => None,
         };
-        values.into_iter().map(|value| value.trim().to_lowercase()).collect()
+        first.map(|country| country.trim().to_lowercase())
     }
 }
 
