@@ -36,7 +36,7 @@ function Genres({ genres, value, on_change }: { genres: readonly GenreOption[]; 
     if (row.current && chip) row.current.scrollLeft = chip.offsetLeft - (row.current.clientWidth - chip.offsetWidth) / 2;
   }, [value]);
 
-  return <div className="genre-choices" ref={row}>
+  return <div className="genre-choices" ref={row} data-loading={genres.length === 0 || undefined}>
     <Choices label="Genre" options={options} value={value} on_change={id => on_change({ genre: id === value ? '' : id })}>
       {genres.some(genre => genre.minor) && <button type="button" className="more-genres" aria-expanded={more} onClick={() => set_more(!more)}>
         {more ? 'Fewer genres' : 'More genres'}
@@ -64,10 +64,8 @@ export function CollectionFilters({ filters, genres, on_change }: { filters: Dis
     <Choices label="Type" look="segmented" options={KINDS} value={filters.kind} on_change={kind => on_change({ kind })} />
     <span className="filter-label" aria-hidden="true">Sort</span>
     <Choices label="Sort" look="segmented" options={SORTS} value={filters.sort} on_change={sort => on_change({ sort })} />
-    {genres.length > 0 && <>
-      <span className="filter-label" aria-hidden="true">Genre</span>
-      <Genres genres={genres} value={filters.genre} on_change={on_change} />
-    </>}
+    <span className="filter-label" aria-hidden="true">Genre</span>
+    <Genres genres={genres} value={filters.genre} on_change={on_change} />
     <span className="filter-label" aria-hidden="true">Hide</span>
     <Hidden value={filters.hide} on_change={on_change} />
   </div>;

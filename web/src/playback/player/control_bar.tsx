@@ -39,7 +39,7 @@ export function ControlBar(props: Props) {
     <div className="control-row">
       <div className="control-group">
         <div className="player-pill play-pill">
-          <PlayerButton label={state.paused ? 'Play' : 'Pause'} shortcut="k" on_click={props.on_toggle_play}>
+          <PlayerButton label={state.paused ? 'Play' : state.waiting ? 'Loading' : 'Pause'} shortcut="k" on_click={props.on_toggle_play}>
             {state.paused ? <Play fill="currentColor" /> : <Pause fill="currentColor" />}
           </PlayerButton>
           {props.next_label && <PlayerButton label={props.next_label} shortcut="SHIFT+n" on_click={props.on_next}><SkipForward fill="currentColor" /></PlayerButton>}

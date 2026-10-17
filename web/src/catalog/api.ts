@@ -11,7 +11,7 @@ type Progress = { imports?: ImportStatus; artwork_status?: ArtworkStatus };
 type Resource<T> =
   | { status: 'idle' | 'loading' }
   | { status: 'ready'; data: T }
-  | { status: 'error'; error: string };
+  | { status: 'error'; error: string; missing?: boolean };
 
 export function awaiting_items(resource: Resource<Pick<CatalogPage, 'items'> & Partial<Pick<CatalogPage, 'imports'>>>) {
   return resource.status === 'loading' || (resource.status === 'ready' && resource.data.items.length === 0
@@ -44,7 +44,7 @@ export function use_resource<T extends object>(url: string | null, { cache = tru
         const failures = previous.url === url ? previous.failures + 1 : 1;
         return previous.url === url && previous.resource.status === 'ready' && failures < MAX_FAILURES && !(error instanceof HttpError && error.status === 404)
           ? { ...previous, failures }
-          : { url, resource: { status: 'error', error: error instanceof Error ? error.message : 'Could not load data.' }, failures };
+          : { url, resource: { status: 'error', error: error instanceof Error ? error.message : 'Could not load data.', missing: error instanceof HttpError && error.status === 404 }, failures };
       });
     });
     return () => controller.abort();
@@ -94,7 +94,7 @@ export function use_import_page<T extends Progress>(url: string | null, items: (
   const [poll, set_poll] = useState({ url, attempt: 0 });
   const attempt = poll.url === url ? poll.attempt : 0;
   const shown = resource.status === 'ready' ? items(resource.data) : [];
-  const waiting = resource.status === 'ready' && (awaiting_update(resource.data, shown) || refreshing(resource.data));
+  const waiting = resource.status === 'ready' ? awaiting_update(resource.data, shown) || refreshing(resource.data) : resource.status === 'error' && resource.missing;
   const empty = shown.length === 0;
 
   useEffect(() => {

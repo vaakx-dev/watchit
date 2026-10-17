@@ -14,3 +14,4 @@
   .genre-choices::-webkit-scrollbar { display: none; }
   .genre-choices > .choices { flex-wrap: nowrap; }
 }
+.genre-choices[data-loading] { min-height: 36px; }

@@ -31,6 +31,7 @@ export function App({ profile, profiles, on_profiles_changed }: Props) {
   const main = useRef<HTMLElement>(null);
   const { resource, retry } = use_title('id' in route ? route.id : undefined);
   use_library_refresh(library, retry);
+  const failed = resource.status === 'error' && !resource.missing;
   const result = resource.status === 'ready' ? resource.data : undefined;
   const title = result?.title;
   const name = title?.title;
@@ -59,8 +60,8 @@ export function App({ profile, profiles, on_profiles_changed }: Props) {
       {route.view === 'rankings' && <Rankings />}
       {(route.view === 'title' || (route.view === 'watch' && title?.kind === 'series')) && result && <TitlePage key={result.title.id} result={result} library={library} />}
       {watching && result && <WatchPage key={result.title.id} result={result} library={library} />}
-      {'id' in route && !title && (route.view === 'title' && resource.status !== 'error'
-        ? <TitleSkeleton /> : <CatalogStatus error={resource.status === 'error' ? resource.error : undefined} retry={retry} />)}
+      {'id' in route && !title && (route.view === 'title' && !failed
+        ? <TitleSkeleton /> : <CatalogStatus error={failed && resource.status === 'error' ? resource.error : undefined} retry={retry} />)}
       {route.view === 'downloads' && <DownloadsPage />}
       {route.view === 'settings' && <SettingsPage section={route.section} profile={profile} profiles={profiles} on_profiles_changed={on_profiles_changed} />}
       {route.view === 'profiles' && <div className="page-gutter"><ProfilePicker profiles={profiles} current={profile} on_changed={on_profiles_changed} /></div>}

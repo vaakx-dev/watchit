@@ -31,7 +31,9 @@
   .library-list { grid-template-columns: 44px minmax(0, 1fr) auto auto; column-gap: var(--space-3); }
   .library-next, .library-year { display: none; }
   .library-poster, .library-row > .status-controls, .library-play { grid-row: span 2; }
+  .library-play:empty { display: none; }
   .library-copy { grid-column: 2; }
+  .library-row:has(.library-play:empty) > .status-controls { grid-column: 3 / -1; justify-self: end; }
   .library-rating { grid-column: 2; grid-row: 2; margin-top: 2px; }
   .library-rating:not(:has(.rating-value)) { display: none; }
   .library-copy .meta { flex-direction: column; align-items: flex-start; gap: 0; }
