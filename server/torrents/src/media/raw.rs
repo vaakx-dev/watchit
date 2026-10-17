@@ -50,8 +50,12 @@ pub async fn raw(
     }
     opened.reader.seek(SeekFrom::Start(start)).await.map_err(AppError::internal)?;
     let guard = opened.guard;
+    let mut playhead = transfers.playhead_cursor(&info_hash, file_index, start);
     let body = ReaderStream::with_capacity(opened.reader.take(take), CHUNK).map(move |chunk| {
         let _reading = &guard;
+        if let (Some(playhead), Ok(bytes)) = (playhead.as_mut(), &chunk) {
+            playhead.advance(bytes.len() as u64);
+        }
         chunk
     });
     Ok((status, out, Body::from_stream(body)).into_response())

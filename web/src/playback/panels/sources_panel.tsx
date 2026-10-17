@@ -3,6 +3,7 @@ import { bytes, percent } from '../../torrents/format';
 import { DownloadResultButton } from '../../torrents/download_result_button';
 import type { Sources } from '../sources/use_sources';
 import { source_key, type PlaySource } from '../sources/types';
+import { RunningNote } from '../../downloads/readiness/running_note';
 import { SourceRow } from './source_row';
 
 function Group({ title, note, children }: { title: string; note?: ReactNode; children: ReactNode[] }) {
@@ -23,11 +24,13 @@ function Row({ source, sources, title_id }: { source: PlaySource; sources: Sourc
   if (source.kind === 'local') {
     const { file } = source;
     return <SourceRow resolution={file.resolution} hdr={file.hdr} name={file.name} current={current} on_play={play}
+      note={file.progress < 1 && <RunningNote info_hash={file.info_hash} />}
       details={[bytes(file.size_bytes), file.progress < 1 && `Downloading ${percent(file.progress)}`]} />;
   }
   if (source.kind === 'torrent') {
     const { result } = source;
     return <SourceRow resolution={result.resolution} hdr={result.hdr} name={result.filename ?? result.name} current={current} on_play={play}
+      note={<RunningNote info_hash={result.info_hash} />}
       details={[seeders(result.seeders), result.size_bytes !== null && bytes(result.size_bytes), result.video_codec, result.audio, result.site, result.languages.join(' / ')]}
       action={<DownloadResultButton result={result} title_id={title_id} />} />;
   }

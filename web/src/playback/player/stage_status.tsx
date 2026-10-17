@@ -1,5 +1,6 @@
 import { percent, speed } from '../../torrents/format';
 import type { Transfer } from '../../torrents/types';
+import { ReadinessNote } from '../../downloads/readiness/readiness_note';
 
 function TransferLine({ transfer }: { transfer: Transfer }) {
   if (transfer.state === 'metadata') return <p className="meta">Fetching torrent details · {transfer.peers} {transfer.peers === 1 ? 'peer' : 'peers'}</p>;
@@ -21,5 +22,6 @@ export function StageStatus({ message, error, transfer, on_sources }: { message:
     <span className="spinner" aria-hidden="true" />
     <p>{message}</p>
     {transfer && <TransferLine transfer={transfer} />}
+    {transfer && <ReadinessNote transfer={transfer} />}
   </div>;
 }
