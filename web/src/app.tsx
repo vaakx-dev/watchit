@@ -5,12 +5,13 @@ import { Home } from './catalog/pages/home';
 import { CatalogStatus } from './catalog/components/status';
 import { use_title } from './catalog/api';
 import { Settings } from './cache/settings';
+import { DownloadsPage } from './downloads/downloads_page';
 import { MyShows } from './library/pages/my_shows';
 import { Rankings } from './library/pages/rankings';
 import { use_library } from './library/use_library';
 import { use_library_refresh } from './library/use_library_refresh';
 import { use_route } from './navigation/route';
-import { Player } from './playback/player';
+import { WatchPage } from './playback/watch_page';
 import { ProfilePicker } from './profiles/profile_picker';
 import type { Profile } from './profiles/types';
 import { Header } from './shell/header';
@@ -30,6 +31,7 @@ export function App({ profile, profiles, on_profiles_changed }: Props) {
   const name = title?.title;
   const route_key = 'id' in route ? `${route.view}/${route.id}` : route.view === 'search' ? `search:${route.query}` : route.view;
   const empty_search = route.view === 'search' && !route.query;
+  const watching = route.view === 'watch' && title !== undefined && title.kind !== 'series';
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -43,7 +45,7 @@ export function App({ profile, profiles, on_profiles_changed }: Props) {
 
   return <>
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); main.current?.focus(); }}>Skip to content</a>
-    <Header route={route} profile={profile} />
+    {!watching && <Header route={route} profile={profile} />}
     <main id="main-content" ref={main} tabIndex={-1}>
       {library.error && <div className="library-notice" role="alert"><p>Your library request failed: {library.error} Changes are not confirmed until the server saves them.</p><button className="button secondary small" disabled={library.pending || library.loading} onClick={library.retry}>Reload library</button></div>}
       {route.view === 'tonight' && <Home library={library} />}
@@ -51,13 +53,14 @@ export function App({ profile, profiles, on_profiles_changed }: Props) {
       {route.view === 'mine' && <MyShows shelf={route.shelf} library={library} />}
       {route.view === 'rankings' && <Rankings />}
       {(route.view === 'title' || (route.view === 'watch' && title?.kind === 'series')) && result && <TitlePage key={result.title.id} result={result} library={library} />}
-      {route.view === 'watch' && result && result.title.kind !== 'series' && <Player key={result.title.id} title={result.title} remembered_source={result.playback_source} library={library} />}
+      {watching && result && <WatchPage key={result.title.id} result={result} library={library} />}
       {'id' in route && !title && (route.view === 'title' && resource.status !== 'error'
         ? <TitleSkeleton /> : <CatalogStatus error={resource.status === 'error' ? resource.error : undefined} retry={retry} />)}
+      {route.view === 'downloads' && <DownloadsPage />}
       {route.view === 'settings' && <Settings />}
       {route.view === 'profiles' && <div className="page-gutter"><ProfilePicker profiles={profiles} current={profile} on_changed={on_profiles_changed} /></div>}
       {route.view === 'missing' && <div className="not-found"><EmptyState title="That page is not in the catalog."><a className="button primary" href="#/">Back to Tonight</a></EmptyState></div>}
     </main>
-    <TabBar route={route} />
+    {!watching && <TabBar route={route} />}
   </>;
 }

@@ -5,7 +5,7 @@ import { SHELVES, type Shelf } from '../library/types';
 import { discover_href, parse_discover, type DiscoverQuery } from './discover';
 
 export type Route =
-  | { view: 'tonight' | 'rankings' | 'settings' | 'profiles' | 'missing' }
+  | { view: 'tonight' | 'rankings' | 'downloads' | 'settings' | 'profiles' | 'missing' }
   | { view: 'discover'; query: DiscoverQuery }
   | { view: 'mine'; shelf: Shelf }
   | { view: 'search'; query: string }
@@ -50,7 +50,7 @@ export function parse_route(hash: string): Route {
   if (target) return parse_route(target);
   const { pathname, params } = split(hash);
   if (pathname === '/') return { view: 'tonight' };
-  for (const view of ['rankings', 'settings', 'profiles'] as const) if (pathname === `/${view}`) return { view };
+  for (const view of ['rankings', 'downloads', 'settings', 'profiles'] as const) if (pathname === `/${view}`) return { view };
   if (pathname === '/discover') return { view: 'discover', query: parse_discover(params) };
   if (pathname === '/mine') return { view: 'mine', shelf: mine_shelf(params) };
   if (pathname === '/search') return { view: 'search', query: params.get('q') ?? '' };

@@ -1,4 +1,5 @@
 import type { SeriesProgress, Status } from '../library/types.ts';
+import type { SavedPosition } from '../playback/progress/api.ts';
 
 export type MediaKind = 'movie' | 'series' | 'episode';
 export type CatalogKind = 'all' | 'movie' | 'series' | 'anime';
@@ -88,6 +89,7 @@ export type TitleResult = {
   freshness: Freshness;
   playback_source: string | null;
   progress: SeriesProgress | null;
+  position?: SavedPosition | null;
   imports?: ImportStatus;
   artwork_status?: ArtworkStatus;
 };
