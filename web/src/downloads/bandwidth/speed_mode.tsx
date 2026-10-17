@@ -1,47 +1,39 @@
-import { ArrowDown, ArrowUp, Gauge, MonitorPlay, Turtle } from 'lucide-react';
+import { Gauge, MonitorPlay, Turtle } from 'lucide-react';
 import { useState } from 'react';
 import { speed as rate } from '../../torrents/format';
 import type { SpeedMode as Mode, SpeedStatus } from '../../torrents/types';
 import { set_alternative } from './api';
 import './bandwidth.css';
 
-const MODES: Record<Mode, { icon: typeof Gauge; label: string }> = {
-  normal: { icon: Gauge, label: 'Normal speed' },
-  alternative: { icon: Turtle, label: 'Alternative speed' },
-  watching: { icon: MonitorPlay, label: 'Watching' },
-};
+const ICONS: Record<Mode, typeof Gauge> = { normal: Gauge, alternative: Turtle, watching: MonitorPlay };
 
-function Limits({ speed }: { speed: SpeedStatus }) {
-  if (speed.mode === 'watching') {
-    return <span>{speed.download_bps_limit ? `Background downloads limited to ${rate(speed.download_bps_limit)}` : 'Background downloads paused'}</span>;
-  }
-  if (speed.download_bps_limit === null && speed.upload_bps_limit === null) return <span>No speed limit</span>;
-  return <span>
-    <span><ArrowDown />{speed.download_bps_limit === null ? 'No limit' : rate(speed.download_bps_limit)}</span>
-    <span><ArrowUp />{speed.upload_bps_limit === null ? 'No limit' : rate(speed.upload_bps_limit)}</span>
-  </span>;
+function describe(speed: SpeedStatus) {
+  const limit = speed.download_bps_limit;
+  if (speed.mode === 'watching') return limit ? `Watching · background limited to ${rate(limit)}` : 'Watching · background paused';
+  const name = speed.mode === 'alternative' ? 'Alternative speed' : 'Normal speed';
+  return limit === null ? name : `${name} · ${rate(limit)} limit`;
 }
 
-export function SpeedMode({ speed }: { speed: SpeedStatus | null }) {
+export function SpeedMode({ speed }: { speed: SpeedStatus }) {
   const [pending, set_pending] = useState(false);
   const [error, set_error] = useState<string | null>(null);
-  if (!speed) return null;
-  const { icon: Icon, label } = MODES[speed.mode];
+  const Icon = ICONS[speed.mode];
+  const label = speed.alternative ? 'Turn off alternative speed' : 'Turn on alternative speed';
 
-  function toggle(alternative: boolean) {
+  function toggle() {
     set_pending(true);
     set_error(null);
-    set_alternative(alternative)
+    set_alternative(!speed.alternative)
       .catch((cause: unknown) => set_error(cause instanceof Error ? cause.message : 'The server did not respond.'))
       .finally(() => set_pending(false));
   }
 
-  return <div className="speed-mode" data-mode={speed.mode}>
-    <p role="status"><Icon /><strong>{label}</strong><Limits speed={speed} /></p>
-    {error && <span className="speed-mode-error" role="alert">{error}</span>}
-    <button type="button" className="button secondary small speed-turtle" aria-pressed={speed.alternative} disabled={pending}
-      onClick={() => toggle(!speed.alternative)}>
-      <Turtle />Alternative speed
+  return <span className="speed-mode" data-mode={speed.mode}>
+    <Icon />{describe(speed)}
+    <button type="button" className="icon-button small ghost speed-turtle" aria-pressed={speed.alternative} aria-label={label} title={label}
+      disabled={pending} onClick={toggle}>
+      <Turtle />
     </button>
-  </div>;
+    {error && <span className="speed-mode-error" role="alert">{error}</span>}
+  </span>;
 }

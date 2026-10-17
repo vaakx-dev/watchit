@@ -22,6 +22,6 @@ export function DownloadTitleButton({ title }: { title: Title }) {
   </a>;
   return <>
     <button type="button" className="button secondary" aria-haspopup="dialog" onClick={() => set_picking(true)}><ArrowDownToLine />Download</button>
-    {picking && <SourcePicker heading={title.title} url={search_url(title.id)} season={false} start={start} on_close={() => set_picking(false)} />}
+    {picking && <SourcePicker heading={title.title} url={unfiltered => search_url(title.id, { unfiltered })} season={false} start={start} on_close={() => set_picking(false)} />}
   </>;
 }

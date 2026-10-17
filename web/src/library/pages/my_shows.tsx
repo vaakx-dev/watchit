@@ -1,3 +1,4 @@
+import { scroll_to_top } from '../../navigation/scroll';
 import { useState } from 'react';
 import { Choices, type Choice } from '../../ui/choices';
 import { EmptyState } from '../../ui/empty_state';
@@ -113,7 +114,7 @@ export function MyShows({ shelf, library }: { shelf: Shelf; library: Library }) 
 
   function change_page(page: number) {
     set_browse({ ...current, page });
-    window.scrollTo(0, 0);
+    scroll_to_top();
   }
 
   return <Page title="My shows">

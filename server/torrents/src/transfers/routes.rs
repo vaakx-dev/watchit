@@ -105,10 +105,9 @@ pub async fn season(State(torrents): State<Torrents>, viewer: Viewer, JsonBody(b
         series: body.series_id,
         season: body.season,
         info_hash: body.info_hash,
-        quality,
         notify_when_ready: body.notify_when_ready.unwrap_or(false),
     };
-    transfers.add_season(request).await.map(Json)
+    transfers.add_season(request, &quality).await.map(Json)
 }
 
 pub async fn update(State(torrents): State<Torrents>, Path(id): Path<String>, JsonBody(body): JsonBody<TransferPatch>) -> AppResult<Json<Transfer>> {

@@ -23,3 +23,4 @@
   .picker-actions { flex: 1; }
   .picker-actions .button { flex: 1; }
 }
+.picker-hidden { display: flex; align-items: center; gap: var(--space-1); color: var(--t3); font-size: var(--type-meta); font-weight: 500; }

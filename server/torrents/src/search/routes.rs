@@ -11,9 +11,9 @@ use crate::title_id::TitleId;
 #[derive(Deserialize)]
 pub struct SearchQuery {
     title: String,
+    season: Option<u32>,
     #[serde(default)]
     unfiltered: bool,
-    season: Option<u32>,
 }
 
 #[derive(Serialize, TS)]
