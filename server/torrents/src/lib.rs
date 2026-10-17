@@ -4,6 +4,7 @@ mod library;
 mod locations;
 mod media;
 mod notify;
+mod quality;
 mod queue;
 mod readiness;
 mod release;
@@ -25,6 +26,7 @@ pub use titles::{NoTitles, Titles};
 pub fn router(torrents: Torrents) -> Router {
     Router::new()
         .route("/api/torrents/search", get(search::routes::search))
+        .route("/api/torrents/quality", get(quality::routes::show).patch(quality::routes::update))
         .route("/api/torrents/settings", get(settings::routes::show).patch(settings::routes::update))
         .route("/api/torrents/{info_hash}/{file_index}/raw", get(media::raw::raw))
         .route("/api/transfers", get(transfers::routes::list).post(transfers::routes::create))
@@ -46,6 +48,7 @@ pub fn export_types(config: &Config) -> Result<(), ExportError> {
     notify::ReadyNotice::export_all(config)?;
     bandwidth::routes::SpeedPatch::export_all(config)?;
     settings::Settings::export_all(config)?;
+    quality::Quality::export_all(config)?;
     locations::FolderListing::export_all(config)?;
     library::routes::LocalFiles::export_all(config)
 }

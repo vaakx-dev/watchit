@@ -11,8 +11,14 @@ use watchit_core::AppResult;
 
 pub use result::{Candidate, TorrentResult};
 
+use crate::quality::Quality;
 use crate::title_id::TitleId;
 use crate::titles::Titles;
+
+pub struct Ranked {
+    pub candidates: Vec<Candidate>,
+    pub hidden: usize,
+}
 
 #[derive(Clone)]
 pub struct Search {
@@ -26,13 +32,16 @@ impl Search {
         Self { http, titles, trackers: Arc::default() }
     }
 
-    pub async fn ranked(&self, title: &TitleId) -> AppResult<Vec<Candidate>> {
+    pub async fn ranked(&self, title: &TitleId, quality: &Quality) -> AppResult<Ranked> {
         let id = title.to_string();
         let (found, runtime) = tokio::join!(torrentio::streams(&self.http, title), self.titles.runtime_minutes(&id));
         let mut found = found?;
         self.remember(&found);
-        ranking::rank(&mut found, runtime);
-        Ok(found)
+        let total = found.len();
+        found.retain(|candidate| quality.admits(candidate));
+        let hidden = total - found.len();
+        ranking::rank(&mut found, quality, runtime);
+        Ok(Ranked { candidates: found, hidden })
     }
 
     pub async fn season_start(&self, series: &str, season: u32) -> TitleId {

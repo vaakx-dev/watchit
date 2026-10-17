@@ -16,7 +16,7 @@ export type StartDownload = (result: TorrentResult | null, notify_when_ready: bo
 
 type Props = {
   heading: string;
-  url: string;
+  url: (unfiltered: boolean) => string;
   season: boolean;
   start: StartDownload;
   on_close: () => void;
@@ -24,7 +24,9 @@ type Props = {
 
 export function SourcePicker({ heading, url, season, start, on_close }: Props) {
   const dialog = useRef<HTMLDialogElement>(null);
-  const { resource, retry } = use_resource<TorrentSearch>(url, { cache: false });
+  const [unfiltered, set_unfiltered] = useState(false);
+  const { resource, retry } = use_resource<TorrentSearch>(url(unfiltered), { cache: false });
+  const hidden = resource.status === 'ready' && !unfiltered ? resource.data.hidden : 0;
   const results = resource.status === 'ready' ? resource.data.results : NO_RESULTS;
   const filters = use_torrent_filters(results, season);
   const [filters_open, set_filters_open] = useState(true);
@@ -48,6 +50,9 @@ export function SourcePicker({ heading, url, season, start, on_close }: Props) {
     <div className="picker-filters">
       <FilterToolbar state={filters} open={filters_open} on_toggle={() => set_filters_open(!filters_open)} />
       {filters_open && results.length > 0 && <FilterPanel state={filters} />}
+      {hidden > 0 && <p className="picker-hidden">
+        {hidden} hidden by your quality settings · <button type="button" className="button ghost small" onClick={() => set_unfiltered(true)}>Show all</button>
+      </p>}
     </div>
     <div className="picker-body" aria-busy={resource.status === 'loading'}>
       {resource.status === 'loading' && <p className="picker-note" role="status">Searching Torrentio…</p>}

@@ -114,6 +114,7 @@ pub async fn season(
     JsonBody(body): JsonBody<SeasonDownload>,
 ) -> AppResult<Json<Vec<Transfer>>> {
     let folder = chosen_folder(&viewer, body.download_dir.as_deref())?;
+    let quality = torrents.quality(viewer.profile).await?;
     let transfers = torrents.transfers().await?;
     let request = SeasonRequest {
         series: body.series_id,
@@ -122,7 +123,7 @@ pub async fn season(
         folder,
         notify_when_ready: body.notify_when_ready.unwrap_or(false),
     };
-    transfers.add_season(request).await.map(Json)
+    transfers.add_season(request, &quality).await.map(Json)
 }
 
 pub async fn update(
