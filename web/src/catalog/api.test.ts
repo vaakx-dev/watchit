@@ -3,7 +3,7 @@ import { awaiting_items, awaiting_refresh, awaiting_update, poll_delay } from '.
 import type { CatalogEntry, ImportStatus } from './types';
 
 const imports: ImportStatus = { enabled: true, pending: true, running: true, imported: 0, error: null, next_retry_at: null };
-const entry: CatalogEntry = { id: 'tt0133093', title: 'The Matrix', year: 1999, artwork: '', genres: ['Sci-fi'], kind: 'movie', anime: false };
+const entry: CatalogEntry = { id: 'tt0133093', title: 'The Matrix', year: 1999, artwork: '', genres: ['Sci-fi'], kind: 'movie', anime: false, imdb_rating: null };
 
 describe('catalog loading state', () => {
   it('backs off polling geometrically up to a cap', () => {
