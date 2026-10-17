@@ -21,7 +21,13 @@ export async function request<T>(url: string, options?: RequestInit): Promise<T>
     const retry_after = response.headers.get('Retry-After');
     throw new HttpError(response.status, body?.error || `Request failed (${response.status}).`, retry_after === null ? undefined : Number(retry_after));
   }
-  return response.json() as Promise<T>;
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
+}
+
+export function send<T>(url: string, method: 'POST' | 'PUT' | 'PATCH' | 'DELETE', body?: unknown, options?: RequestInit): Promise<T> {
+  const headers = body === undefined ? undefined : { 'Content-Type': 'application/json' };
+  return request<T>(url, { ...options, method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
 }
 
 function start<T extends object>(url: string): Pending {

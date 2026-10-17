@@ -5,6 +5,7 @@ import { EpisodeSkeleton } from '../components/skeleton';
 import { CatalogStatus } from '../components/status';
 import { season_label, watched_summary } from '../episodes';
 import type { SeasonNavigation } from '../use_season_navigation';
+import { DownloadSeasonButton } from '../../downloads/actions/download_season_button';
 import { RatingControl } from '../../library/components/rating';
 import { SeasonWatchedButton } from '../../library/components/season_watched';
 import type { Library } from '../../library/use_library';
@@ -18,6 +19,7 @@ function SeasonBar({ series, navigation, episodes, library }: { series: Title; n
     <SeasonPicker seasons={navigation.seasons} value={season} on_change={episodes.select_season} />
     {summary && navigation.season === season && <span className="season-summary">{summary}</span>}
     {navigation.season === season && <SeasonWatchedButton series_id={series.id} navigation={navigation} library={library} />}
+    {navigation.season === season && navigation.items.length > 0 && <DownloadSeasonButton series_id={series.id} season={season} />}
     <div className="season-rating">
       <span>{season_label(season)} rating</span>
       <RatingControl key={season} title={`${series.title} ${season_label(season)}`} value={library.seasons[series.id]?.[season] ?? null}

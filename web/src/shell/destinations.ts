@@ -8,3 +8,4 @@ export const DISCOVER: Destination = { view: 'discover', href: '#/discover', lab
 export const SEARCH: Destination = { view: 'search', href: '#/search', label: 'Search', icon: 'search' };
 export const MINE: Destination = { view: 'mine', href: '#/mine', label: 'My shows', icon: 'nav-lists' };
 export const RANKINGS: Destination = { view: 'rankings', href: '#/rankings', label: 'Rankings', icon: 'nav-rankings' };
+export const DOWNLOADS: Destination = { view: 'downloads', href: '#/downloads', label: 'Downloads', icon: 'downloads' };

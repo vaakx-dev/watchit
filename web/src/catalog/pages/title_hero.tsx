@@ -7,6 +7,7 @@ import { TrailerAction } from '../components/trailer';
 import { episode_code, play_label } from '../episodes';
 import { runtime } from '../format';
 import { discover_route } from '../../navigation/route';
+import { DownloadTitleButton } from '../../downloads/actions/download_title_button';
 import { StatusControls } from '../../library/components/status';
 import { TitleRating } from '../../library/components/title_rating';
 import type { SeriesProgress } from '../../library/types';
@@ -60,6 +61,7 @@ export function TitleHero({ title, progress, seasons, library }: { title: Title;
           <PlayAction title={title} progress={progress} />
           {title.kind !== 'episode' && <StatusControls title={title} library={library} labelled />}
           <TrailerAction title={title.title} trailers={title.trailers ?? []} />
+          {title.kind !== 'series' && <DownloadTitleButton title={title} />}
           <button type="button" className="icon-button" disabled={!library.ready} aria-label="Save" title="Save"
             aria-pressed={saved} onClick={() => { void library.toggle_saved(title); }}><Icon name="nav-lists" /></button>
         </div>
