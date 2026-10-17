@@ -1,4 +1,5 @@
 use rusqlite::{Connection, params};
+use watchit_catalog::MediaKind;
 use watchit_core::AppResult;
 
 use super::store;
@@ -38,15 +39,13 @@ impl Library {
     }
 
     pub(crate) fn request_missing(&self, conn: &Connection, profile: i64) -> AppResult<()> {
-        let mut statement = conn.prepare_cached("SELECT DISTINCT COALESCE(series_id, id) FROM library_entries WHERE profile_id = ?1")?;
-        let wanted: Vec<String> = statement.query_map([profile], |row| row.get(0))?.collect::<rusqlite::Result<_>>()?;
-        let mut requested = 0;
-        for id in wanted.iter().filter(|id| self.catalog.kind(conn, id).ok().flatten().is_none()) {
-            self.catalog.import_title(conn, id)?;
-            requested += 1;
-            if requested == IMPORT_BATCH {
-                break;
-            }
+        let mut statement = conn.prepare_cached(
+            "SELECT COALESCE(series_id, id), MAX(series_id IS NOT NULL) FROM library_entries WHERE profile_id = ?1 GROUP BY 1",
+        )?;
+        let wanted: Vec<(String, bool)> = statement.query_map([profile], |row| Ok((row.get(0)?, row.get(1)?)))?.collect::<rusqlite::Result<_>>()?;
+        let missing = wanted.iter().filter(|(id, _)| self.catalog.kind(conn, id).ok().flatten().is_none());
+        for (id, has_episodes) in missing.take(IMPORT_BATCH) {
+            self.catalog.backfill_title(conn, id, has_episodes.then_some(MediaKind::Series))?;
         }
         Ok(())
     }
