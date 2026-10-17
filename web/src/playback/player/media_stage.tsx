@@ -103,7 +103,7 @@ export function MediaStage({ title, source, start, position, next, library, pane
     {!desktop && <video ref={video} className="stage-video" playsInline aria-label={`${title.title} video`} />}
     <div className="stage-surface" {...clicks} onPointerDown={() => set_menu(null)} />
     <StageStatus message={error ? null : stage_message({ has_file: file !== null, session, state })} error={error} transfer={transfer}
-      on_sources={() => on_panel('sources')} />
+      starting={source.kind === 'torrent' && (session === null || state.time <= playback.start)} on_sources={() => on_panel('sources')} />
     {bezel && <Bezel key={bezel.count} paused={bezel.paused} />}
     <div className="player-overlay" data-shown={idle.shown || undefined}>
       <div className="player-gradient top" />

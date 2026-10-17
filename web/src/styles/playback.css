@@ -10,6 +10,7 @@ html.mpv-layer, html.mpv-layer body, html.mpv-layer #root, html.mpv-layer .watch
 
 .stage-status { position: absolute; left: 50%; top: 50%; display: grid; justify-items: center; gap: var(--space-3); max-width: min(440px, 90%); padding: var(--space-4) var(--space-5); border-radius: var(--radius-panel); background: rgb(10 10 11 / .55); color: var(--t1); font-size: var(--type-card); font-weight: 600; text-align: center; transform: translate(-50%, -50%); pointer-events: none; }
 .stage-status[role="alert"] { pointer-events: auto; background: rgb(20 20 22 / .92); }
+.stage-status button { pointer-events: auto; }
 .stage-status .meta { justify-content: center; font-variant-numeric: tabular-nums; }
 .spinner { width: 36px; height: 36px; border: 3px solid rgb(255 255 255 / .2); border-top-color: #fff; border-radius: 50%; animation: spin .9s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
