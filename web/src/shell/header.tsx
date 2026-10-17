@@ -3,7 +3,9 @@ import type { Route } from '../navigation/route';
 import { ProfileAvatar } from '../profiles/avatar';
 import type { Profile } from '../profiles/types';
 import { framed } from '../title_bar/frame';
+import { open_system_menu } from '../title_bar/system_menu';
 import { WindowControls } from '../title_bar/window_controls';
+import { HistoryButtons } from './history_buttons';
 import { Brand } from './brand';
 import { DISCOVER, DOWNLOADS, MINE, RANKINGS, TONIGHT } from './destinations';
 import { SearchField } from './search_field';
@@ -11,7 +13,8 @@ import { SearchField } from './search_field';
 export function Header({ route, profile }: { route: Route; profile: Profile }) {
   const searching = route.view === 'search';
   return (
-    <header className={`top-bar page-gutter${searching ? ' searching' : ''}`} data-tauri-drag-region={framed ? 'deep' : undefined}>
+    <header className={`top-bar page-gutter${searching ? ' searching' : ''}`} data-tauri-drag-region={framed ? 'deep' : undefined} onContextMenu={framed ? open_system_menu : undefined}>
+      {framed && <HistoryButtons />}
       <a href="#/" aria-label="Watchit, Tonight"><Brand /></a>
       <nav aria-label="Main navigation">
         {[TONIGHT, DISCOVER, MINE, RANKINGS, DOWNLOADS].map(item => <a key={item.view} href={item.href}

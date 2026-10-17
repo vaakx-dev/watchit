@@ -18,3 +18,4 @@ html.framed { --bar-height: 48px; }
 html.framed .top-bar { min-height: var(--bar-height); }
 
 .window-strip { position: fixed; inset: 0 0 auto; z-index: 40; display: flex; justify-content: flex-end; height: var(--bar-height); }
+.history-buttons { display: flex; flex: none; gap: 2px; margin-right: -12px; }

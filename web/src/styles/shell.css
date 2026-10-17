@@ -3,7 +3,7 @@
 .brand .eye-outline { color: var(--watched); }
 .brand .eye-pupil { color: #fff; }
 
-.top-bar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 28px; height: var(--bar-height); background: rgb(10 10 11 / .94); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.top-bar { flex: none; position: relative; z-index: 10; display: flex; align-items: center; gap: 28px; height: var(--bar-height); background: rgb(10 10 11 / .94); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
 .top-bar nav { display: flex; align-self: stretch; gap: 22px; }
 .top-bar nav a { position: relative; display: flex; align-items: center; color: var(--t2); font-size: 14px; font-weight: 500; white-space: nowrap; }
 .top-bar nav a:hover { color: var(--t1); }
@@ -36,7 +36,7 @@
   .top-bar > .icon-button { margin-left: auto; }
   .top-bar.searching .search-field { display: flex; order: 3; width: 100%; margin: 0 0 var(--space-3); }
   .brand { font-size: 18px; }
-  body:has(.tab-bar) { padding-bottom: calc(var(--tabs-height) + env(safe-area-inset-bottom)); }
+  #root:has(.tab-bar) > main { padding-bottom: calc(var(--tabs-height) + env(safe-area-inset-bottom)); }
   .tab-bar { position: fixed; inset: auto 0 0; z-index: 10; display: grid; grid-template-columns: repeat(6, 1fr); height: calc(var(--tabs-height) + env(safe-area-inset-bottom)); padding: 7px 4px env(safe-area-inset-bottom); background: rgb(13 13 15 / .96); backdrop-filter: blur(10px); border-top: 1px solid var(--line); }
   .tab-bar a { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--t3); font-size: 10.5px; font-weight: 500; }
   .tab-bar .lucide { width: 21px; height: 21px; }

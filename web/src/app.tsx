@@ -1,4 +1,7 @@
+import { scroll_to_top } from './navigation/scroll';
 import { useEffect, useRef } from 'react';
+import { use_history_shortcuts } from './navigation/use_history_shortcuts';
+import { framed } from './title_bar/frame';
 import { Collection } from './catalog/pages/collection';
 import { TitlePage, TitleSkeleton } from './catalog/pages/title';
 import { Home } from './catalog/pages/home';
@@ -23,6 +26,7 @@ type Props = { profile: Profile; profiles: Profile[]; on_profiles_changed: () =>
 
 export function App({ profile, profiles, on_profiles_changed }: Props) {
   const route = use_route();
+  use_history_shortcuts(framed);
   const library = use_library();
   const main = useRef<HTMLElement>(null);
   const { resource, retry } = use_title('id' in route ? route.id : undefined);
@@ -35,7 +39,7 @@ export function App({ profile, profiles, on_profiles_changed }: Props) {
   const watching = route.view === 'watch' && title !== undefined && title.kind !== 'series';
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    scroll_to_top();
     const target = empty_search ? document.getElementById('search-input') : main.current;
     target?.focus({ preventScroll: true });
   }, [route_key, empty_search]);
