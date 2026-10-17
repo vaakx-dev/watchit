@@ -23,6 +23,7 @@ import './styles/settings.css';
 import './styles/downloads.css';
 import './downloads/locations/locations.css';
 import './remote/remote.css';
+import './settings/quality/quality.css';
 import './styles/profiles.css';
 import './styles/loading.css';
 import './title_bar/title_bar.css';

@@ -1,10 +1,10 @@
 use std::sync::LazyLock;
 
 use regex::Regex;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, TS)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, TS)]
 #[ts(export_to = "torrents/")]
 pub enum Resolution {
     #[serde(rename = "2160p")]
