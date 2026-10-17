@@ -12,7 +12,9 @@ function TransferLine({ transfer }: { transfer: Transfer }) {
   </p>;
 }
 
-export function StageStatus({ message, error, transfer, on_sources }: { message: string | null; error: string | null; transfer: Transfer | null; on_sources: () => void }) {
+type Props = { message: string | null; error: string | null; transfer: Transfer | null; starting: boolean; on_sources: () => void };
+
+export function StageStatus({ message, error, transfer, starting, on_sources }: Props) {
   if (error) return <div className="stage-status" role="alert">
     <p>{error}</p>
     <button type="button" className="button secondary small" onClick={on_sources}>Try another source</button>
@@ -23,5 +25,6 @@ export function StageStatus({ message, error, transfer, on_sources }: { message:
     <p>{message}</p>
     {transfer && <TransferLine transfer={transfer} />}
     {transfer && <ReadinessNote transfer={transfer} />}
+    {starting && <button type="button" className="button ghost small" onClick={on_sources}>Choose another source</button>}
   </div>;
 }

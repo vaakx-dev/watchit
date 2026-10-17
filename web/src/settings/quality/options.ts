@@ -28,12 +28,4 @@ export const LANGUAGES: { value: string; label: string }[] = [
   { value: 'ru', label: 'Russian' },
 ];
 
-const BYTES_PER_GB = 1_000_000_000;
-
-export const to_gigabytes = (bytes: number | null) => (bytes === null ? '' : String(Math.round(bytes / BYTES_PER_GB * 10) / 10));
-
-export function to_bytes(text: string): number | null | 'invalid' {
-  if (!text.trim()) return null;
-  const gigabytes = Number(text);
-  return Number.isFinite(gigabytes) && gigabytes > 0 ? Math.round(gigabytes * BYTES_PER_GB) : 'invalid';
-}
+export const BYTES_PER_GB = 1_000_000_000;

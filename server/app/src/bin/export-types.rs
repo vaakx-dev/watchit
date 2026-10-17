@@ -14,6 +14,7 @@ fn main() -> anyhow::Result<()> {
     watchit_catalog::export_types(&config)?;
     watchit_library::export_types(&config)?;
     watchit_remote::export_types(&config)?;
+    watchit_server::about::export_types(&config)?;
     println!("TypeScript types written to {}", out_dir.display());
     Ok(())
 }

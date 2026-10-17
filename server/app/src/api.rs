@@ -41,6 +41,7 @@ pub fn router(context: &Context, listen: SocketAddr, ffmpeg_dir: &Path) -> AppRe
         .merge(watchit_catalog::router(catalog))
         .merge(watchit_library::router(library))
         .merge(watchit_remote::router(Remote::new(listen)))
+        .merge(crate::about::router())
         .layer(middleware::from_fn(require_viewer));
     let router = Router::new()
         .merge(watchit_profiles::router(profiles))

@@ -6,7 +6,7 @@ import { InstallPanel } from './install_panel';
 import { TailscalePanel } from './tailscale_panel';
 import type { RemoteStatus } from './types';
 
-export function RemoteSection() {
+export function RemoteSettings() {
   const { resource, retry } = use_resource<RemoteStatus>('/api/remote', { cache: false });
   const [changed, set_changed] = useState<RemoteStatus | null>(null);
   const status = changed ?? (resource.status === 'ready' ? resource.data : null);
@@ -16,8 +16,7 @@ export function RemoteSection() {
     retry();
   }
 
-  return <section className="settings-section remote" aria-labelledby="settings-remote">
-    <h2 id="settings-remote">Connect another device</h2>
+  return <div className="remote">
     {status ? <>
       <p>Open Watchit from a phone, tablet or another PC. Each profile signs in on that device the same way.</p>
       {status.addresses.length > 0 ? <>
@@ -27,5 +26,5 @@ export function RemoteSection() {
       <TailscalePanel status={status} on_changed={set_changed} on_recheck={recheck} />
       <InstallPanel />
     </> : <CatalogStatus error={resource.status === 'error' ? resource.error : undefined} retry={retry} message="Looking for network addresses." />}
-  </section>;
+  </div>;
 }

@@ -60,7 +60,7 @@ export function poll_delay(attempt: number, empty = false) {
 }
 
 export function awaiting_update(data: Progress, items: readonly Pick<CatalogEntry, 'artwork'>[]) {
-  if (!items.length) return data.imports?.pending === true;
+  if (data.imports?.pending === true && !data.imports.error) return true;
   return data.artwork_status?.pending === true && items.some(item => !item.artwork);
 }
 

@@ -72,7 +72,7 @@ struct Classification {
 fn classify(meta: &Meta, labels: &[String]) -> Classification {
     let ids: Vec<String> = labels.iter().map(|label| genre_id(label)).collect();
     let animation = ids.iter().any(|id| id == "animation");
-    let anime = ids.iter().any(|id| id == "anime") || (animation && meta.countries().iter().any(|country| country == "japan"));
+    let anime = ids.iter().any(|id| id == "anime") || (animation && meta.primary_country().as_deref() == Some("japan"));
     Classification { anime, known: anime || !animation || meta.fields.has("country") }
 }
 

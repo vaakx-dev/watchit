@@ -37,7 +37,7 @@ function channel_layout(channels: number | null) {
 }
 
 export function track_option(id: number, track: Described, index: number): TrackOption {
-  const name = language(track.language);
-  const detail = [track.title !== name ? track.title : null, codec_name(track.codec), channel_layout(track.channels)].filter(Boolean).join(' · ');
-  return { id, label: name ?? track.title ?? `Track ${index + 1}`, detail: detail || null };
+  const label = language(track.language) ?? track.title ?? `Track ${index + 1}`;
+  const detail = [track.title !== label ? track.title : null, codec_name(track.codec), channel_layout(track.channels)].filter(Boolean).join(' · ');
+  return { id, label, detail: detail || null };
 }

@@ -6840,6 +6840,7 @@ dependencies = [
  "async-trait",
  "axum",
  "form_urlencoded",
+ "serde",
  "tokio",
  "tokio-util",
  "tower",
