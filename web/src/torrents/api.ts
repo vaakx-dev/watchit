@@ -3,8 +3,12 @@ import type { SeasonDownload, TorrentSettings, Transfer, TransferKind, TransferL
 
 const id_path = (id: string) => encodeURIComponent(id);
 
-export const search_url = (title_id: string, season?: number) =>
-  `/api/torrents/search?title=${id_path(title_id)}${season === undefined ? '' : `&season=${season}`}`;
+export function search_url(title_id: string, { season, unfiltered = false }: { season?: number; unfiltered?: boolean } = {}) {
+  const query = new URLSearchParams({ title: title_id });
+  if (season !== undefined) query.set('season', String(season));
+  if (unfiltered) query.set('unfiltered', 'true');
+  return `/api/torrents/search?${query}`;
+}
 
 export const local_files_url = (title_id: string) => `/api/titles/${id_path(title_id)}/files`;
 

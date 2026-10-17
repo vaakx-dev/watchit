@@ -121,10 +121,9 @@ pub async fn season(
         season: body.season,
         info_hash: body.info_hash,
         folder,
-        quality,
         notify_when_ready: body.notify_when_ready.unwrap_or(false),
     };
-    transfers.add_season(request).await.map(Json)
+    transfers.add_season(request, &quality).await.map(Json)
 }
 
 pub async fn update(

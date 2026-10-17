@@ -16,7 +16,6 @@ pub struct SeasonRequest {
     pub info_hash: Option<String>,
     pub folder: Option<PathBuf>,
     pub notify_when_ready: bool,
-    pub quality: Quality,
 }
 
 fn best_pack(found: &[Candidate]) -> Option<&Candidate> {
@@ -27,11 +26,11 @@ fn best_pack(found: &[Candidate]) -> Option<&Candidate> {
 }
 
 impl Transfers {
-    pub async fn add_season(self: &Arc<Self>, request: SeasonRequest) -> AppResult<Vec<Transfer>> {
+    pub async fn add_season(self: &Arc<Self>, request: SeasonRequest, quality: &Quality) -> AppResult<Vec<Transfer>> {
         let TitleId::Title(series) = TitleId::parse(&request.series)? else {
             return Err(AppError::bad_request("A season download needs a series id."));
         };
-        let SeasonRequest { season, folder, notify_when_ready, quality, .. } = request;
+        let SeasonRequest { season, folder, notify_when_ready, .. } = request;
         let pack = |info_hash: String| {
             let pick = Pick { title_id: series.clone(), choice: Choice::Season { season } };
             let folder = folder.clone();
@@ -42,7 +41,7 @@ impl Transfers {
         }
         let episodes = self.titles.season_episodes(&series, season).await;
         let first = episodes.first().copied().unwrap_or(1);
-        let found = self.search.ranked(&TitleId::episode(&series, season, first), &quality).await?.candidates;
+        let found = self.search.ranked(&TitleId::episode(&series, season, first), quality).await?.candidates;
         if let Some(best) = best_pack(&found) {
             return pack(best.result.info_hash.clone()).await;
         }
@@ -52,7 +51,7 @@ impl Transfers {
         let mut added = Vec::new();
         for number in episodes {
             let title = TitleId::episode(&series, season, number);
-            let results = if number == first { found.clone() } else { self.search.ranked(&title, &quality).await?.candidates };
+            let results = if number == first { found.clone() } else { self.search.ranked(&title, quality).await?.candidates };
             let Some(best) = results.first() else { continue };
             let pick = Pick::files_or(&title.to_string(), best.result.file_index.map(|index| vec![index]), Choice::Main);
             added.push(self.add(&best.result.info_hash, pick, Kind::Download, folder.clone(), notify_when_ready).await?);

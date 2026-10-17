@@ -17,7 +17,7 @@ export function DownloadSeasonButton({ series_id, series_title, season }: { seri
   if (downloading) return <a className="button ghost small" href="#/downloads"><ArrowDownToLine />In downloads</a>;
   return <>
     <button type="button" className="button ghost small" aria-haspopup="dialog" onClick={() => set_picking(true)}><ArrowDownToLine />Download season</button>
-    {picking && <SourcePicker heading={`${series_title} · Season ${season}`} url={search_url(series_id, season)} season start={start}
+    {picking && <SourcePicker heading={`${series_title} · Season ${season}`} url={unfiltered => search_url(series_id, { season, unfiltered })} season start={start}
       on_close={() => set_picking(false)} />}
   </>;
 }
