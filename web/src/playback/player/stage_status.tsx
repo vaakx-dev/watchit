@@ -12,9 +12,9 @@ function TransferLine({ transfer }: { transfer: Transfer }) {
   </p>;
 }
 
-type Props = { message: string | null; error: string | null; transfer: Transfer | null; starting: boolean; on_sources: () => void };
+type Props = { message: string | null; error: string | null; transfer: Transfer | null; switched: string | null; starting: boolean; on_sources: () => void };
 
-export function StageStatus({ message, error, transfer, starting, on_sources }: Props) {
+export function StageStatus({ message, error, transfer, switched, starting, on_sources }: Props) {
   if (error) return <div className="stage-status" role="alert">
     <p>{error}</p>
     <button type="button" className="button secondary small" onClick={on_sources}>Try another source</button>
@@ -23,6 +23,7 @@ export function StageStatus({ message, error, transfer, starting, on_sources }: 
   return <div className="stage-status" role="status">
     <span className="spinner" aria-hidden="true" />
     <p>{message}</p>
+    {switched && <p className="meta">{switched}</p>}
     {transfer && <TransferLine transfer={transfer} />}
     {transfer && <ReadinessNote transfer={transfer} />}
     {starting && <button type="button" className="button ghost small" onClick={on_sources}>Choose another source</button>}

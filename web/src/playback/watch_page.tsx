@@ -34,7 +34,8 @@ export function WatchPage({ result, library }: { result: TitleResult; library: L
   function stage() {
     if (selected?.kind === 'embed') return <EmbedStage title={title} provider={selected.provider} library={library} panel={panel} has_episodes={has_episodes} on_panel={set_panel} />;
     if (selected) return <MediaStage key={source_key(selected)} title={title} source={selected} start={position.current} position={position}
-      next={seasons.navigation?.next ?? null} library={library} panel={panel} has_episodes={has_episodes} fullscreen={fullscreen} on_panel={set_panel} />;
+      next={seasons.navigation?.next ?? null} library={library} panel={panel} has_episodes={has_episodes} fullscreen={fullscreen}
+      switched_from={sources.switched_from} on_stall={sources.automatic_pick ? () => sources.skip_stalled(selected) : null} on_panel={set_panel} />;
     return <div className="stage embed-stage">
       <EmbedBar title={title} />
       <p className="player-unavailable" role="status">{sources.searching ? 'Looking for sources…' : 'No playback sources are available for this title.'}</p>

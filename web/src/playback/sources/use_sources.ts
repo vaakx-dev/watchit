@@ -32,15 +32,25 @@ export function use_sources(title: Title, remembered: string | null) {
   const search = use_resource<{ results: TorrentResult[] }>(searchable ? search_url(title.id) : null, { cache: false });
   const [chosen, set_chosen] = useState<string | null>(null);
   const [save_error, set_save_error] = useState<string | null>(null);
+  const [stalled, set_stalled] = useState<string[]>([]);
+  const [switched_from, set_switched_from] = useState<PlaySource | null>(null);
 
   const local = files.resource.status === 'ready' ? local_sources(files.resource.data.files) : [];
   const results = search.resource.status === 'ready' ? search.resource.data.results : NO_RESULTS;
   const torrents = useMemo(() => results.map((result): PlaySource => ({ kind: 'torrent', result })), [results]);
+  const live_torrents = torrents.filter(source => !stalled.includes(source_key(source)));
   const embeds: Embed[] = PROVIDERS.filter(provider => provider.url(title)).map(provider => ({ kind: 'embed', provider }));
   const searching = searchable && [files.resource, search.resource].some(resource => resource.status === 'loading');
   const wanted_embed = remembered === TORRENT_PREFERENCE ? undefined : embeds.find(embed => embed.provider.id === remembered);
-  const automatic = wanted_embed ?? (searching ? undefined : local[0] ?? torrents[0] ?? pick_embed(embeds, null));
+  const automatic = wanted_embed ?? (searching ? undefined : local[0] ?? live_torrents[0] ?? pick_embed(embeds, null));
   const selected = [...local, ...torrents, ...embeds].find(source => source_key(source) === chosen) ?? automatic;
+
+  const automatic_pick = chosen === null && selected?.kind === 'torrent';
+
+  function skip_stalled(source: PlaySource) {
+    set_stalled(current => [...current, source_key(source)]);
+    set_switched_from(source);
+  }
 
   function choose(source: PlaySource) {
     set_chosen(source_key(source));
@@ -55,7 +65,10 @@ export function use_sources(title: Title, remembered: string | null) {
     results,
     embeds,
     selected,
+    automatic_pick,
+    switched_from,
     searching,
+    skip_stalled,
     search_error: failure(search.resource),
     save_error,
     choose,
