@@ -15,8 +15,16 @@ pub struct SeriesProgress {
     pub opened_at: Option<String>,
 }
 
+#[derive(Clone, Copy, Debug, Serialize, TS)]
+#[ts(export_to = "catalog/")]
+pub struct SavedPosition {
+    pub position_seconds: f64,
+    pub duration_seconds: f64,
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct TitleExtras {
+    pub resume: Option<SavedPosition>,
     pub playback_source: Option<String>,
     pub progress: Option<SeriesProgress>,
 }

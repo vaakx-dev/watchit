@@ -10,9 +10,10 @@ fn main() -> anyhow::Result<()> {
     watchit_playback::export_types(&config)?;
     watchit_profiles::export_types(&config)?;
     watchit_torrents::export_types(&config)?;
-    watchit_remote::export_types(&config)?;
     watchit_artwork::export_types(&config)?;
     watchit_catalog::export_types(&config)?;
+    watchit_library::export_types(&config)?;
+    watchit_remote::export_types(&config)?;
     println!("TypeScript types written to {}", out_dir.display());
     Ok(())
 }

@@ -6,9 +6,10 @@ use axum::http::{HeaderValue, header};
 use axum::middleware;
 use axum::routing::any;
 use tower_http::set_header::SetResponseHeaderLayer;
-use watchit_core::{AppError, AppResult, Context};
 use watchit_artwork::Artwork;
 use watchit_catalog::Catalog;
+use watchit_core::{AppError, AppResult, Context};
+use watchit_library::Library;
 use watchit_playback::Playback;
 use watchit_profiles::Profiles;
 use watchit_remote::Remote;
@@ -28,14 +29,17 @@ pub fn router(context: &Context, listen: SocketAddr) -> AppResult<Router> {
     let auth = Auth { profiles: profiles.clone(), tokens: context.tokens.clone() };
     let artwork = Artwork::open(context)?;
     let catalog = Catalog::open(context, artwork.clone())?;
+    let library = Library::open(context, catalog.clone())?;
+    catalog.set_personal(Arc::new(library.clone()))?;
     let torrents = Torrents::open(context, Arc::new(CatalogTitles::new(catalog.clone(), context.db.clone())))?;
     let sources = Arc::new(TorrentSources::new(torrents.clone(), listen));
     let signed_in = Router::new()
         .merge(watchit_torrents::router(torrents))
         .merge(watchit_playback::router(Playback::open(context, sources)?))
-        .merge(watchit_remote::router(Remote::new(listen)))
         .merge(watchit_artwork::status_router(artwork.clone()))
         .merge(watchit_catalog::router(catalog))
+        .merge(watchit_library::router(library))
+        .merge(watchit_remote::router(Remote::new(listen)))
         .layer(middleware::from_fn(require_viewer));
     let router = Router::new()
         .merge(watchit_profiles::router(profiles))

@@ -4181,6 +4181,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "watchit-library"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "chrono",
+ "form_urlencoded",
+ "hex",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "tokio",
+ "ts-rs",
+ "watchit-artwork",
+ "watchit-catalog",
+ "watchit-core",
+ "watchit-profiles",
+]
+
+[[package]]
 name = "watchit-playback"
 version = "0.1.0"
 dependencies = [
@@ -4250,6 +4269,7 @@ dependencies = [
  "watchit-artwork",
  "watchit-catalog",
  "watchit-core",
+ "watchit-library",
  "watchit-playback",
  "watchit-profiles",
  "watchit-remote",
