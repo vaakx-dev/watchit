@@ -1,0 +1,21 @@
+.remote > p, .remote-tailscale p, .remote-install p { max-width: 60ch; margin: 0 0 var(--space-3); color: var(--t2); font-size: var(--type-card); line-height: 1.5; }
+.remote p a { color: var(--t1); text-decoration: underline; }
+.remote code { padding: 1px 5px; border-radius: 4px; background: var(--s2); font-size: var(--type-meta); }
+.remote h3 { margin: var(--space-5) 0 var(--space-2); font-size: var(--type-body); font-weight: 700; }
+.remote-addresses { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--space-5); margin: var(--space-4) 0; }
+.remote-list { flex: 1 1 340px; display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; min-width: 0; }
+.remote-list li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-panel); background: var(--s1); }
+.remote-list li[data-selected="true"] { outline: 1px solid var(--line); background: var(--s2); }
+.remote-address { display: grid; gap: 2px; min-width: 0; }
+.remote-label { display: flex; align-items: center; gap: var(--space-2); font-size: var(--type-card); font-weight: 600; }
+.remote-label small { padding: 1px 6px; border-radius: var(--radius-full); background: var(--s3); color: var(--watching); font-size: 11px; font-weight: 700; }
+.remote-url { overflow-wrap: anywhere; color: var(--t2); font-size: var(--type-card); font-variant-numeric: tabular-nums; user-select: all; }
+.remote-address-actions, .remote-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.remote-actions { margin: var(--space-3) 0; }
+.remote-address-actions .button[aria-pressed="true"] { background: rgb(255 255 255 / .22); }
+.remote-qr { flex: 0 0 auto; display: grid; gap: var(--space-2); width: 192px; margin: 0; padding: var(--space-3); border-radius: var(--radius-panel); background: #fff; color: #000; }
+.remote-qr img { width: 168px; height: 168px; }
+.remote-qr figcaption { font-size: 11px; line-height: 1.35; overflow-wrap: anywhere; color: #3f3f46; }
+.remote .remote-hint { color: var(--t3); }
+.remote .remote-warning, .remote .remote-error { color: var(--dropped); }
+.remote .remote-error:empty { display: none; }
