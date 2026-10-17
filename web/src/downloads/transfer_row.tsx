@@ -3,6 +3,7 @@ import { bytes, eta, percent, speed } from '../torrents/format';
 import type { Transfer } from '../torrents/types';
 import { ArrowDown, ArrowUp, Clock, Play, Users } from 'lucide-react';
 import { finished, STATE_LABELS } from './states';
+import { ReadinessNote } from './readiness/readiness_note';
 import { TransferActions } from './transfer_actions';
 
 function episode_label(title_id: string) {
@@ -35,6 +36,7 @@ export function TransferRow({ transfer, on_remove }: { transfer: Transfer; on_re
         {transfer.kind === 'stream' && <span className="transfer-kind">Streaming</span>}
       </h3>
       <Stats transfer={transfer} />
+      <ReadinessNote transfer={transfer} />
       {!finished(transfer) && transfer.state !== 'error' && <div className="transfer-progress" role="progressbar" aria-label={`${transfer.name} progress`}
         aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.floor(transfer.progress * 100)}>
         <span style={{ '--progress': `${transfer.progress * 100}%` } as CSSProperties} />

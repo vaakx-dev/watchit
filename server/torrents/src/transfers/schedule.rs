@@ -74,6 +74,7 @@ impl Transfers {
             let elapsed = last.elapsed();
             last = Instant::now();
             self.account(elapsed);
+            self.sample_readiness(elapsed).await;
             self.reconcile().await;
             ticks += 1;
             if ticks.is_multiple_of(PERSIST_EVERY) {
