@@ -1,12 +1,18 @@
+mod api;
+mod auth;
+mod compression;
+mod origin;
+mod web;
+
 use std::net::SocketAddr;
 use std::path::PathBuf;
+use std::time::Duration;
 
-use axum::Router;
-use axum::routing::get;
 use tokio::net::TcpListener;
-use tokio::sync::oneshot;
 use tokio::task::JoinHandle;
-use watchit_core::{Db, Paths};
+use watchit_core::{Background, Context};
+
+const DRAIN: Duration = Duration::from_secs(5);
 
 pub struct Config {
     pub data_dir: PathBuf,
@@ -16,8 +22,8 @@ pub struct Config {
 
 pub struct Server {
     addr: SocketAddr,
-    stop: oneshot::Sender<()>,
-    task: JoinHandle<()>,
+    background: Background,
+    http: JoinHandle<()>,
 }
 
 impl Server {
@@ -25,24 +31,29 @@ impl Server {
         self.addr
     }
 
-    pub async fn shutdown(self) {
-        let _ = self.stop.send(());
-        let _ = self.task.await;
+    pub async fn shutdown(mut self) {
+        self.background.stop();
+        if tokio::time::timeout(DRAIN, &mut self.http).await.is_err() {
+            self.http.abort();
+        }
+        self.background.finished().await;
     }
 }
 
 pub async fn start(config: Config) -> anyhow::Result<Server> {
-    let paths = Paths::new(config.data_dir)?;
-    let _db = Db::open(&paths.database())?;
-    let router = Router::new().route("/api/health", get(|| async { "ok" }));
+    let context = Context::open(config.data_dir)?;
+    let mut router = api::router(&context)?;
+    if let Some(web_dir) = &config.web_dir {
+        router = router.merge(web::router(web_dir));
+    }
+    let app = router.layer(compression::layer()).into_make_service_with_connect_info::<SocketAddr>();
     let listener = TcpListener::bind(config.listen).await?;
     let addr = listener.local_addr()?;
-    let (stop, stopped) = oneshot::channel::<()>();
-    let task = tokio::spawn(async move {
-        let shutdown = async { let _ = stopped.await; };
-        if let Err(error) = axum::serve(listener, router).with_graceful_shutdown(shutdown).await {
+    let stopping = context.background.stopping();
+    let http = tokio::spawn(async move {
+        if let Err(error) = axum::serve(listener, app).with_graceful_shutdown(stopping).await {
             tracing::error!(%error, "server stopped");
         }
     });
-    Ok(Server { addr, stop, task })
+    Ok(Server { addr, background: context.background, http })
 }
