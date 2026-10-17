@@ -58,7 +58,7 @@ export function create_mpv_engine(): Engine {
   return {
     kind: 'mpv',
     load(media) {
-      store.reset();
+      store.reset('volume', 'muted', 'paused');
       set('start', media.start > 0 ? String(media.start) : 'none');
       set('pause', false);
       mpv_send(['mpv-command', ['loadfile', new URL(media.url, window.location.href).href]]);

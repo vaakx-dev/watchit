@@ -79,7 +79,7 @@ export function create_browser_engine(video: HTMLVideoElement): Engine {
     load(media) {
       const attempt = ++loading;
       release();
-      store.reset();
+      store.reset('volume', 'muted');
       store.update({ volume: Math.round(video.volume * 100), muted: video.muted });
       video.addEventListener('loadedmetadata', () => {
         if (attempt !== loading) return;
