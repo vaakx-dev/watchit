@@ -11,6 +11,7 @@ import { use_progress_report } from '../progress/use_progress_report';
 import { use_session } from '../session/use_session';
 import { source_label, type PlaySource } from '../sources/types';
 import { use_file_source } from '../sources/use_file_source';
+import { use_stall_fallback } from '../sources/use_stall_fallback';
 import { Bezel } from './bezel';
 import { ControlBar } from './control_bar';
 import { ENDING_SECONDS, EndingCard } from './ending_card';
@@ -34,6 +35,8 @@ type Props = {
   panel: Panel | null;
   has_episodes: boolean;
   fullscreen: { active: boolean; toggle: () => void };
+  switched_from: PlaySource | null;
+  on_stall: (() => void) | null;
   on_panel: (panel: Panel | null) => void;
 };
 
@@ -45,7 +48,7 @@ function use_transparent_window(active: boolean) {
   }, [active]);
 }
 
-export function MediaStage({ title, source, start, position, next, library, panel, has_episodes, fullscreen, on_panel }: Props) {
+export function MediaStage({ title, source, start, position, next, library, panel, has_episodes, fullscreen, switched_from, on_stall, on_panel }: Props) {
   const video = useRef<HTMLVideoElement>(null);
   const { engine, state } = use_engine(video);
   const { file, transfer, error: source_error } = use_file_source(title.id, source);
@@ -64,6 +67,7 @@ export function MediaStage({ title, source, start, position, next, library, pane
   const go_next = () => { if (next) window.location.hash = `#/watch/${next.id}`; };
 
   use_transparent_window(engine?.kind === 'mpv');
+  use_stall_fallback(on_stall !== null && session === null, transfer, () => on_stall?.());
   use_stage_load(engine, session, playback.start, text_subtitle);
   use_progress_report(title.id, { time: state.time, duration, paused: state.paused, ready: session !== null && !state.waiting }, saved => {
     if (saved.entry.status !== (library.entries[title.id]?.status ?? null)) library.refresh();
@@ -103,6 +107,7 @@ export function MediaStage({ title, source, start, position, next, library, pane
     {!desktop && <video ref={video} className="stage-video" playsInline aria-label={`${title.title} video`} />}
     <div className="stage-surface" {...clicks} onPointerDown={() => set_menu(null)} />
     <StageStatus message={error ? null : stage_message({ has_file: file !== null, session, state })} error={error} transfer={transfer}
+      switched={switched_from && `Switched to ${source_label(source)} · the ${source_label(switched_from)} source found no peers`}
       starting={source.kind === 'torrent' && (session === null || state.time <= playback.start)} on_sources={() => on_panel('sources')} />
     {bezel && <Bezel key={bezel.count} paused={bezel.paused} />}
     <div className="player-overlay" data-shown={idle.shown || undefined}>
