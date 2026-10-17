@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { ProfileGate } from './profiles/profile_gate';
 import { listen_for_install } from './pwa/install';
 import { register_service_worker } from './pwa/register';
+import { mark_frame } from './title_bar/frame';
 import '@fontsource-variable/archivo/wdth.css';
 import './styles/tokens.css';
 import './styles/base.css';
@@ -24,7 +25,9 @@ import './downloads/locations/locations.css';
 import './remote/remote.css';
 import './styles/profiles.css';
 import './styles/loading.css';
+import './title_bar/title_bar.css';
 
+mark_frame();
 listen_for_install();
 register_service_worker();
 createRoot(document.getElementById('root')!).render(<StrictMode><ProfileGate /></StrictMode>);

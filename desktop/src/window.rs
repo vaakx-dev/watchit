@@ -3,6 +3,7 @@ use tauri::window::{Color, WindowBuilder};
 use tauri::{AppHandle, LogicalPosition, LogicalSize, Manager, WebviewUrl, Window, WindowEvent};
 
 use crate::player::Player;
+use crate::title_bar;
 
 const MAIN: &str = "main";
 const UI: &str = "ui";
@@ -11,7 +12,8 @@ pub fn create(app: &AppHandle, port: u16, hidden: bool) -> anyhow::Result<()> {
     let window = WindowBuilder::new(app, MAIN)
         .title("Watchit")
         .inner_size(1280.0, 720.0)
-        .min_inner_size(640.0, 360.0)
+        .min_inner_size(500.0, 360.0)
+        .decorations(false)
         .center()
         .visible(!hidden)
         .background_color(Color(0, 0, 0, 255))
@@ -21,6 +23,7 @@ pub fn create(app: &AppHandle, port: u16, hidden: bool) -> anyhow::Result<()> {
     let url = WebviewUrl::External(format!("http://127.0.0.1:{port}").parse()?);
     let ui = WebviewBuilder::new(UI, url).transparent(true).auto_resize();
     let webview = window.add_child(ui, LogicalPosition::new(0.0, 0.0), LogicalSize::new(size.width, size.height))?;
+    title_bar::attach(&window)?;
     app.manage(Player::start(webview, wid));
     Ok(())
 }

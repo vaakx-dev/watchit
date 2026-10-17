@@ -4,6 +4,7 @@ mod autostart;
 mod notifications;
 mod player;
 mod server;
+mod title_bar;
 mod tools;
 mod tray;
 mod updates;
@@ -31,7 +32,7 @@ fn main() {
             Ok(())
         })
         .on_window_event(window::on_event)
-        .invoke_handler(tauri::generate_handler![player::bridge::mpv_message])
+        .invoke_handler(tauri::generate_handler![player::bridge::mpv_message, title_bar::snap_button::maximize_button_area])
         .build(tauri::generate_context!())
         .expect("cannot build the Watchit app")
         .run(server::on_run_event);

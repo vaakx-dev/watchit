@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import type { TitleResult } from '../catalog/types';
 import { use_season_navigation } from '../catalog/use_season_navigation';
 import type { Library } from '../library/use_library';
+import { framed } from '../title_bar/frame';
 import { EpisodesPanel } from './panels/episodes_panel';
 import type { Panel } from './panels/panel';
 import { PanelDrawer } from './panels/panel_drawer';
 import { SourcesPanel } from './panels/sources_panel';
 import { EmbedStage } from './player/embed_stage';
 import { MediaStage } from './player/media_stage';
-import { TopBar } from './player/top_bar';
+import { EmbedBar } from './player/top_bar';
 import { use_fullscreen } from './player/use_fullscreen';
 import { resume_at } from './progress/resume';
 import { source_key } from './sources/types';
@@ -35,12 +36,12 @@ export function WatchPage({ result, library }: { result: TitleResult; library: L
     if (selected) return <MediaStage key={source_key(selected)} title={title} source={selected} start={position.current} position={position}
       next={seasons.navigation?.next ?? null} library={library} panel={panel} has_episodes={has_episodes} fullscreen={fullscreen} on_panel={set_panel} />;
     return <div className="stage embed-stage">
-      <div className="embed-bar"><TopBar title={title} /></div>
+      <EmbedBar title={title} />
       <p className="player-unavailable" role="status">{sources.searching ? 'Looking for sources…' : 'No playback sources are available for this title.'}</p>
     </div>;
   }
 
-  return <div ref={root} className="watch-player" aria-labelledby="watch-title" data-panel={panel ?? undefined}>
+  return <div ref={root} className="watch-player" aria-labelledby="watch-title" data-panel={panel ?? undefined} data-captioned={(framed && !fullscreen.active) || undefined}>
     {stage()}
     {panel && <PanelDrawer panel={panel} on_close={() => set_panel(null)}>
       {panel === 'sources' ? <SourcesPanel sources={sources} title_id={title.id} /> : <EpisodesPanel episode={title} seasons={seasons} library={library} />}

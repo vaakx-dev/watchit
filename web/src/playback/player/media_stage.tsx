@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, type RefObject } from 'react';
 import { episode_code } from '../../catalog/episodes';
 import type { EpisodeEntry, Title } from '../../catalog/types';
 import type { Library } from '../../library/use_library';
+import { framed } from '../../title_bar/frame';
+import { WindowControls } from '../../title_bar/window_controls';
 import { desktop } from '../engine/mpv_bridge';
 import { use_engine } from '../engine/use_engine';
 import type { Panel } from '../panels/panel';
@@ -58,6 +60,7 @@ export function MediaStage({ title, source, start, position, next, library, pane
   const ending = !dismissed && duration !== null && (state.ended || (state.time > 0 && duration - state.time <= ENDING_SECONDS));
   const idle = use_idle(state.paused || menu !== null || panel !== null || dragging || ending);
   const error = source_error ?? playback.error ?? state.error;
+  const captioned = framed && !fullscreen.active;
   const go_next = () => { if (next) window.location.hash = `#/watch/${next.id}`; };
 
   use_transparent_window(engine?.kind === 'mpv');
@@ -105,9 +108,10 @@ export function MediaStage({ title, source, start, position, next, library, pane
     <div className="player-overlay" data-shown={idle.shown || undefined}>
       <div className="player-gradient top" />
       <div className="player-gradient bottom" />
-      <div className="player-top-bar" onPointerEnter={() => idle.hover(true)} onPointerLeave={() => idle.hover(false)}>
+      <div className="player-top-bar" data-tauri-drag-region={captioned ? 'deep' : undefined} onPointerEnter={() => idle.hover(true)} onPointerLeave={() => idle.hover(false)}>
         <TopBar title={title} />
       </div>
+      {captioned && <WindowControls active={idle.shown} />}
       <div className="player-bottom" onPointerEnter={() => idle.hover(true)} onPointerLeave={() => idle.hover(false)}>
         <ControlBar state={state} duration={duration} audio={audio} subtitles={subtitles} source_label={source_label(source)} menu={menu} panel={panel}
           has_episodes={has_episodes} next_label={next ? `Next episode, ${episode_code(next)}` : null} fullscreen={fullscreen} on_menu={set_menu} on_panel={on_panel}
