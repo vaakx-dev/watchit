@@ -1,4 +1,5 @@
 pub mod snap_button;
+pub mod system_menu;
 
 use tauri::Window;
 use windows::Win32::Foundation::HWND;
