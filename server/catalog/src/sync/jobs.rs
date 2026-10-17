@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::cinemeta::source::SourceQuery;
 use crate::clock::{DAY_MS, iso, now_ms};
-use crate::model::{CatalogKind, ImportStatus, MediaKind};
+use crate::model::{CatalogKind, ImportStatus};
 
 const DISCOVERY_REFRESH_MS: i64 = 7 * DAY_MS;
 pub(crate) const TRENDING_REFRESH_MS: i64 = DAY_MS;
@@ -18,7 +18,7 @@ pub(crate) enum Work {
         #[serde(default)]
         previous: Vec<String>,
         #[serde(default)]
-        details: VecDeque<(String, MediaKind)>,
+        details: VecDeque<String>,
         #[serde(default)]
         has_next: bool,
     },

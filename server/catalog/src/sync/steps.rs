@@ -52,14 +52,14 @@ impl Inner {
     async fn catalog_step(&self, job: &mut Job) -> Result<Step, StepError> {
         let page = job.page;
         let Work::Catalog { query, previous, details, has_next, .. } = &mut job.work else { unreachable!() };
-        if let Some((id, kind)) = details.pop_front() {
+        if let Some(id) = details.pop_front() {
             let mut published = Vec::new();
             if !self.fresh(&id, false).await? {
-                match self.source.title(&id, Some(kind)).await {
+                match self.source.title(&id, None).await {
                     Ok(meta) => published = self.publish_detail(meta, id).await?,
                     Err(error) if error.status == 404 => {}
                     Err(error) => {
-                        details.push_front((id, kind));
+                        details.push_front(id);
                         return Err(error.into());
                     }
                 }
@@ -76,7 +76,7 @@ impl Inner {
         let filters = Filters { anime: query.kind == CatalogKind::Anime && !query.query.is_empty(), genre: !query.genre.is_empty() && !query.query.is_empty() };
         let items = self.publish_catalog(result.metas, filters).await?;
         *previous = items.iter().map(|item| item.id.clone()).collect();
-        details.extend(items.iter().filter(|item| item.needs_detail).map(|item| (item.id.clone(), item.kind)));
+        details.extend(items.iter().filter(|item| item.needs_detail).map(|item| item.id.clone()));
         *has_next = result.has_next;
         let ended = details.is_empty();
         if ended {
@@ -113,9 +113,7 @@ impl Inner {
     async fn detail_step(&self, job: &mut Job, id: String, episodes: bool) -> Result<Step, StepError> {
         let mut published = Vec::new();
         if !self.fresh(&id, episodes).await? {
-            let lookup = id.clone();
-            let known = self.db.run(move |conn| record::kind_of(conn, &lookup)).await?;
-            let kind = if episodes { Some(MediaKind::Series) } else { known.filter(|kind| *kind != MediaKind::Episode) };
+            let kind = episodes.then_some(MediaKind::Series);
             let meta = self.source.title(&id, kind).await?;
             published = self.publish_detail(meta, id).await?;
         }

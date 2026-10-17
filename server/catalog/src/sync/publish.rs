@@ -1,7 +1,7 @@
 use watchit_core::AppResult;
 
 use crate::cinemeta::error::SourceError;
-use crate::cinemeta::mapping::{apply, episodes, lacks};
+use crate::cinemeta::mapping::{apply, episodes, lacks, media_kind};
 use crate::cinemeta::meta::Meta;
 use crate::clock::now_ms;
 use crate::model::MediaKind;
@@ -57,6 +57,10 @@ impl Inner {
                 let mut lacking = Vec::with_capacity(metas.len());
                 for meta in &metas {
                     let previous = record::load(&transaction, meta.id())?;
+                    let verified = record::verified_kind(&transaction, meta.id())?;
+                    if verified.is_some_and(|kind| Some(kind) != media_kind(meta)) {
+                        continue;
+                    }
                     if let Some(record) = apply(previous, meta) {
                         lacking.push(lacks(meta, filters.anime, filters.genre));
                         records.push(record);

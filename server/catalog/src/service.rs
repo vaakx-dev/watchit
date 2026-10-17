@@ -90,6 +90,10 @@ impl Catalog {
         Ok(row.map(|row| row.episode(&images)))
     }
 
+    pub fn runtime_minutes(&self, conn: &Connection, id: &str) -> AppResult<Option<u32>> {
+        record::runtime_minutes(conn, id)
+    }
+
     pub fn season_episodes(&self, conn: &Connection, series_id: &str, season: i64) -> AppResult<Vec<String>> {
         episodes::season_ids(conn, series_id, season)
     }

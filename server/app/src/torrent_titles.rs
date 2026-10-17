@@ -20,8 +20,10 @@ fn episode_number(id: &str) -> Option<u32> {
 
 #[async_trait]
 impl Titles for CatalogTitles {
-    async fn runtime_minutes(&self, _title_id: &str) -> Option<u32> {
-        None
+    async fn runtime_minutes(&self, title_id: &str) -> Option<u32> {
+        let catalog = self.catalog.clone();
+        let id = title_id.to_owned();
+        self.db.run(move |conn| catalog.runtime_minutes(conn, &id)).await.ok().flatten()
     }
 
     async fn season_episodes(&self, series_id: &str, season: u32) -> Vec<u32> {
