@@ -8,6 +8,9 @@ fn main() -> anyhow::Result<()> {
     }
     let config = ts_rs::Config::new().with_large_int("number").with_out_dir(&out_dir);
     watchit_profiles::export_types(&config)?;
+    watchit_artwork::export_types(&config)?;
+    watchit_catalog::export_types(&config)?;
+    watchit_library::export_types(&config)?;
     println!("TypeScript types written to {}", out_dir.display());
     Ok(())
 }
