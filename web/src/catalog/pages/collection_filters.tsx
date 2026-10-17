@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { Choices, type Choice } from '../../ui/choices';
+import { useRowScroll } from '../../ui/use_row_scroll';
 import { Check } from 'lucide-react';
 import { HIDDEN_STATUSES, type DiscoverQuery, type HiddenStatus } from '../../navigation/discover';
 import type { CatalogKind, CatalogSort, GenreOption } from '../types';
@@ -27,6 +28,8 @@ function Genres({ genres, value, on_change }: { genres: readonly GenreOption[]; 
   const minor = genres.filter(genre => genre.minor && (more || genre === selected));
   const options = [...major, ...minor].map(genre => ({ value: genre.id, label: genre.label }));
   if (value && !selected) options.push({ value, label: value });
+
+  useRowScroll(row);
 
   useLayoutEffect(() => {
     const chip = row.current?.querySelector<HTMLElement>('[aria-pressed="true"]');
