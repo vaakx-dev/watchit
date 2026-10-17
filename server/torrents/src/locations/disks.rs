@@ -28,9 +28,7 @@ impl Transfers {
     pub fn disks(&self) -> Vec<Disk> {
         let settings = self.settings();
         let mut drives = self.used_by_drive();
-        for folder in [Some(&settings.download_dir), settings.movie_dir.as_ref(), settings.series_dir.as_ref()].into_iter().flatten() {
-            drives.entry(root_of(folder)).or_insert(0);
-        }
+        drives.entry(root_of(&settings.download_dir)).or_insert(0);
         drives
             .into_iter()
             .map(|(root, used_bytes)| Disk {

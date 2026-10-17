@@ -70,5 +70,4 @@ pub struct Transfer {
     pub notify_when_ready: bool,
     pub readiness: Readiness,
     pub queue_position: Option<u32>,
-    pub download_dir: String,
 }

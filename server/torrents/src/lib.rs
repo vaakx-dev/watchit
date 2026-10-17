@@ -20,7 +20,7 @@ use ts_rs::{Config, ExportError, TS};
 
 pub use media::{MediaSource, TorrentFile, raw_path};
 pub use service::Torrents;
-pub use titles::{NoTitles, Titles};
+pub use titles::{NoTitles, TitleName, Titles};
 
 pub fn router(torrents: Torrents) -> Router {
     Router::new()

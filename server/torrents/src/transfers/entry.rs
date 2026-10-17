@@ -8,7 +8,7 @@ use super::record::{FileRecord, Record};
 use crate::engine::Handle;
 use crate::queue::Slot;
 use crate::readiness::Tracker;
-use crate::locations::Moving;
+use crate::locations::{LibraryLink, Moving};
 
 pub struct Entry {
     pub record: Record,
@@ -25,7 +25,9 @@ pub struct Entry {
     pub sent: Option<Transfer>,
     pub readiness: Tracker,
     pub relocation: Option<Moving>,
-    pub move_error: Option<String>,
+    pub file_error: Option<String>,
+    pub library: Vec<LibraryLink>,
+    pub import_failed: BTreeSet<usize>,
 }
 
 pub struct Progress {
@@ -52,7 +54,9 @@ impl Entry {
             sent: None,
             readiness: Tracker::default(),
             relocation: None,
-            move_error: None,
+            file_error: None,
+            library: Vec::new(),
+            import_failed: BTreeSet::new(),
         }
     }
 

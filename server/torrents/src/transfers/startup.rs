@@ -7,11 +7,12 @@ use watchit_core::AppResult;
 use super::entry::Entry;
 use super::{Transfers, pick, store};
 use crate::engine::{self, Handle};
-use crate::queue;
+use crate::{locations, queue};
 
 impl Transfers {
     pub async fn restore(self: &Arc<Self>) -> AppResult<()> {
-        let (saved, ranks) = self.db.run(|conn| Ok((store::load(conn)?, queue::load_ranks(conn)?))).await?;
+        let (saved, ranks, mut library) =
+            self.db.run(|conn| Ok((store::load(conn)?, queue::load_ranks(conn)?, locations::load_library(conn)?))).await?;
         let known: HashSet<String> = saved.iter().map(|(record, _)| record.info_hash.clone()).collect();
         let managed: Vec<Handle> = self.session.with_torrents(|torrents| torrents.map(|(_, handle)| handle.clone()).collect());
         for handle in managed.iter().filter(|handle| !known.contains(&handle.info_hash().as_string())) {
@@ -24,6 +25,7 @@ impl Transfers {
         for (record, files) in saved {
             let handle = TorrentIdOrHash::parse(&record.info_hash).ok().and_then(|id| self.session.get(id));
             let mut entry = Entry::new(record, files);
+            entry.library = library.remove(&entry.record.info_hash).unwrap_or_default();
             entry.queue_rank = ranks.get(&entry.record.info_hash).copied().unwrap_or_else(|| queue::next_rank(&self.entries()));
             match handle {
                 Some(handle) => {

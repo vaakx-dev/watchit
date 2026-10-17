@@ -24,15 +24,14 @@ fn state(entry: &Entry, progress: &Progress) -> State {
 fn error(entry: &Entry, progress: &Progress, state: State) -> Option<String> {
     match state {
         State::Error => progress.stats.as_ref().and_then(|stats| stats.error.clone()).or_else(|| entry.record.error.clone()),
-        State::Queued => entry.slot.waiting().map(str::to_owned).or_else(|| entry.move_error.clone()),
-        _ => entry.move_error.clone(),
+        State::Queued => entry.slot.waiting().map(str::to_owned).or_else(|| entry.file_error.clone()),
+        _ => entry.file_error.clone(),
     }
 }
 
 pub fn snapshot(entry: &Entry) -> Transfer {
     if let Some(moving) = &entry.relocation {
-        let download_dir = moving.target.to_string_lossy().into_owned();
-        return Transfer { state: State::Moving, error: None, download_bps: 0, upload_bps: 0, peers: 0, eta_seconds: None, download_dir, ..moving.before.clone() };
+        return Transfer { state: State::Moving, error: None, download_bps: 0, upload_bps: 0, peers: 0, eta_seconds: None, ..moving.before.clone() };
     }
     let progress = entry.progress();
     let state = state(entry, &progress);
@@ -73,6 +72,5 @@ pub fn snapshot(entry: &Entry) -> Transfer {
         notify_when_ready: entry.record.notify_when_ready,
         readiness: entry.readiness.current.clone(),
         queue_position: entry.queue_position,
-        download_dir: entry.record.download_dir.to_string_lossy().into_owned(),
     }
 }
