@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { save_settings } from '../../torrents/api';
+import { read_settings, save_settings } from '../../torrents/api';
 import type { TorrentSettings } from '../../torrents/types';
 import { field_error, NUMBER_FIELDS, to_settings, to_values, type Values } from './fields';
 
@@ -20,8 +20,8 @@ export function SettingsForm({ initial }: { initial: TorrentSettings }) {
     set_pending(true);
     set_saved(false);
     set_failure('');
-    const settings = to_settings(values);
     try {
+      const settings = { ...await read_settings(), ...to_settings(values) };
       const next = await save_settings(settings);
       set_values(to_values(next ?? settings));
       set_saved(true);

@@ -14,7 +14,7 @@ function Stats({ transfer }: { transfer: Transfer }) {
   if (transfer.state === 'error') return <p className="transfer-failure">{transfer.error ?? 'This download failed.'}</p>;
   const active = !finished(transfer) && transfer.state !== 'paused';
   return <p className="meta transfer-stats">
-    <span>{STATE_LABELS[transfer.state]}</span>
+    <span>{STATE_LABELS[transfer.state]}{transfer.state === 'queued' && transfer.queue_position !== null && ` · #${transfer.queue_position + 1} in queue`}</span>
     <span>{percent(transfer.progress)}{finished(transfer) ? '' : ` of ${bytes(transfer.size_bytes)}`}</span>
     {finished(transfer) && <span>{bytes(transfer.size_bytes)}</span>}
     {active && <span><ArrowDown />{speed(transfer.download_bps)}</span>}

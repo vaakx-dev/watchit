@@ -64,4 +64,5 @@ pub struct Transfer {
     pub peers: u32,
     pub eta_seconds: Option<u64>,
     pub added_at: i64,
+    pub queue_position: Option<u32>,
 }

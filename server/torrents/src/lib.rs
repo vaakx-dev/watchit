@@ -1,6 +1,7 @@
 mod engine;
 mod library;
 mod media;
+mod queue;
 mod release;
 mod search;
 mod service;

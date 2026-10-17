@@ -1,6 +1,6 @@
 import type { TorrentSettings } from '../../torrents/types';
 
-type NumberKey = Exclude<keyof TorrentSettings, 'download_dir'>;
+type NumberKey = Exclude<keyof TorrentSettings, 'download_dir' | 'max_active'>;
 
 export type NumberField = { key: NumberKey; label: string; unit: string; hint: string; scale: number; optional: boolean; integer: boolean };
 
@@ -13,10 +13,9 @@ export const NUMBER_FIELDS: NumberField[] = [
   { key: 'max_upload_bps', label: 'Upload speed limit', unit: 'MiB/s', hint: 'Leave empty for no limit.', scale: MIB, optional: true, integer: false },
   { key: 'seed_ratio', label: 'Stop seeding at ratio', unit: '×', hint: 'Uploaded divided by downloaded. Leave empty to keep seeding.', scale: 1, optional: true, integer: false },
   { key: 'seed_minutes', label: 'Stop seeding after', unit: 'min', hint: 'Leave empty to keep seeding.', scale: 1, optional: true, integer: true },
-  { key: 'max_active', label: 'Active downloads at once', unit: '', hint: 'Others wait in the queue.', scale: 1, optional: false, integer: true },
 ];
 
-export type Values = Record<keyof TorrentSettings, string>;
+export type Values = Record<NumberKey | 'download_dir', string>;
 
 function shown(value: number | null, scale: number) {
   if (value === null) return '';
@@ -37,12 +36,12 @@ export function field_error(field: NumberField, text: string) {
   return '';
 }
 
-export function to_settings(values: Values): TorrentSettings {
+export function to_settings(values: Values): Partial<TorrentSettings> {
   const read = (field: NumberField) => {
     const text = values[field.key].trim();
     if (text === '') return null;
     return field.scale > 1 ? Math.round(Number(text) * field.scale) : Number(text);
   };
   const numbers = Object.fromEntries(NUMBER_FIELDS.map(field => [field.key, read(field)]));
-  return { ...numbers, download_dir: values.download_dir.trim() } as TorrentSettings;
+  return { ...numbers, download_dir: values.download_dir.trim() } as Partial<TorrentSettings>;
 }

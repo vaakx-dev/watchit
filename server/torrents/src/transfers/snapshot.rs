@@ -24,7 +24,7 @@ fn state(entry: &Entry, progress: &Progress) -> State {
 fn error(entry: &Entry, progress: &Progress, state: State) -> Option<String> {
     match state {
         State::Error => progress.stats.as_ref().and_then(|stats| stats.error.clone()).or_else(|| entry.record.error.clone()),
-        State::Queued => entry.waiting.map(str::to_owned),
+        State::Queued => entry.slot.waiting().map(str::to_owned),
         _ => None,
     }
 }
@@ -66,5 +66,6 @@ pub fn snapshot(entry: &Entry) -> Transfer {
         peers: live.map_or(0, |live| live.snapshot.peer_stats.live),
         eta_seconds,
         added_at: entry.record.added_at,
+        queue_position: entry.queue_position,
     }
 }
