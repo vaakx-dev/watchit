@@ -149,7 +149,7 @@ pub async fn events(State(torrents): State<Torrents>) -> AppResult<Sse<impl Stre
     let stopping = torrents.stopping();
     let live = BroadcastStream::new(transfers.subscribe()).filter_map(|event| future::ready(event.ok()));
     let speed = TransferEvent::Speed(transfers.bandwidth.status());
-    let current = futures::stream::iter(transfers.all().into_iter().map(TransferEvent::Changed).chain([speed]));
+    let current = futures::stream::iter(transfers.all().into_iter().map(|transfer| TransferEvent::Changed(Box::new(transfer))).chain([speed]));
     let stream = current
         .chain(live)
         .filter_map(|event| future::ready(sse_event(event).map(Ok)))

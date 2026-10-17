@@ -7,7 +7,7 @@ use crate::queue;
 
 #[derive(Clone, Debug)]
 pub enum TransferEvent {
-    Changed(Transfer),
+    Changed(Box<Transfer>),
     Removed { id: String },
     Ready(ReadyNotice),
     Speed(SpeedStatus),
@@ -35,7 +35,7 @@ impl Transfers {
             .collect();
         drop(entries);
         for transfer in changed {
-            let _ = self.events.send(TransferEvent::Changed(transfer));
+            let _ = self.events.send(TransferEvent::Changed(Box::new(transfer)));
         }
         for notice in ready {
             let _ = self.events.send(TransferEvent::Ready(notice));
