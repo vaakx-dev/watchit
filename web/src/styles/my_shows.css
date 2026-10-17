@@ -29,7 +29,11 @@
   .library-toolbar { gap: var(--space-3); }
   .library-sort { margin-left: 0; }
   .library-list { grid-template-columns: 44px minmax(0, 1fr) auto auto; column-gap: var(--space-3); }
-  .library-rating, .library-next, .library-year { display: none; }
+  .library-next, .library-year { display: none; }
+  .library-poster, .library-row > .status-controls, .library-play { grid-row: span 2; }
+  .library-copy { grid-column: 2; }
+  .library-rating { grid-column: 2; grid-row: 2; margin-top: 2px; }
+  .library-rating:not(:has(.rating-value)) { display: none; }
   .library-copy .meta { flex-direction: column; align-items: flex-start; gap: 0; }
   .library-copy .meta > *::before { content: none; }
 }
