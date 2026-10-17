@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { NotifySwitch } from '../../downloads/notify/notify_switch';
 import { bytes, percent } from '../../torrents/format';
 import { DownloadResultButton } from '../../torrents/download_result_button';
@@ -6,6 +6,10 @@ import type { Sources } from '../sources/use_sources';
 import { source_key, type PlaySource } from '../sources/types';
 import { RunningNote } from '../../downloads/readiness/running_note';
 import { SourceRow } from './source_row';
+import { FilterPanel } from '../../torrents/filters/filter_panel';
+import { FilterToolbar } from '../../torrents/filters/filter_toolbar';
+import { language_name } from '../../torrents/filters/language_name';
+import { use_torrent_filters } from '../../torrents/filters/use_torrent_filters';
 
 function Group({ title, note, children }: { title: string; note?: ReactNode; children: ReactNode[] }) {
   return <section className="source-group" aria-label={title}>
@@ -32,7 +36,7 @@ function Row({ source, sources, title_id }: { source: PlaySource; sources: Sourc
     const { result } = source;
     return <SourceRow resolution={result.resolution} hdr={result.hdr} name={result.filename ?? result.name} current={current} on_play={play}
       note={<RunningNote info_hash={result.info_hash} />}
-      details={[seeders(result.seeders), result.size_bytes !== null && bytes(result.size_bytes), result.video_codec, result.audio, result.site, result.languages.join(' / ')]}
+      details={[seeders(result.seeders), result.size_bytes !== null && bytes(result.size_bytes), result.video_codec, result.audio, result.site, result.languages.map(language_name).join(' / ')]}
       action={<DownloadResultButton result={result} title_id={title_id} />} />;
   }
   return <li className="source-row">
@@ -51,12 +55,24 @@ function TorrentNote({ sources }: { sources: Sources }) {
   return null;
 }
 
+function TorrentFilters({ filters }: { filters: ReturnType<typeof use_torrent_filters> }) {
+  const [open, set_open] = useState(false);
+  if (filters.total < 2) return null;
+  return <div className="source-filters">
+    <FilterToolbar state={filters} open={open} on_toggle={() => set_open(!open)} />
+    {open && <FilterPanel state={filters} />}
+  </div>;
+}
+
 export function SourcesPanel({ sources, title_id }: { sources: Sources; title_id: string }) {
+  const filters = use_torrent_filters(sources.results);
   const rows = (list: PlaySource[]) => list.map(source => <Row key={source_key(source)} source={source} sources={sources} title_id={title_id} />);
+  const torrents: PlaySource[] = filters.shown.map(result => ({ kind: 'torrent', result }));
   return <div className="sources-panel">
     {sources.local.length > 0 && <Group title="On this server">{rows(sources.local)}</Group>}
     <NotifySwitch />
-    <Group title="Torrents" note={<TorrentNote sources={sources} />}>{rows(sources.torrents)}</Group>
+    <TorrentFilters filters={filters} />
+    <Group title="Torrents" note={<TorrentNote sources={sources} />}>{rows(torrents)}</Group>
     {sources.embeds.length > 0 && <Group title="Embedded players">{rows(sources.embeds)}</Group>}
     <p className="watch-note" role={sources.save_error ? 'alert' : undefined}>
       {sources.save_error ? `Your source choice wasn't saved: ${sources.save_error}` : 'Your choice is remembered for this title.'}

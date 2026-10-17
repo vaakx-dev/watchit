@@ -9,12 +9,12 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tokio_stream::wrappers::BroadcastStream;
 use ts_rs::TS;
-use watchit_core::{AppError, AppResult, JsonBody};
+use watchit_core::{AppError, AppResult, JsonBody, Viewer};
 
 use super::control::Change;
 use super::model::{Kind, Transfer};
 use super::record::{Choice, Pick};
-use super::TransferEvent;
+use super::{SeasonRequest, TransferEvent};
 use crate::bandwidth::SpeedStatus;
 use crate::locations::Disk;
 use crate::service::Torrents;
@@ -47,6 +47,12 @@ pub struct NewTransfer {
 pub struct SeasonDownload {
     series_id: String,
     season: u32,
+    #[serde(default)]
+    #[ts(optional)]
+    info_hash: Option<String>,
+    #[serde(default)]
+    #[ts(optional)]
+    notify_when_ready: Option<bool>,
 }
 
 #[derive(Deserialize, TS)]
@@ -92,9 +98,17 @@ pub async fn create(State(torrents): State<Torrents>, JsonBody(body): JsonBody<N
     transfers.add(&body.info_hash, pick, body.kind, body.notify_when_ready.unwrap_or(false)).await.map(Json)
 }
 
-pub async fn season(State(torrents): State<Torrents>, JsonBody(body): JsonBody<SeasonDownload>) -> AppResult<Json<Vec<Transfer>>> {
+pub async fn season(State(torrents): State<Torrents>, viewer: Viewer, JsonBody(body): JsonBody<SeasonDownload>) -> AppResult<Json<Vec<Transfer>>> {
+    let quality = torrents.quality(viewer.profile).await?;
     let transfers = torrents.transfers().await?;
-    transfers.add_season(&body.series_id, body.season).await.map(Json)
+    let request = SeasonRequest {
+        series: body.series_id,
+        season: body.season,
+        info_hash: body.info_hash,
+        quality,
+        notify_when_ready: body.notify_when_ready.unwrap_or(false),
+    };
+    transfers.add_season(request).await.map(Json)
 }
 
 pub async fn update(State(torrents): State<Torrents>, Path(id): Path<String>, JsonBody(body): JsonBody<TransferPatch>) -> AppResult<Json<Transfer>> {

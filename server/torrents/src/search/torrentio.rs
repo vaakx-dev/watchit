@@ -7,7 +7,7 @@ use watchit_core::{AppError, AppResult};
 
 use super::languages;
 use super::result::{Candidate, TorrentResult, Traits};
-use crate::release::{Hdr, Resolution, audio, video};
+use crate::release::{Hdr, Resolution, audio, episode, video};
 use crate::title_id::TitleId;
 
 const ADDON: &str = "https://torrentio.strem.fun";
@@ -51,14 +51,14 @@ pub async fn streams(http: &reqwest::Client, title: &TitleId) -> AppResult<Vec<C
         return Err(unavailable(&format!("Torrent search failed with HTTP {}.", response.status().as_u16())));
     }
     let body: Response = response.json().await.map_err(|_| unavailable("Torrent search returned an unreadable response."))?;
-    Ok(body.streams.into_iter().filter_map(candidate).collect())
+    Ok(body.streams.into_iter().filter_map(|stream| candidate(stream, title)).collect())
 }
 
 fn unavailable(message: &str) -> AppError {
     AppError::new(axum::http::StatusCode::BAD_GATEWAY, message)
 }
 
-fn candidate(stream: Stream) -> Option<Candidate> {
+fn candidate(stream: Stream, title: &TitleId) -> Option<Candidate> {
     let info_hash = stream.info_hash?.to_ascii_lowercase();
     if info_hash.len() != 40 || !info_hash.bytes().all(|byte| byte.is_ascii_hexdigit()) {
         return None;
@@ -82,6 +82,10 @@ fn candidate(stream: Stream) -> Option<Candidate> {
         cam: video::is_cam(&torrent_name) || matches!(label.split(' ').next(), Some("CAM" | "TeleSync" | "TeleCine" | "SCR")),
         three_d: video::is_3d(&label) || video::is_3d(&torrent_name),
     };
+    let season_pack = match title {
+        TitleId::Episode { season, .. } => episode::coverage(&torrent_name).is_pack_for(*season),
+        TitleId::Title(_) => false,
+    };
     let trackers = stream.sources.iter().filter_map(|source| source.strip_prefix("tracker:")).map(str::to_owned).collect();
     Some(Candidate {
         result: TorrentResult {
@@ -97,6 +101,7 @@ fn candidate(stream: Stream) -> Option<Candidate> {
             seeders: SEEDERS.captures(stats).and_then(|found| found[1].parse().ok()),
             site: SITE.captures(stats).map(|found| found[1].to_owned()),
             languages: language_line.map(languages::from_flags).unwrap_or_default(),
+            season_pack,
         },
         traits,
         trackers,

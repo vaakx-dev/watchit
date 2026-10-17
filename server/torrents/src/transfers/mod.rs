@@ -27,6 +27,7 @@ pub use add::valid_info_hash;
 pub use entry::{Entry, Progress};
 pub use events::TransferEvent;
 pub use record::{Choice, Pick};
+pub use season::SeasonRequest;
 pub use store::create_tables;
 
 use crate::bandwidth::Bandwidth;

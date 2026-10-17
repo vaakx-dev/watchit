@@ -85,3 +85,6 @@ a.watch-episode:focus-visible { outline-offset: -2px; }
 @media (max-width: 760px) {
   .ending-next { grid-template-columns: 96px minmax(0, 1fr); }
 }
+.source-filters { display: grid; gap: var(--space-3); padding: 0 var(--space-2); }
+.source-filters .filter-panel { grid-template-columns: 1fr; gap: var(--space-1); }
+.source-filters .filter-panel .filter-label { margin-top: var(--space-2); }
