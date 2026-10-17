@@ -4187,7 +4187,7 @@ dependencies = [
  "axum",
  "chrono",
  "form_urlencoded",
- "hex",
+ "hex 0.4.3",
  "rusqlite",
  "serde",
  "serde_json",
