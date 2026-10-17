@@ -8,7 +8,7 @@ use watchit_core::{AppError, AppResult};
 
 use super::record::FileRecord;
 use super::{Transfers, now};
-use crate::engine::{self, Handle};
+use crate::engine::{self, Handle, MetadataFile};
 
 const METADATA_WAIT: Duration = Duration::from_secs(90);
 
@@ -65,7 +65,7 @@ impl Transfers {
         waiting.await.map_err(|_| AppError::new(StatusCode::GATEWAY_TIMEOUT, "Torrent metadata did not arrive in time.").retry_after(5))?
     }
 
-    fn start_reading(self: &Arc<Self>, info_hash: &str, index: usize, handle: &Handle) -> AppResult<(String, u64, ReaderGuard)> {
+    pub fn select_file(&self, info_hash: &str, index: usize, handle: &Handle) -> AppResult<MetadataFile> {
         let available = engine::files_of(handle).map_err(engine_error)?;
         let file = available.into_iter().find(|file| file.index == index).ok_or_else(|| AppError::not_found("File not found in torrent."))?;
         let mut entries = self.entries();
@@ -74,10 +74,17 @@ impl Transfers {
             entry.files.push(FileRecord { index, name: file.path.clone(), size_bytes: file.size_bytes, title_id: None });
             entry.files.sort_by_key(|known| known.index);
         }
-        entry.readers += 1;
         entry.record.last_used_at = now();
         drop(entries);
         self.wake();
+        Ok(file)
+    }
+
+    fn start_reading(self: &Arc<Self>, info_hash: &str, index: usize, handle: &Handle) -> AppResult<(String, u64, ReaderGuard)> {
+        let file = self.select_file(info_hash, index, handle)?;
+        if let Some(entry) = self.entries().get_mut(info_hash) {
+            entry.readers += 1;
+        }
         Ok((file.path, file.size_bytes, ReaderGuard { transfers: Arc::clone(self), info_hash: info_hash.to_owned() }))
     }
 

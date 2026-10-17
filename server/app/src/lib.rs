@@ -2,6 +2,7 @@ mod api;
 mod auth;
 mod compression;
 mod origin;
+mod torrent_sources;
 mod web;
 
 use std::net::SocketAddr;

@@ -58,4 +58,12 @@ impl Transfers {
         self.wake();
         Ok(())
     }
+
+    pub async fn resume_for_playback(self: &Arc<Self>, info_hash: &str) -> AppResult<()> {
+        let paused = self.entries().get(info_hash).is_some_and(|entry| entry.record.paused);
+        if paused {
+            self.change(info_hash, Change { paused: Some(false), kind: None }).await?;
+        }
+        Ok(())
+    }
 }

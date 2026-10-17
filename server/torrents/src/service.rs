@@ -107,6 +107,8 @@ impl Torrents {
         let transfers = self.transfers().await?;
         let info_hash = info_hash.to_ascii_lowercase();
         let handle = transfers.ready_handle(&info_hash).await?;
+        transfers.select_file(&info_hash, file_index, &handle)?;
+        transfers.resume_for_playback(&info_hash).await?;
         if transfers.complete_file(&info_hash, file_index) {
             return Ok(MediaSource::File(transfers.disk_path(&handle, file_index)?));
         }
