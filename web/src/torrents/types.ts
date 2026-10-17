@@ -1,5 +1,6 @@
 export type { DiskUsage as Disk } from '../generated/torrents/DiskUsage';
 export type { Hdr as HdrFormat } from '../generated/torrents/Hdr';
+export type { FolderListing } from '../generated/torrents/FolderListing';
 export type { LocalFile } from '../generated/torrents/LocalFile';
 export type { Readiness } from '../generated/torrents/Readiness';
 export type { Resolution } from '../generated/torrents/Resolution';
@@ -12,5 +13,6 @@ export type { Transfer } from '../generated/torrents/Transfer';
 export type { TransferFile } from '../generated/torrents/TransferFile';
 export type { TransferKind } from '../generated/torrents/TransferKind';
 export type { TransferList } from '../generated/torrents/TransferList';
+export type { TransferPatch } from '../generated/torrents/TransferPatch';
 export type { TransferState } from '../generated/torrents/TransferState';
 export type { WhileWatching } from '../generated/torrents/WhileWatching';

@@ -1,63 +1,26 @@
-use std::collections::{BTreeSet, HashSet};
+use std::collections::{BTreeSet, HashMap, HashSet};
+use std::path::PathBuf;
 use std::future::Future;
 use std::time::{Duration, Instant};
 
 use librqbit::TorrentStatsState;
 
 use super::Transfers;
-use super::disk::free_bytes;
-use super::entry::{Entry, Progress};
+use super::entry::Entry;
 use super::model::Kind;
 use crate::engine::Handle;
-use crate::settings::Settings;
+use crate::locations::root_of;
+use crate::bandwidth;
+use crate::queue;
 
 const TICK: Duration = Duration::from_secs(1);
 const PERSIST_EVERY: u32 = 15;
-const WAITING_FOR_BUDGET: &str = "Waiting for room in the disk budget.";
-const WAITING_FOR_DISK: &str = "Waiting for free disk space.";
 
 enum Action {
     Pause(Handle),
     Resume(Handle),
     SelectFiles(Handle, HashSet<usize>),
     Evict(String),
-}
-
-struct Admission {
-    slots: u32,
-    budget_room: Option<u64>,
-    disk_room: u64,
-}
-
-impl Admission {
-    fn new(settings: &Settings, used_bytes: u64) -> Self {
-        Self {
-            slots: settings.max_active,
-            budget_room: settings.disk_budget_bytes.map(|budget| budget.saturating_sub(used_bytes)),
-            disk_room: free_bytes(settings.download_dir()),
-        }
-    }
-
-    fn admit(&mut self, remaining: u64) -> Result<(), Option<&'static str>> {
-        if self.slots == 0 {
-            return Err(None);
-        }
-        if self.budget_room.is_some_and(|room| remaining > room) {
-            return Err(Some(WAITING_FOR_BUDGET));
-        }
-        if remaining > self.disk_room {
-            return Err(Some(WAITING_FOR_DISK));
-        }
-        self.slots -= 1;
-        self.budget_room = self.budget_room.map(|room| room - remaining);
-        self.disk_room -= remaining;
-        Ok(())
-    }
-}
-
-fn seeding_done(entry: &Entry, progress: &Progress, settings: &Settings) -> bool {
-    let ratio = if progress.size_bytes == 0 { 0.0 } else { entry.record.uploaded_bytes as f64 / progress.size_bytes as f64 };
-    settings.seeding_done(ratio, entry.record.seeded_seconds / 60)
 }
 
 impl Transfers {
@@ -111,46 +74,23 @@ impl Transfers {
     fn plan(&self) -> Vec<Action> {
         let settings = self.settings();
         let mut entries = self.entries();
-        let used_bytes: u64 = entries.values().map(|entry| entry.progress().downloaded_bytes).sum();
-        let mut admission = Admission::new(&settings, used_bytes);
-        let hold = self.bandwidth.hold();
+        let used = queue::used_by_drive(&entries);
+        queue::assign_slots(&mut entries, &settings, used.clone());
+        if let Some(reason) = self.bandwidth.hold() {
+            bandwidth::hold_background(&mut entries, reason);
+        }
         let mut actions = Vec::new();
 
-        let mut queue: Vec<&mut Entry> = entries.values_mut().filter(|entry| entry.handle.is_some()).collect();
-        queue.sort_by_key(|entry| entry.record.added_at);
-        for entry in queue {
+        for entry in entries.values() {
             let Some(handle) = entry.handle.clone() else { continue };
             let progress = entry.progress();
             let engine = progress.engine_state();
-            let selected: BTreeSet<usize> = entry.selected();
+            let wanted: BTreeSet<usize> = queue::wanted_files(entry, &progress);
             let engine_selected: Option<BTreeSet<usize>> = handle.only_files().map(|files| files.into_iter().collect());
-            if !matches!(engine, Some(TorrentStatsState::Initializing { .. })) && engine_selected.as_ref() != Some(&selected) {
-                actions.push(Action::SelectFiles(handle.clone(), selected.into_iter().collect()));
+            if !matches!(engine, Some(TorrentStatsState::Initializing { .. })) && engine_selected.as_ref() != Some(&wanted) {
+                actions.push(Action::SelectFiles(handle.clone(), wanted.into_iter().collect()));
             }
-            entry.waiting = None;
-            let run = if entry.record.paused {
-                false
-            } else if entry.readers > 0 {
-                true
-            } else if progress.finished() {
-                !seeding_done(entry, &progress, &settings)
-            } else if entry.record.kind == Kind::Stream {
-                true
-            } else {
-                match admission.admit(progress.remaining()) {
-                    Ok(()) => true,
-                    Err(reason) => {
-                        entry.waiting = reason;
-                        false
-                    }
-                }
-            };
-            let held = run && hold.is_some() && entry.readers == 0 && !progress.finished();
-            if held {
-                entry.waiting = hold;
-            }
-            let run = run && !held;
-            match (engine, run) {
+            match (engine, entry.slot.runs()) {
                 (Some(TorrentStatsState::Live), false) => actions.push(Action::Pause(handle)),
                 (Some(TorrentStatsState::Paused), true) => actions.push(Action::Resume(handle)),
                 _ => {}
@@ -158,15 +98,16 @@ impl Transfers {
         }
 
         if let Some(budget) = settings.disk_budget_bytes {
-            let mut over = used_bytes.saturating_sub(budget);
+            let mut over: HashMap<PathBuf, u64> = used.into_iter().map(|(drive, bytes)| (drive, bytes.saturating_sub(budget))).collect();
             let mut evictable: Vec<&Entry> =
-                entries.values().filter(|entry| entry.record.kind == Kind::Stream && entry.readers == 0).collect();
+                entries.values().filter(|entry| entry.record.kind == Kind::Stream && entry.readers == 0 && entry.relocation.is_none()).collect();
             evictable.sort_by_key(|entry| entry.record.last_used_at);
             for entry in evictable {
-                if over == 0 {
-                    break;
+                let excess = over.entry(root_of(&entry.record.download_dir)).or_insert(0);
+                if *excess == 0 {
+                    continue;
                 }
-                over = over.saturating_sub(entry.progress().downloaded_bytes);
+                *excess = excess.saturating_sub(entry.progress().downloaded_bytes);
                 actions.push(Action::Evict(entry.record.info_hash.clone()));
             }
         }

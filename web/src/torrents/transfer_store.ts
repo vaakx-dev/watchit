@@ -3,12 +3,12 @@ import { list_transfers } from './api';
 import { read_events } from './event_stream';
 import type { Disk, SpeedStatus, Transfer } from './types';
 
-export type TransferSnapshot = { transfers: Transfer[]; disk: Disk | null; speed: SpeedStatus | null; live: boolean; error: string | null };
+export type TransferSnapshot = { transfers: Transfer[]; disks: Disk[]; speed: SpeedStatus | null; live: boolean; error: string | null };
 
 const RECONNECT_MS = 3000;
 const DISK_REFRESH_MS = 10000;
 
-let snapshot: TransferSnapshot = { transfers: [], disk: null, speed: null, live: false, error: null };
+let snapshot: TransferSnapshot = { transfers: [], disks: [], speed: null, live: false, error: null };
 const listeners = new Set<() => void>();
 let stop: (() => void) | null = null;
 
@@ -36,7 +36,7 @@ export function remove_transfer(id: string) {
 
 function refresh(signal: AbortSignal) {
   return list_transfers(signal).then(list => {
-    publish({ transfers: [...list.transfers].sort((a, b) => b.added_at - a.added_at), disk: list.disk, speed: list.speed, error: null });
+    publish({ transfers: [...list.transfers].sort((a, b) => b.added_at - a.added_at), disks: list.disks, speed: list.speed, error: null });
   });
 }
 

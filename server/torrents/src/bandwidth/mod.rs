@@ -1,3 +1,4 @@
+mod hold;
 mod pacer;
 pub mod routes;
 mod schedule;
@@ -13,6 +14,7 @@ use std::time::{Duration, Instant};
 use chrono::{DateTime, Local};
 use librqbit::limits::LimitsConfig;
 
+pub use hold::hold_background;
 pub use schedule::Schedule;
 pub use status::{SpeedMode, SpeedStatus, WhileWatching};
 pub use store::{create_table, load};

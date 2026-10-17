@@ -1,16 +1,18 @@
 import { useState, type FormEvent } from 'react';
-import { save_settings } from '../../torrents/api';
+import { read_settings, save_settings } from '../../torrents/api';
 import type { TorrentSettings } from '../../torrents/types';
 import { AlternativeFields } from '../bandwidth/alternative_fields';
-import { schedule_error, to_speed_settings } from '../bandwidth/fields';
+import { schedule_error, to_speed_settings, type SpeedSettings } from '../bandwidth/fields';
 import { WatchingFields } from '../bandwidth/watching_fields';
-import { FieldHint } from './field_hint';
+import { FolderField } from '../locations/folder_field';
+import { use_admin } from '../locations/use_admin';
 import { field_errors, NUMBER_FIELDS, to_settings, to_values, type Values } from './fields';
 import { NumberRow } from './number_row';
 
 export function SettingsForm({ initial }: { initial: TorrentSettings }) {
   const [values, set_values] = useState(() => to_values(initial));
   const [speed, set_speed] = useState(() => to_speed_settings(initial));
+  const admin = use_admin();
   const [touched, set_touched] = useState(false);
   const [pending, set_pending] = useState(false);
   const [saved, set_saved] = useState(false);
@@ -26,8 +28,8 @@ export function SettingsForm({ initial }: { initial: TorrentSettings }) {
     set_pending(true);
     set_saved(false);
     set_failure('');
-    const settings = { ...to_settings(values), ...speed };
     try {
+      const settings = { ...await read_settings(), ...to_settings(values), ...speed };
       const next = await save_settings(settings);
       set_values(to_values(next ?? settings));
       set_speed(to_speed_settings(next ?? settings));
@@ -49,7 +51,7 @@ export function SettingsForm({ initial }: { initial: TorrentSettings }) {
     changed();
   }
 
-  function change_speed(next: Partial<typeof speed>) {
+  function change_speed(next: Partial<SpeedSettings>) {
     set_speed(current => ({ ...current, ...next }));
     changed();
   }
@@ -57,12 +59,12 @@ export function SettingsForm({ initial }: { initial: TorrentSettings }) {
   return <form className="cache-form" onSubmit={save} noValidate>
     <fieldset disabled={pending}>
       <legend className="sr-only">Torrent settings</legend>
-      <div className="cache-field folder-field">
-        <label htmlFor="download_dir">Download folder</label>
-        <div className="cache-input"><input id="download_dir" value={values.download_dir} spellCheck={false} aria-describedby="download_dir-hint"
-          aria-invalid={touched && folder_error ? true : undefined} onChange={event => change('download_dir', event.target.value)} /></div>
-        <FieldHint id="download_dir-hint" error={folder_error} touched={touched} text="A folder on the computer running the server." />
-      </div>
+      <FolderField id="download_dir" label="Download folder" hint="A folder on the computer running the server." value={values.download_dir}
+        invalid={touched ? folder_error : ''} admin={admin} on_change={value => change('download_dir', value)} />
+      <FolderField id="movie_dir" label="Movies folder" hint="Leave empty to use the download folder." value={values.movie_dir}
+        placeholder="Same as download folder" admin={admin} on_change={value => change('movie_dir', value)} />
+      <FolderField id="series_dir" label="Shows folder" hint="Leave empty to use the download folder." value={values.series_dir}
+        placeholder="Same as download folder" admin={admin} on_change={value => change('series_dir', value)} />
       {NUMBER_FIELDS.map(field => <NumberRow key={field.key} field={field} value={values[field.key]} error={errors[field.key]}
         touched={touched} on_change={value => change(field.key, value)} />)}
       <AlternativeFields values={values} errors={errors} schedule={speed.schedule} touched={touched}

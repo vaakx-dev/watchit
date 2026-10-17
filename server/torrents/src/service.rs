@@ -9,6 +9,7 @@ use watchit_core::{AppError, AppResult, Background, Context, StreamTokens, Viewe
 use crate::bandwidth::{self, Bandwidth};
 use crate::engine;
 use crate::media::{MediaSource, raw_url};
+use crate::queue;
 use crate::search::Search;
 use crate::settings::{self, Settings};
 use crate::titles::Titles;
@@ -57,7 +58,7 @@ async fn launch(launch: Launch) {
             return;
         }
     };
-    let transfers = Transfers::new(context.db.clone(), Arc::clone(&session), search, titles, settings, bandwidth);
+    let transfers = Transfers::new(context.db.clone(), Arc::clone(&session), search, titles, engine::session_folder(&folder), settings, bandwidth);
     if let Err(error) = transfers.restore().await {
         tracing::error!(%error, "could not restore transfers");
     }
@@ -71,7 +72,8 @@ impl Torrents {
         context.db.run_blocking(|conn| {
             settings::create_table(conn)?;
             bandwidth::create_table(conn)?;
-            transfers::create_tables(conn)
+            transfers::create_tables(conn)?;
+            queue::create_table(conn)
         })?;
         let folder = std::path::absolute(context.paths.folder("torrents")?)?;
         let default_download_dir = std::path::absolute(context.paths.folder("downloads")?)?;

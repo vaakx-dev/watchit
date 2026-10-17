@@ -2,7 +2,7 @@ mod magnet;
 mod metadata;
 
 use std::net::{Ipv6Addr, SocketAddr};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -13,6 +13,14 @@ use librqbit::{DhtSessionConfig, ListenerMode, ListenerOptions, Session, Session
 pub use metadata::{AddRequest, Metadata, MetadataFile, add_resolved, files_of, resolve};
 
 pub type Handle = Arc<librqbit::ManagedTorrent>;
+
+pub fn session_folder(folder: &Path) -> PathBuf {
+    folder.join("session")
+}
+
+pub fn bitfield_file(session_folder: &Path, info_hash: &str) -> PathBuf {
+    session_folder.join(format!("{info_hash}.bitv"))
+}
 
 const STREAM_WORKER_THREADS: usize = 64;
 const DHT_DUMP_INTERVAL: Duration = Duration::from_secs(60);
@@ -27,7 +35,7 @@ const FALLBACK_TRACKERS: [&str; 5] = [
 pub async fn start(folder: &Path, listen_port: u16, download_dir: &Path, limits: LimitsConfig) -> anyhow::Result<Arc<Session>> {
     let options = SessionOptions {
         fastresume: true,
-        persistence: Some(SessionPersistenceConfig::Json { folder: Some(folder.join("session")) }),
+        persistence: Some(SessionPersistenceConfig::Json { folder: Some(session_folder(folder)) }),
         dht: Some(DhtSessionConfig {
             persistence: Some(DhtPersistenceConfig {
                 dump_interval: Some(DHT_DUMP_INTERVAL),

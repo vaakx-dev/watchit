@@ -75,6 +75,7 @@ impl Transfers {
             entry.files.sort_by_key(|known| known.index);
         }
         entry.record.last_used_at = now();
+        entry.focus = Some(index);
         drop(entries);
         self.wake();
         Ok(file)

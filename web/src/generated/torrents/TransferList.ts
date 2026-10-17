@@ -3,4 +3,4 @@ import type { DiskUsage } from "./DiskUsage";
 import type { SpeedStatus } from "./SpeedStatus";
 import type { Transfer } from "./Transfer";
 
-export type TransferList = { transfers: Array<Transfer>, disk: DiskUsage, speed: SpeedStatus, };
+export type TransferList = { transfers: Array<Transfer>, disks: Array<DiskUsage>, speed: SpeedStatus, };

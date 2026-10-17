@@ -1,20 +1,20 @@
-mod add;
+pub mod add;
 mod control;
-mod disk;
 mod entry;
 mod events;
 pub mod model;
-mod pick;
+pub mod pick;
 mod reader;
 mod record;
 pub mod routes;
 mod schedule;
 mod season;
-mod snapshot;
+pub mod snapshot;
 mod startup;
 mod store;
 
 use std::collections::HashMap;
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex, MutexGuard, RwLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -22,7 +22,7 @@ use librqbit::Session;
 use tokio::sync::{Notify, broadcast};
 use watchit_core::{AppResult, Db};
 
-pub use disk::Disk;
+pub use add::valid_info_hash;
 pub use entry::{Entry, Progress};
 pub use events::TransferEvent;
 pub use record::{Choice, Pick};
@@ -41,10 +41,11 @@ pub struct Transfers {
     pub search: Search,
     pub titles: Arc<dyn Titles>,
     pub bandwidth: Bandwidth,
+    pub session_folder: PathBuf,
     settings: RwLock<Settings>,
     entries: Mutex<HashMap<String, Entry>>,
     events: broadcast::Sender<TransferEvent>,
-    resolved: Notify,
+    pub resolved: Notify,
     wake: Notify,
 }
 
@@ -53,13 +54,22 @@ pub fn now() -> i64 {
 }
 
 impl Transfers {
-    pub fn new(db: Db, session: Arc<Session>, search: Search, titles: Arc<dyn Titles>, settings: Settings, bandwidth: Bandwidth) -> Arc<Self> {
+    pub fn new(
+        db: Db,
+        session: Arc<Session>,
+        search: Search,
+        titles: Arc<dyn Titles>,
+        session_folder: PathBuf,
+        settings: Settings,
+        bandwidth: Bandwidth,
+    ) -> Arc<Self> {
         Arc::new(Self {
             db,
             session,
             search,
             titles,
             bandwidth,
+            session_folder,
             settings: RwLock::new(settings),
             entries: Mutex::default(),
             events: broadcast::channel(EVENT_BUFFER).0,
@@ -85,9 +95,14 @@ impl Transfers {
     }
 
     pub async fn persist(&self, info_hash: &str) -> AppResult<()> {
-        let saved = self.entries().get(info_hash).map(|entry| (entry.record.clone(), entry.files.clone()));
-        let Some((record, files)) = saved else { return Ok(()) };
-        self.db.run(move |conn| store::save(conn, &record, &files)).await
+        let saved = self.entries().get(info_hash).map(|entry| (entry.record.clone(), entry.files.clone(), entry.queue_rank));
+        let Some((record, files, rank)) = saved else { return Ok(()) };
+        self.db
+            .run(move |conn| {
+                store::save(conn, &record, &files)?;
+                crate::queue::save_rank(conn, &record.info_hash, rank)
+            })
+            .await
     }
 
     pub async fn update_settings(&self, settings: Settings) -> AppResult<Settings> {

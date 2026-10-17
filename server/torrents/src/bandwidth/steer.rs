@@ -6,6 +6,7 @@ use watchit_core::AppResult;
 
 use super::{Observation, SpeedStatus, store};
 use crate::engine;
+use crate::transfers::model::Kind;
 use crate::transfers::Transfers;
 
 impl Transfers {
@@ -19,7 +20,7 @@ impl Transfers {
             }
             if entry.readers > 0 {
                 reading = true;
-            } else {
+            } else if entry.record.kind == Kind::Download && !entry.record.paused {
                 background.insert(entry.record.info_hash.clone(), progress.downloaded_bytes);
             }
         }
