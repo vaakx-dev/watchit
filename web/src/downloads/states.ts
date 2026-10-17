@@ -1,17 +1,5 @@
 import type { Transfer, TransferState } from '../torrents/types';
 
-export const FILTERS = ['all', 'downloading', 'seeding', 'completed', 'paused', 'error'] as const;
-export type Filter = typeof FILTERS[number];
-
-export const FILTER_LABELS: Record<Filter, string> = {
-  all: 'All',
-  downloading: 'Downloading',
-  seeding: 'Seeding',
-  completed: 'Completed',
-  paused: 'Paused',
-  error: 'Errored',
-};
-
 export const STATE_LABELS: Record<TransferState, string> = {
   metadata: 'Fetching details',
   queued: 'Queued',
@@ -23,13 +11,21 @@ export const STATE_LABELS: Record<TransferState, string> = {
   error: 'Error',
 };
 
-export function matches(transfer: Transfer, filter: Filter) {
-  if (filter === 'all') return true;
-  if (filter === 'downloading') return transfer.state === 'metadata' || transfer.state === 'queued' || transfer.state === 'downloading';
-  if (filter === 'completed') return transfer.progress >= 1;
-  return transfer.state === filter;
+export function finished(transfer: Transfer) {
+  return transfer.state === 'seeding' || transfer.state === 'completed' || (transfer.progress >= 1 && transfer.state !== 'error');
 }
 
-export function finished(transfer: Transfer) {
-  return transfer.state === 'seeding' || transfer.state === 'completed';
+function waiting(transfer: Transfer) {
+  return transfer.queue_position !== null && (transfer.state === 'queued' || transfer.state === 'paused');
+}
+
+export function sections(transfers: readonly Transfer[]) {
+  const downloads = transfers.filter(transfer => transfer.kind === 'download');
+  const unfinished = downloads.filter(transfer => !finished(transfer));
+  return {
+    now: unfinished.filter(transfer => !waiting(transfer)),
+    up_next: unfinished.filter(waiting).sort((a, b) => (a.queue_position ?? 0) - (b.queue_position ?? 0)),
+    completed: downloads.filter(finished),
+    streams: transfers.filter(transfer => transfer.kind === 'stream'),
+  };
 }
