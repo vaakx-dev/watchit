@@ -27,7 +27,7 @@ pub fn create(wid: isize) -> Mpv {
         init.set_property("hwdec", "auto")?;
         init.set_property("vo", "gpu-next,gpu,")?;
         for (name, value) in OPTIONS {
-            if let Err(error) = init.set_property(*name, *value) {
+            if let Err(error) = init.set_property(name, *value) {
                 eprintln!("mpv: cannot set {name}={value}: {error:?}");
             }
         }
