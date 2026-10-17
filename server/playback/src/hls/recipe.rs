@@ -1,8 +1,9 @@
 use axum::http::StatusCode;
 use watchit_core::{AppError, AppResult};
 
+use super::fragments::segment_pattern;
 use super::segments::{SEGMENT_SECONDS, Segment, equal_segments, gop_frames, keyframe_segments};
-use super::video::{Encode, strings};
+use super::video::{Encode, HEVC_TAG, strings};
 use crate::decide::{AudioPlan, Decision, VideoPlan};
 use crate::ffmpeg::Encoders;
 use crate::probe::Media;
@@ -12,10 +13,12 @@ const RUN_SECONDS: f64 = 900.0;
 const DEFAULT_FRAME_RATE: f64 = 24.0;
 const KEYFRAME_SEEK_OFFSET: f64 = 0.5;
 const KEYFRAME_SEEK_MARGIN: f64 = 0.04;
+const TIMELINE_OFFSET: f64 = 1.0;
+const FRAGMENTED_MP4: &str = "movflags=+frag_keyframe+empty_moov+default_base_moof+delay_moov+frag_discont+skip_trailer:use_editlist=0:avoid_negative_ts=disabled";
 
 #[derive(Clone, Debug)]
 enum Video {
-    Copy { stream: u32, strip_dolby_vision: bool },
+    Copy { stream: u32, hevc: bool, strip_dolby_vision: bool },
     Encode(Encode),
 }
 
@@ -33,7 +36,8 @@ impl Recipe {
         let duration = media.duration.ok_or_else(|| AppError::new(StatusCode::UNPROCESSABLE_ENTITY, "The video has no known duration."))?;
         let (video, segments, keyframes) = match (decision.video, &media.video) {
             (Some(VideoPlan::Copy), Some(stream)) => {
-                let video = Video::Copy { stream: stream.index, strip_dolby_vision: stream.dolby_vision.is_some() && stream.codec == "hevc" };
+                let hevc = stream.codec == "hevc";
+                let video = Video::Copy { stream: stream.index, hevc, strip_dolby_vision: hevc && stream.dolby_vision.is_some() };
                 let segments = match &keyframes {
                     Some(keyframes) => keyframe_segments(keyframes, duration),
                     None => equal_segments(duration, SEGMENT_SECONDS),
@@ -64,7 +68,7 @@ impl Recipe {
             args.extend(encode.input_args());
         }
         if matches!(self.video, Some(Video::Copy { .. })) {
-            args.extend(strings(&["-fflags", "+genpts"]));
+            args.extend(strings(&["-fflags", "+genpts", "-noaccurate_seek"]));
         }
         let seek = self.seek(first);
         if seek > 0.0 {
@@ -76,14 +80,14 @@ impl Recipe {
         args.extend(strings(&["-i", &self.input.ffmpeg_input()]));
         args.extend(self.video_args());
         args.extend(self.audio_args());
-        args.extend(strings(&["-map_metadata", "-1", "-map_chapters", "-1", "-copyts", "-start_at_zero", "-avoid_negative_ts", "disabled", "-max_muxing_queue_size", "2048"]));
-        args.extend(strings(&["-f", "segment", "-segment_format", "mpegts", "-segment_start_number", &first.to_string()]));
+        args.extend(strings(&["-map_metadata", "-1", "-map_chapters", "-1", "-copyts", "-start_at_zero", "-avoid_negative_ts", "disabled", "-output_ts_offset", &seconds(TIMELINE_OFFSET), "-max_muxing_queue_size", "2048"]));
+        args.extend(strings(&["-f", "segment", "-segment_format", "mp4", "-segment_format_options", FRAGMENTED_MP4, "-segment_start_number", &first.to_string()]));
         let origin = self.segments[first].start;
         let cuts: Vec<String> = self.segments[first + 1..end].iter().map(|segment| seconds(segment.start - origin)).collect();
         if !cuts.is_empty() {
             args.extend(strings(&["-segment_times", &cuts.join(","), "-segment_time_delta", "0.05"]));
         }
-        args.extend(strings(&["-y", "%d.ts"]));
+        args.extend(strings(&["-y", &segment_pattern()]));
         args
     }
 
@@ -97,8 +101,11 @@ impl Recipe {
     fn video_args(&self) -> Vec<String> {
         match &self.video {
             None => Vec::new(),
-            Some(Video::Copy { stream, strip_dolby_vision }) => {
+            Some(Video::Copy { stream, hevc, strip_dolby_vision }) => {
                 let mut args = strings(&["-map", &format!("0:{stream}"), "-c:v", "copy"]);
+                if *hevc {
+                    args.extend(strings(&["-tag:v", HEVC_TAG]));
+                }
                 if *strip_dolby_vision {
                     args.extend(strings(&["-bsf:v", "hevc_metadata=remove_dovi=1"]));
                 }

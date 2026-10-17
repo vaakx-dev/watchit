@@ -114,6 +114,14 @@ impl Playback {
         Ok(vod_playlist(&job.recipe().segments, &session.token))
     }
 
+    pub async fn init(&self, id: &str) -> AppResult<Vec<u8>> {
+        let session = self.session(id)?;
+        let job = session.job.as_ref().ok_or_else(not_found)?;
+        let init = job.init().await?.to_vec();
+        session.touch();
+        Ok(init)
+    }
+
     pub async fn segment(&self, id: &str, index: usize) -> AppResult<PathBuf> {
         let session = self.session(id)?;
         let job = session.job.as_ref().ok_or_else(not_found)?;

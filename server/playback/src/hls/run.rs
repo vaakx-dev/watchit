@@ -8,6 +8,7 @@ use tokio::sync::oneshot;
 
 use watchit_core::Background;
 
+use super::fragments::{segment_index, segment_name};
 use crate::ffmpeg::Tools;
 
 const TAIL_LINES: usize = 30;
@@ -70,7 +71,7 @@ async fn read_stderr(stderr: ChildStderr, directory: PathBuf, on_event: &impl Fn
         let line = String::from_utf8_lossy(&buffer).trim_end().to_owned();
         buffer.clear();
         if let Some(index) = ended_segment(&line) {
-            on_event(RunEvent::Segment(index, directory.join(format!("{index}.ts"))));
+            on_event(RunEvent::Segment(index, directory.join(segment_name(index))));
         }
         if tail.len() == TAIL_LINES {
             tail.pop_front();
@@ -86,5 +87,5 @@ fn ended_segment(line: &str) -> Option<usize> {
     if !after.ends_with(" ended") {
         return None;
     }
-    name.strip_suffix(".ts")?.parse().ok()
+    segment_index(name)
 }
