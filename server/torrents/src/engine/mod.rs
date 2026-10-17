@@ -32,20 +32,20 @@ const FALLBACK_TRACKERS: [&str; 5] = [
     "udp://explodie.org:6969/announce",
 ];
 
-pub async fn start(folder: &Path, listen_port: u16, download_dir: &Path, limits: LimitsConfig) -> anyhow::Result<Arc<Session>> {
+pub async fn start(folder: &Path, listen_port: Option<u16>, download_dir: &Path, limits: LimitsConfig) -> anyhow::Result<Arc<Session>> {
     let options = SessionOptions {
         fastresume: true,
         persistence: Some(SessionPersistenceConfig::Json { folder: Some(session_folder(folder)) }),
-        dht: Some(DhtSessionConfig {
+        dht: listen_port.map(|_| DhtSessionConfig {
             persistence: Some(DhtPersistenceConfig {
                 dump_interval: Some(DHT_DUMP_INTERVAL),
                 config_filename: Some(folder.join("dht.json")),
             }),
             ..Default::default()
         }),
-        listen: Some(ListenerOptions {
+        listen: listen_port.map(|port| ListenerOptions {
             mode: ListenerMode::TcpAndUtp,
-            listen_addr: SocketAddr::from((Ipv6Addr::UNSPECIFIED, listen_port)),
+            listen_addr: SocketAddr::from((Ipv6Addr::UNSPECIFIED, port)),
             ..Default::default()
         }),
         runtime_worker_threads: Some(STREAM_WORKER_THREADS),
