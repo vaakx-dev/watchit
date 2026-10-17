@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use rusqlite::{Connection, Row, params};
 use watchit_core::{AppError, AppResult};
 
@@ -19,6 +21,7 @@ pub fn create_tables(conn: &Connection) -> AppResult<()> {
             trackers TEXT NOT NULL,
             error TEXT,
             picks TEXT NOT NULL,
+            download_dir TEXT NOT NULL,
             notify_when_ready INTEGER NOT NULL
         );
         CREATE TABLE IF NOT EXISTS transfer_files (
@@ -60,6 +63,7 @@ fn record(row: &Row) -> rusqlite::Result<Record> {
         trackers: json(row.get("trackers")?)?,
         error: row.get("error")?,
         picks: json(row.get("picks")?)?,
+        download_dir: PathBuf::from(row.get::<_, String>("download_dir")?),
         notify_when_ready: row.get("notify_when_ready")?,
     })
 }
@@ -93,12 +97,12 @@ pub fn save(conn: &Connection, record: &Record, files: &[FileRecord]) -> AppResu
     let picks = serde_json::to_string(&record.picks).map_err(AppError::internal)?;
     let tx = conn.unchecked_transaction()?;
     tx.execute(
-        "INSERT INTO transfers (info_hash, name, title_id, kind, paused, added_at, last_used_at, uploaded_bytes, seeded_seconds, trackers, error, picks, notify_when_ready)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)
+        "INSERT INTO transfers (info_hash, name, title_id, kind, paused, added_at, last_used_at, uploaded_bytes, seeded_seconds, trackers, error, picks, download_dir, notify_when_ready)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)
          ON CONFLICT (info_hash) DO UPDATE SET name = excluded.name, title_id = excluded.title_id, kind = excluded.kind,
             paused = excluded.paused, last_used_at = excluded.last_used_at, uploaded_bytes = excluded.uploaded_bytes,
             seeded_seconds = excluded.seeded_seconds, trackers = excluded.trackers,
-            error = excluded.error, picks = excluded.picks,
+            error = excluded.error, picks = excluded.picks, download_dir = excluded.download_dir,
             notify_when_ready = excluded.notify_when_ready",
         params![
             record.info_hash,
@@ -113,6 +117,7 @@ pub fn save(conn: &Connection, record: &Record, files: &[FileRecord]) -> AppResu
             trackers,
             record.error,
             picks,
+            record.download_dir.to_string_lossy(),
             record.notify_when_ready
         ],
     )?;

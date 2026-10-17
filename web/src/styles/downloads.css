@@ -1,5 +1,5 @@
 .downloads { display: grid; gap: var(--space-5); max-width: 980px; padding-bottom: var(--space-7); }
-.downloads-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-2); margin: 0; }
+.downloads-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-2); margin: 0; }
 .downloads-summary div { padding: var(--space-3) var(--space-4); border-radius: var(--radius-panel); background: var(--s1); }
 .downloads-summary dt { color: var(--t2); font-size: var(--type-meta); }
 .downloads-summary dd { margin: 2px 0 0; font-size: var(--type-section); font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -23,6 +23,8 @@
 .transfer-stats { font-variant-numeric: tabular-nums; }
 .transfer-stats .lucide { width: 12px; height: 12px; margin-right: 3px; }
 .transfer-failure { color: var(--dropped); font-size: var(--type-meta); font-weight: 500; }
+.transfer-location { display: flex; align-items: center; gap: 4px; min-width: 0; overflow-wrap: anywhere; }
+.transfer-location .lucide { flex: none; width: 12px; height: 12px; }
 .transfer-progress { height: 4px; overflow: hidden; border-radius: var(--radius-full); background: var(--s2); }
 .transfer-progress span { display: block; width: var(--progress); height: 100%; border-radius: inherit; background: var(--watching); transition: width .4s; }
 .transfer-row[data-state="paused"] .transfer-progress span, .transfer-row[data-state="queued"] .transfer-progress span, .transfer-row[data-state="metadata"] .transfer-progress span { background: var(--t3); }
@@ -43,7 +45,6 @@
 .downloads-settings .catalog-status { min-height: 120px; }
 
 @media (max-width: 760px) {
-  .downloads-summary { grid-template-columns: repeat(2, 1fr); }
   .transfer-row { flex-wrap: wrap; }
   .transfer-copy { flex-basis: 100%; }
   .transfer-actions { margin-left: auto; }

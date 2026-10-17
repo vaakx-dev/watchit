@@ -32,6 +32,7 @@ pub enum State {
     Queued,
     Downloading,
     Paused,
+    Moving,
     Seeding,
     Completed,
     Error,
@@ -68,4 +69,6 @@ pub struct Transfer {
     pub added_at: i64,
     pub notify_when_ready: bool,
     pub readiness: Readiness,
+    pub queue_position: Option<u32>,
+    pub download_dir: String,
 }

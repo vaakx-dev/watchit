@@ -18,6 +18,10 @@ const DEFAULT_MAX_ACTIVE: u32 = 3;
 pub struct Settings {
     #[ts(type = "string")]
     pub download_dir: PathBuf,
+    #[ts(type = "string | null")]
+    pub movie_dir: Option<PathBuf>,
+    #[ts(type = "string | null")]
+    pub series_dir: Option<PathBuf>,
     pub disk_budget_bytes: Option<u64>,
     pub max_download_bps: Option<u32>,
     pub max_upload_bps: Option<u32>,
@@ -30,6 +34,8 @@ impl Settings {
     pub fn defaults(download_dir: PathBuf) -> Self {
         Self {
             download_dir,
+            movie_dir: None,
+            series_dir: None,
             disk_budget_bytes: None,
             max_download_bps: None,
             max_upload_bps: None,
@@ -40,8 +46,10 @@ impl Settings {
     }
 
     pub fn validated(self) -> AppResult<Self> {
-        if !self.download_dir.is_absolute() {
-            return Err(AppError::bad_request("The download folder must be an absolute path."));
+        for folder in self.folders() {
+            if !folder.is_absolute() {
+                return Err(AppError::bad_request("Download folders must be absolute paths."));
+            }
         }
         if self.max_active == 0 {
             return Err(AppError::bad_request("At least one download must be allowed to run."));
@@ -52,9 +60,15 @@ impl Settings {
         if self.seed_ratio.is_some_and(|ratio| !ratio.is_finite() || ratio < 0.0) {
             return Err(AppError::bad_request("The seeding ratio must be zero or more."));
         }
-        std::fs::create_dir_all(&self.download_dir)
-            .map_err(|error| AppError::bad_request(format!("The download folder can't be used: {error}.")))?;
+        for folder in self.folders() {
+            std::fs::create_dir_all(folder)
+                .map_err(|error| AppError::bad_request(format!("{} can't be used: {error}.", folder.display())))?;
+        }
         Ok(self)
+    }
+
+    fn folders(&self) -> impl Iterator<Item = &PathBuf> {
+        [Some(&self.download_dir), self.movie_dir.as_ref(), self.series_dir.as_ref()].into_iter().flatten()
     }
 
     pub fn download_dir(&self) -> &Path {

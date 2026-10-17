@@ -22,7 +22,7 @@ export function use_file_source(title_id: string, source: PlaySource) {
   useEffect(() => {
     if (!result) return;
     let current = true;
-    add_transfer(result.info_hash, result.file_index === null ? null : [result.file_index], title_id, 'stream', notify_wanted())
+    add_transfer(result.info_hash, result.file_index === null ? null : [result.file_index], title_id, 'stream', undefined, notify_wanted())
       .then(transfer => {
         upsert_transfer(transfer);
         if (current) set_started({ key, transfer_id: transfer.id, error: null });
