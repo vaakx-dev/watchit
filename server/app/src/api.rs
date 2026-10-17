@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::Router;
 use axum::http::{HeaderValue, header};
 use axum::middleware;
@@ -5,6 +7,7 @@ use axum::routing::any;
 use tower_http::set_header::SetResponseHeaderLayer;
 use watchit_core::{AppError, AppResult, Context};
 use watchit_profiles::Profiles;
+use watchit_torrents::{NoTitles, Torrents};
 
 use crate::auth::{Auth, authenticate, require_viewer};
 use crate::origin::reject_cross_origin_writes;
@@ -17,6 +20,7 @@ pub fn router(context: &Context) -> AppResult<Router> {
     let profiles = Profiles::open(context)?;
     let auth = Auth { profiles: profiles.clone(), tokens: context.tokens.clone() };
     let signed_in = Router::new()
+        .merge(watchit_torrents::router(Torrents::open(context, Arc::new(NoTitles))?))
         .layer(middleware::from_fn(require_viewer));
     let router = Router::new()
         .merge(watchit_profiles::router(profiles))
