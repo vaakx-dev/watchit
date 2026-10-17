@@ -6,9 +6,10 @@ use libmpv2::{EndFileReason, Format, Mpv};
 use serde_json::{Value, json};
 use tauri::{Emitter, Webview};
 
-const FLAG_PROPS: &[&str] = &["pause", "paused-for-cache", "seeking", "eof-reached", "idle-active"];
+const FLAG_PROPS: &[&str] = &["pause", "mute", "paused-for-cache", "seeking", "eof-reached", "idle-active"];
 const DOUBLE_PROPS: &[&str] = &["time-pos", "duration", "volume", "speed", "demuxer-cache-time"];
-const JSON_PROPS: &[&str] = &["video-params", "video-target-params", "track-list", "metadata"];
+const JSON_PROPS: &[&str] = &["video-params", "video-target-params", "track-list", "metadata", "demuxer-cache-state"];
+const TRACK_PROPS: &[&str] = &["aid", "sid"];
 
 pub fn format_of(prop: &str) -> Format {
     if FLAG_PROPS.contains(&prop) {
@@ -54,6 +55,7 @@ fn prop_value(name: &str, data: PropertyData) -> Value {
         PropertyData::Int64(value) => json!(value),
         PropertyData::Double(value) => json!(value),
         PropertyData::OsdStr(value) => json!(value),
+        PropertyData::Str(value) if TRACK_PROPS.contains(&name) => json!(value.parse::<i64>().ok()),
         PropertyData::Str(value) if JSON_PROPS.contains(&name) => {
             serde_json::from_str(value).unwrap_or_else(|_| json!(value))
         }

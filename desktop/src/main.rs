@@ -27,7 +27,7 @@ fn main() {
             Ok(())
         })
         .on_window_event(window::on_event)
-        .invoke_handler(tauri::generate_handler![player::bridge::mpv_message, window::win_set_fullscreen])
+        .invoke_handler(tauri::generate_handler![player::bridge::mpv_message])
         .build(tauri::generate_context!())
         .expect("cannot build the Watchit app")
         .run(server::on_run_event);

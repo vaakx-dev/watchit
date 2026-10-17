@@ -1,6 +1,6 @@
 use tauri::webview::WebviewBuilder;
 use tauri::window::{Color, WindowBuilder};
-use tauri::{AppHandle, LogicalPosition, LogicalSize, Manager, Window, WindowEvent, WebviewUrl};
+use tauri::{AppHandle, LogicalPosition, LogicalSize, Manager, WebviewUrl, Window, WindowEvent};
 
 use crate::player::Player;
 
@@ -44,7 +44,3 @@ pub fn on_event(window: &Window, event: &WindowEvent) {
     }
 }
 
-#[tauri::command]
-pub fn win_set_fullscreen(window: Window, fullscreen: bool) -> Result<(), String> {
-    window.set_fullscreen(fullscreen).map_err(|error| error.to_string())
-}
