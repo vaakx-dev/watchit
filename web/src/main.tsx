@@ -15,6 +15,7 @@ import './styles/personal.css';
 import './styles/my_shows.css';
 import './styles/rankings.css';
 import './styles/settings.css';
+import './styles/downloads.css';
 import './styles/profiles.css';
 import './styles/loading.css';
 

@@ -3,7 +3,7 @@ import type { Route } from '../navigation/route';
 import { ProfileAvatar } from '../profiles/avatar';
 import type { Profile } from '../profiles/types';
 import { Brand } from './brand';
-import { DISCOVER, MINE, RANKINGS, TONIGHT } from './destinations';
+import { DISCOVER, DOWNLOADS, MINE, RANKINGS, TONIGHT } from './destinations';
 import { SearchField } from './search_field';
 
 export function Header({ route, profile }: { route: Route; profile: Profile }) {
@@ -12,7 +12,7 @@ export function Header({ route, profile }: { route: Route; profile: Profile }) {
     <header className={`top-bar page-gutter${searching ? ' searching' : ''}`}>
       <a href="#/" aria-label="Watchit, Tonight"><Brand /></a>
       <nav aria-label="Main navigation">
-        {[TONIGHT, DISCOVER, MINE, RANKINGS].map(item => <a key={item.view} href={item.href}
+        {[TONIGHT, DISCOVER, MINE, RANKINGS, DOWNLOADS].map(item => <a key={item.view} href={item.href}
           aria-current={route.view === item.view ? 'page' : undefined}>{item.label}</a>)}
       </nav>
       <SearchField query={searching ? route.query : null} />
