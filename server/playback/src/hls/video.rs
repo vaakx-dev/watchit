@@ -3,6 +3,7 @@ use crate::probe::{Transfer, VideoStream};
 
 const TONEMAP_CUDA: &str = "tonemap_cuda=format=yuv420p:p=bt709:t=bt709:m=bt709:tonemap=bt2390:peak=100:desat=0";
 const TONEMAP_CPU: &str = "format=gbrpf32le,zscale=p=bt709,tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p";
+pub const HEVC_TAG: &str = "hvc1";
 const H264_BITRATE_1080P: f64 = 10_000_000.0;
 const MIN_BITRATE: f64 = 2_000_000.0;
 const MAX_BITRATE: f64 = 30_000_000.0;
@@ -85,7 +86,7 @@ impl Encode {
         let gop_args = ["-g:v:0", &gop, "-keyint_min:v:0", &gop];
         let mut args = match (self.nvenc, self.target.keep_hdr) {
             (true, Some(transfer)) => {
-                let mut args = strings(&["-c:v", "hevc_nvenc", "-preset", "p4", "-profile:v", "main10", "-spatial-aq", "1", "-aq-strength", "15"]);
+                let mut args = strings(&["-c:v", "hevc_nvenc", "-preset", "p4", "-profile:v", "main10", "-tag:v", HEVC_TAG, "-spatial-aq", "1", "-aq-strength", "15"]);
                 args.extend(bitrate_args(h264_bitrate * 2 / 3));
                 args.extend(strings(&["-color_primaries", "bt2020", "-color_trc", trc(transfer), "-colorspace", "bt2020nc"]));
                 args

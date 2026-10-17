@@ -3,9 +3,10 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex, MutexGuard, Weak};
 use std::time::{Duration, Instant};
 
-use tokio::sync::{Notify, oneshot};
+use tokio::sync::{Notify, OnceCell, oneshot};
 use watchit_core::{AppError, AppResult, Background};
 
+use super::fragments::read_init;
 use super::recipe::Recipe;
 use super::run::{RunEvent, RunExit, spawn};
 use super::segments::SEGMENT_SECONDS;
@@ -18,6 +19,7 @@ const MAX_STARTS_PER_REQUEST: u32 = 2;
 
 pub struct Job {
     inner: Arc<Inner>,
+    init: OnceCell<Vec<u8>>,
 }
 
 struct Inner {
@@ -65,11 +67,23 @@ impl Job {
         let state = State { ready: BTreeMap::new(), run: None, runs: 0, last_request: first, last_access: Instant::now(), waiting: 0 };
         let inner = Arc::new(Inner { recipe, tools, background, directory, state: Mutex::new(state), changed: Notify::new() });
         inner.start_run(&mut inner.lock(), first)?;
-        Ok(Self { inner })
+        Ok(Self { inner, init: OnceCell::new() })
     }
 
     pub fn recipe(&self) -> &Recipe {
         &self.inner.recipe
+    }
+
+    pub async fn init(&self) -> AppResult<&[u8]> {
+        let init = self
+            .init
+            .get_or_try_init(|| async {
+                let current = self.inner.lock().last_request;
+                let path = self.segment(current).await?;
+                read_init(&path).await.map_err(AppError::internal)
+            })
+            .await?;
+        Ok(init)
     }
 
     pub async fn segment(&self, index: usize) -> AppResult<PathBuf> {

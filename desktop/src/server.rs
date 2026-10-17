@@ -31,11 +31,10 @@ pub fn start(app: &AppHandle) -> anyhow::Result<u16> {
         Some(dir) => PathBuf::from(dir),
         None => app.path().resource_dir()?.join("web"),
     };
-    let port = match std::env::var("WATCHIT_PORT") {
-        Ok(port) => port.parse()?,
-        Err(_) => DEFAULT_PORT,
+    let listen = match std::env::var("WATCHIT_LISTEN") {
+        Ok(address) => address.parse()?,
+        Err(_) => SocketAddr::from((Ipv4Addr::UNSPECIFIED, DEFAULT_PORT)),
     };
-    let listen = SocketAddr::from((Ipv4Addr::UNSPECIFIED, port));
     let server = tauri::async_runtime::block_on(watchit_server::start(Config {
         data_dir,
         listen,

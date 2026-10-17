@@ -35,8 +35,12 @@ pub struct Torrents {
     startup: watch::Receiver<Startup>,
 }
 
-fn listen_port() -> u16 {
-    std::env::var(LISTEN_PORT_VARIABLE).ok().and_then(|port| port.parse().ok()).unwrap_or(DEFAULT_LISTEN_PORT)
+fn listen_port() -> Option<u16> {
+    match std::env::var(LISTEN_PORT_VARIABLE) {
+        Ok(value) if value == "off" => None,
+        Ok(value) => Some(value.parse().unwrap_or(DEFAULT_LISTEN_PORT)),
+        Err(_) => Some(DEFAULT_LISTEN_PORT),
+    }
 }
 
 struct Launch {

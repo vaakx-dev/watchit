@@ -11,6 +11,7 @@ use tokio_util::io::ReaderStream;
 use watchit_core::{AppError, AppResult, JsonBody, Viewer};
 
 use crate::api::{CreateSession, PlaybackSession};
+use crate::hls::{INIT_NAME, open_media, segment_index};
 use crate::service::Playback;
 
 pub fn router(playback: Arc<Playback>) -> Router {
@@ -18,6 +19,7 @@ pub fn router(playback: Arc<Playback>) -> Router {
         .route("/api/playback/sessions", post(create))
         .route("/api/playback/sessions/{id}", delete(remove))
         .route("/api/playback/sessions/{id}/hls/main.m3u8", get(playlist))
+        .route(&format!("/api/playback/sessions/{{id}}/hls/{INIT_NAME}"), get(init))
         .route("/api/playback/sessions/{id}/hls/{segment}", get(segment))
         .route("/api/playback/sessions/{id}/subtitles/{track}", get(subtitle))
         .with_state(playback)
@@ -37,10 +39,16 @@ async fn playlist(State(playback): State<Arc<Playback>>, UrlPath(id): UrlPath<St
     Ok(([(header::CONTENT_TYPE, "application/vnd.apple.mpegurl"), (header::CACHE_CONTROL, "no-cache")], body).into_response())
 }
 
+async fn init(State(playback): State<Arc<Playback>>, UrlPath(id): UrlPath<String>) -> AppResult<Response> {
+    let body = playback.init(&id).await?;
+    Ok(([(header::CONTENT_TYPE, "video/mp4"), (header::CACHE_CONTROL, "no-cache")], body).into_response())
+}
+
 async fn segment(State(playback): State<Arc<Playback>>, UrlPath((id, segment)): UrlPath<(String, String)>) -> AppResult<Response> {
-    let index = numbered(&segment, ".ts")?;
-    let path = playback.segment(&id, index as usize).await?;
-    file_response(&path, "video/mp2t").await
+    let index = segment_index(&segment).ok_or_else(|| AppError::not_found("Not found."))?;
+    let path = playback.segment(&id, index).await?;
+    let (file, length) = open_media(&path).await.map_err(AppError::internal)?;
+    Ok(stream_response(file, length, "video/mp4"))
 }
 
 async fn subtitle(State(playback): State<Arc<Playback>>, UrlPath((id, track)): UrlPath<(String, String)>) -> AppResult<Response> {
@@ -56,6 +64,10 @@ fn numbered(name: &str, extension: &str) -> AppResult<u32> {
 async fn file_response(path: &Path, content_type: &'static str) -> AppResult<Response> {
     let file = tokio::fs::File::open(path).await.map_err(AppError::internal)?;
     let length = file.metadata().await.map_err(AppError::internal)?.len();
+    Ok(stream_response(file, length, content_type))
+}
+
+fn stream_response(file: tokio::fs::File, length: u64, content_type: &'static str) -> Response {
     let headers = [(header::CONTENT_TYPE, content_type.to_owned()), (header::CONTENT_LENGTH, length.to_string()), (header::CACHE_CONTROL, "no-cache".to_owned())];
-    Ok((headers, Body::from_stream(ReaderStream::new(file))).into_response())
+    (headers, Body::from_stream(ReaderStream::new(file))).into_response()
 }
