@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { request } from '../catalog/client';
 import type { PlaybackPreference } from '../library/types';
-import { pick_provider, type Provider } from './providers';
+import { pick_provider, type Source } from './providers';
 
-export function use_playback_source(title_id: string, sources: readonly Provider[], remembered: string | null) {
+export function use_playback_source<T extends Source>(title_id: string, sources: readonly T[], remembered: string | null) {
   const [chosen, set_chosen] = useState<string | null>(null);
   const [error, set_error] = useState<string | null>(null);
 

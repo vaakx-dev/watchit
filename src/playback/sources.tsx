@@ -1,9 +1,9 @@
 import { Choices } from '../ui/choices';
-import type { Provider } from './providers';
+import type { Source } from './providers';
 
 export function SourceChoices({ sources, provider, error, on_choose }: {
-  sources: readonly Provider[];
-  provider: Provider | undefined;
+  sources: readonly Source[];
+  provider: Source | undefined;
   error: string | null;
   on_choose: (source: string) => void;
 }) {

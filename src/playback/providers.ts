@@ -2,11 +2,9 @@ import type { Title } from '../catalog/types';
 
 type PlaybackTitle = Pick<Title, 'kind' | 'imdb_id' | 'tmdb_id' | 'season' | 'episode' | 'series' | 'provider_ids'>;
 
-export type Provider = {
-  id: string;
-  name: string;
-  url: (title: PlaybackTitle) => string | null;
-};
+export type Source = { id: string; name: string };
+
+export type Provider = Source & { url: (title: PlaybackTitle) => string | null };
 
 function episode_reference(title: PlaybackTitle) {
   const id = title.series?.imdb_id ?? title.series?.tmdb_id;
@@ -58,7 +56,7 @@ export const PROVIDERS = [
   },
 ] as const satisfies readonly Provider[];
 
-export function pick_provider(sources: readonly Provider[], remembered: string | null) {
+export function pick_provider<T extends Source>(sources: readonly T[], remembered: string | null) {
   return sources.find(source => source.id === remembered) ?? sources.find(source => source.id === 'one-anime') ?? sources[0];
 }
 

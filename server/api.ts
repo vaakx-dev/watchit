@@ -21,6 +21,7 @@ import { create_franchises } from './related/franchises.ts';
 import { related_titles } from './related/titles.ts';
 import { PinError } from './storage/pins.ts';
 import { create_store } from './storage/index.ts';
+import { create_torrents } from './torrents/index.ts';
 import type { Hidden, Store } from './storage/types.ts';
 
 type Services = ReturnType<typeof create_services>;
@@ -48,7 +49,7 @@ function create_services() {
   sync.start();
   artwork.start();
   if (enabled) images.recompress();
-  return { store, images, catalog: create_catalog(store), sync, artwork, attribution, franchises: create_franchises(store, { enabled }), requests: new Set<Promise<void>>() };
+  return { store, images, catalog: create_catalog(store), sync, artwork, attribution, franchises: create_franchises(store, { enabled }), torrents: create_torrents(store), requests: new Set<Promise<void>>() };
 }
 
 let services: Services | undefined;
@@ -218,6 +219,7 @@ async function dispatch(req: IncomingMessage, res: ServerResponse, url: URL, con
   const image_match = /^\/api\/images\/([a-f0-9]{64})$/.exec(url.pathname);
   const profile_path = /^\/api\/(?:session|profiles)(?:\/|$)/.test(url.pathname);
 
+  if (url.pathname.startsWith('/api/torrents/')) return context.torrents.route(req, res, url);
   if (req.method === 'GET') {
     if (profile_path) return profile_route(req, res, url, store);
     if (url.pathname === '/api/catalog') {
@@ -359,7 +361,7 @@ export async function close_services() {
   const previous = services;
   services = undefined;
   if (!previous) return;
-  await Promise.all([previous.sync.stop(), previous.artwork.stop(), previous.images.stop(), previous.franchises.stop()]);
+  await Promise.all([previous.sync.stop(), previous.artwork.stop(), previous.images.stop(), previous.franchises.stop(), previous.torrents.close()]);
   await previous.attribution.stop();
   await Promise.allSettled([...previous.requests]);
   previous.store.close();
