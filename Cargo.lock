@@ -6771,16 +6771,12 @@ dependencies = [
  "axum",
  "chrono",
  "form_urlencoded",
- "hex 0.4.3",
  "rusqlite",
  "serde",
- "serde_json",
- "tokio",
  "ts-rs",
  "watchit-artwork",
  "watchit-catalog",
  "watchit-core",
- "watchit-profiles",
 ]
 
 [[package]]
