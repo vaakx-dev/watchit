@@ -112,6 +112,7 @@ impl Transfers {
         let mut entries = self.entries();
         let used_bytes: u64 = entries.values().map(|entry| entry.progress().downloaded_bytes).sum();
         let mut admission = Admission::new(&settings, used_bytes);
+        let hold = self.bandwidth.hold();
         let mut actions = Vec::new();
 
         let mut queue: Vec<&mut Entry> = entries.values_mut().filter(|entry| entry.handle.is_some()).collect();
@@ -143,6 +144,11 @@ impl Transfers {
                     }
                 }
             };
+            let held = run && hold.is_some() && entry.readers == 0 && !progress.finished();
+            if held {
+                entry.waiting = hold;
+            }
+            let run = run && !held;
             match (engine, run) {
                 (Some(TorrentStatsState::Live), false) => actions.push(Action::Pause(handle)),
                 (Some(TorrentStatsState::Paused), true) => actions.push(Action::Resume(handle)),
@@ -167,6 +173,7 @@ impl Transfers {
     }
 
     pub async fn reconcile(&self) {
+        self.steer_bandwidth().await;
         for action in self.plan() {
             let outcome = match action {
                 Action::Pause(handle) => self.session.pause(&handle).await,

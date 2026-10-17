@@ -1,4 +1,5 @@
 use super::Transfers;
+use crate::bandwidth::SpeedStatus;
 use super::model::Transfer;
 use super::snapshot::snapshot;
 
@@ -6,6 +7,7 @@ use super::snapshot::snapshot;
 pub enum TransferEvent {
     Changed(Transfer),
     Removed { id: String },
+    Speed(SpeedStatus),
 }
 
 impl Transfers {
@@ -25,6 +27,10 @@ impl Transfers {
         for transfer in changed {
             let _ = self.events.send(TransferEvent::Changed(transfer));
         }
+    }
+
+    pub fn emit_speed(&self, status: SpeedStatus) {
+        let _ = self.events.send(TransferEvent::Speed(status));
     }
 
     pub fn emit_removed(&self, id: &str) {

@@ -2,7 +2,6 @@ mod magnet;
 mod metadata;
 
 use std::net::{Ipv6Addr, SocketAddr};
-use std::num::NonZeroU32;
 use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;
@@ -12,8 +11,6 @@ use librqbit::limits::LimitsConfig;
 use librqbit::{DhtSessionConfig, ListenerMode, ListenerOptions, Session, SessionOptions, SessionPersistenceConfig};
 
 pub use metadata::{AddRequest, Metadata, MetadataFile, add_resolved, files_of, resolve};
-
-use crate::settings::Settings;
 
 pub type Handle = Arc<librqbit::ManagedTorrent>;
 
@@ -27,7 +24,7 @@ const FALLBACK_TRACKERS: [&str; 5] = [
     "udp://explodie.org:6969/announce",
 ];
 
-pub async fn start(folder: &Path, listen_port: u16, settings: &Settings) -> anyhow::Result<Arc<Session>> {
+pub async fn start(folder: &Path, listen_port: u16, download_dir: &Path, limits: LimitsConfig) -> anyhow::Result<Arc<Session>> {
     let options = SessionOptions {
         fastresume: true,
         persistence: Some(SessionPersistenceConfig::Json { folder: Some(folder.join("session")) }),
@@ -44,22 +41,14 @@ pub async fn start(folder: &Path, listen_port: u16, settings: &Settings) -> anyh
             ..Default::default()
         }),
         runtime_worker_threads: Some(STREAM_WORKER_THREADS),
-        ratelimits: limits(settings),
+        ratelimits: limits,
         trackers: FALLBACK_TRACKERS.iter().map(|tracker| tracker.parse()).collect::<Result<_, _>>()?,
         ..Default::default()
     };
-    Session::new_with_opts(settings.download_dir().to_path_buf(), options).await
+    Session::new_with_opts(download_dir.to_path_buf(), options).await
 }
 
-pub fn limits(settings: &Settings) -> LimitsConfig {
-    LimitsConfig {
-        download_bps: settings.max_download_bps.and_then(NonZeroU32::new),
-        upload_bps: settings.max_upload_bps.and_then(NonZeroU32::new),
-    }
-}
-
-pub fn apply_limits(session: &Session, settings: &Settings) {
-    let limits = limits(settings);
+pub fn set_limits(session: &Session, limits: LimitsConfig) {
     session.ratelimits.set_download_bps(limits.download_bps);
     session.ratelimits.set_upload_bps(limits.upload_bps);
 }

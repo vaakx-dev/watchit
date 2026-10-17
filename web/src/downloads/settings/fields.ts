@@ -1,6 +1,7 @@
 import type { TorrentSettings } from '../../torrents/types';
+import { BANDWIDTH_FIELDS } from '../bandwidth/fields';
 
-type NumberKey = Exclude<keyof TorrentSettings, 'download_dir'>;
+export type NumberKey = { [K in keyof TorrentSettings]: TorrentSettings[K] extends number | null ? K : never }[keyof TorrentSettings];
 
 export type NumberField = { key: NumberKey; label: string; unit: string; hint: string; scale: number; optional: boolean; integer: boolean };
 
@@ -16,7 +17,11 @@ export const NUMBER_FIELDS: NumberField[] = [
   { key: 'max_active', label: 'Active downloads at once', unit: '', hint: 'Others wait in the queue.', scale: 1, optional: false, integer: true },
 ];
 
-export type Values = Record<keyof TorrentSettings, string>;
+const FIELDS = [...NUMBER_FIELDS, ...BANDWIDTH_FIELDS];
+
+export type Values = Record<NumberKey | 'download_dir', string>;
+
+export type Errors = Record<NumberKey, string>;
 
 function shown(value: number | null, scale: number) {
   if (value === null) return '';
@@ -24,11 +29,11 @@ function shown(value: number | null, scale: number) {
 }
 
 export function to_values(settings: TorrentSettings): Values {
-  const numbers = Object.fromEntries(NUMBER_FIELDS.map(field => [field.key, shown(settings[field.key], field.scale)]));
+  const numbers = Object.fromEntries(FIELDS.map(field => [field.key, shown(settings[field.key], field.scale)]));
   return { ...numbers, download_dir: settings.download_dir } as Values;
 }
 
-export function field_error(field: NumberField, text: string) {
+function field_error(field: NumberField, text: string) {
   if (text.trim() === '') return field.optional ? '' : 'Enter a number.';
   const value = Number(text);
   if (!Number.isFinite(value) || value < 0) return 'Enter a positive number.';
@@ -37,12 +42,16 @@ export function field_error(field: NumberField, text: string) {
   return '';
 }
 
-export function to_settings(values: Values): TorrentSettings {
+export function field_errors(values: Values): Errors {
+  return Object.fromEntries(FIELDS.map(field => [field.key, field_error(field, values[field.key])])) as Errors;
+}
+
+export function to_settings(values: Values): Pick<TorrentSettings, NumberKey | 'download_dir'> {
   const read = (field: NumberField) => {
     const text = values[field.key].trim();
     if (text === '') return null;
     return field.scale > 1 ? Math.round(Number(text) * field.scale) : Number(text);
   };
-  const numbers = Object.fromEntries(NUMBER_FIELDS.map(field => [field.key, read(field)]));
-  return { ...numbers, download_dir: values.download_dir.trim() } as TorrentSettings;
+  const numbers = Object.fromEntries(FIELDS.map(field => [field.key, read(field)]));
+  return { ...numbers, download_dir: values.download_dir.trim() } as Pick<TorrentSettings, NumberKey | 'download_dir'>;
 }

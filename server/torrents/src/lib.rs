@@ -1,3 +1,4 @@
+mod bandwidth;
 mod engine;
 mod library;
 mod media;
@@ -25,6 +26,7 @@ pub fn router(torrents: Torrents) -> Router {
         .route("/api/transfers", get(transfers::routes::list).post(transfers::routes::create))
         .route("/api/transfers/events", get(transfers::routes::events))
         .route("/api/transfers/season", post(transfers::routes::season))
+        .route("/api/transfers/speed", patch(bandwidth::routes::update))
         .route("/api/transfers/{id}", patch(transfers::routes::update).delete(transfers::routes::remove))
         .route("/api/titles/{title_id}/files", get(library::routes::files))
         .with_state(torrents)
@@ -36,6 +38,7 @@ pub fn export_types(config: &Config) -> Result<(), ExportError> {
     transfers::routes::NewTransfer::export_all(config)?;
     transfers::routes::SeasonDownload::export_all(config)?;
     transfers::routes::TransferPatch::export_all(config)?;
+    bandwidth::routes::SpeedPatch::export_all(config)?;
     settings::Settings::export_all(config)?;
     library::routes::LocalFiles::export_all(config)
 }

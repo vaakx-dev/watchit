@@ -9,6 +9,7 @@ anyhow = "1.0.104"
 async-trait = "0.1.92"
 axum = "0.8.9"
 bytes = "1.12.1"
+chrono = { version = "0.4.45", default-features = false, features = ["std", "clock"] }
 fs4 = "1.1.0"
 futures = "0.3.34"
 librqbit = "9.0.1"

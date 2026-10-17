@@ -6,6 +6,7 @@ use axum::http::StatusCode;
 use tokio::sync::watch;
 use watchit_core::{AppError, AppResult, Background, Context, StreamTokens, Viewer};
 
+use crate::bandwidth::{self, Bandwidth};
 use crate::engine;
 use crate::media::{MediaSource, raw_url};
 use crate::search::Search;
@@ -39,14 +40,16 @@ struct Launch {
     context: Context,
     folder: PathBuf,
     settings: Settings,
+    alternative: bool,
     search: Search,
     titles: Arc<dyn Titles>,
     ready: watch::Sender<Startup>,
 }
 
 async fn launch(launch: Launch) {
-    let Launch { context, folder, settings, search, titles, ready } = launch;
-    let session = match engine::start(&folder, listen_port(), &settings).await {
+    let Launch { context, folder, settings, alternative, search, titles, ready } = launch;
+    let bandwidth = Bandwidth::new(&settings, alternative);
+    let session = match engine::start(&folder, listen_port(), settings.download_dir(), bandwidth.limits()).await {
         Ok(session) => session,
         Err(error) => {
             tracing::error!(error = format!("{error:#}"), "torrent engine failed to start");
@@ -54,7 +57,7 @@ async fn launch(launch: Launch) {
             return;
         }
     };
-    let transfers = Transfers::new(context.db.clone(), Arc::clone(&session), search, titles, settings);
+    let transfers = Transfers::new(context.db.clone(), Arc::clone(&session), search, titles, settings, bandwidth);
     if let Err(error) = transfers.restore().await {
         tracing::error!(%error, "could not restore transfers");
     }
@@ -67,15 +70,17 @@ impl Torrents {
     pub fn open(context: &Context, titles: Arc<dyn Titles>) -> AppResult<Self> {
         context.db.run_blocking(|conn| {
             settings::create_table(conn)?;
+            bandwidth::create_table(conn)?;
             transfers::create_tables(conn)
         })?;
         let folder = std::path::absolute(context.paths.folder("torrents")?)?;
         let default_download_dir = std::path::absolute(context.paths.folder("downloads")?)?;
         let settings = context.db.run_blocking(|conn| settings::load(conn))?.unwrap_or_else(|| Settings::defaults(default_download_dir));
+        let alternative = context.db.run_blocking(|conn| bandwidth::load(conn))?;
         std::fs::create_dir_all(settings.download_dir())?;
         let search = Search::new(reqwest::Client::new(), Arc::clone(&titles));
         let (ready, startup) = watch::channel(Startup::Starting);
-        let launching = Launch { context: context.clone(), folder, settings, search: search.clone(), titles, ready };
+        let launching = Launch { context: context.clone(), folder, settings, alternative, search: search.clone(), titles, ready };
         context.background.spawn(launch(launching));
         Ok(Self { search, tokens: context.tokens.clone(), background: context.background.clone(), startup })
     }
