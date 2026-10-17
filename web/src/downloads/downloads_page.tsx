@@ -24,7 +24,7 @@ function Notice({ live, error }: { live: boolean; error: string | null }) {
 }
 
 export function DownloadsPage() {
-  const { transfers, disk, live, error } = use_transfers();
+  const { transfers, disks, live, error } = use_transfers();
   const [filter, set_filter] = useState<Filter>('all');
   const [removing, set_removing] = useState<Transfer | null>(null);
   const shown = transfers.filter(transfer => matches(transfer, filter));
@@ -32,7 +32,7 @@ export function DownloadsPage() {
 
   return <Page title="Downloads">
     <div className="downloads">
-      <Summary transfers={transfers} disk={disk} />
+      <Summary transfers={transfers} disks={disks} />
       <Notice live={live} error={error} />
       <QueueSection transfers={transfers} />
       <Choices label="Show downloads" options={options} value={filter} on_change={set_filter} />

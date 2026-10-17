@@ -55,7 +55,7 @@ async fn launch(launch: Launch) {
             return;
         }
     };
-    let transfers = Transfers::new(context.db.clone(), Arc::clone(&session), search, titles, settings);
+    let transfers = Transfers::new(context.db.clone(), Arc::clone(&session), search, titles, engine::session_folder(&folder), settings);
     if let Err(error) = transfers.restore().await {
         tracing::error!(%error, "could not restore transfers");
     }

@@ -1,6 +1,8 @@
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 use super::admission::Admission;
+use crate::locations::root_of;
 use crate::settings::Settings;
 use crate::transfers::model::Kind;
 use crate::transfers::{Entry, Progress};
@@ -49,15 +51,23 @@ fn slot(entry: &Entry, settings: &Settings, admission: &mut Admission) -> Slot {
     } else if entry.record.kind == Kind::Stream {
         Slot::Streaming
     } else {
-        match admission.admit(progress.remaining()) {
+        match admission.admit(&root_of(&entry.record.download_dir), progress.remaining()) {
             Ok(()) => Slot::Active,
             Err(reason) => Slot::Queued(reason),
         }
     }
 }
 
-pub fn assign_slots(entries: &mut HashMap<String, Entry>, settings: &Settings, used_bytes: u64) {
-    let mut admission = Admission::new(settings, used_bytes);
+pub fn used_by_drive(entries: &HashMap<String, Entry>) -> HashMap<PathBuf, u64> {
+    let mut used: HashMap<PathBuf, u64> = HashMap::new();
+    for entry in entries.values() {
+        *used.entry(root_of(&entry.record.download_dir)).or_insert(0) += entry.progress().downloaded_bytes;
+    }
+    used
+}
+
+pub fn assign_slots(entries: &mut HashMap<String, Entry>, settings: &Settings, used: HashMap<PathBuf, u64>) {
+    let mut admission = Admission::new(settings, used);
     let mut line: Vec<&mut Entry> = entries.values_mut().collect();
     line.sort_by_key(|entry| (entry.queue_rank, entry.record.added_at));
     for entry in line {

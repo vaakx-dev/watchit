@@ -1,10 +1,13 @@
 import { useState, type FormEvent } from 'react';
 import { read_settings, save_settings } from '../../torrents/api';
 import type { TorrentSettings } from '../../torrents/types';
+import { FolderField } from '../locations/folder_field';
+import { use_admin } from '../locations/use_admin';
 import { field_error, NUMBER_FIELDS, to_settings, to_values, type Values } from './fields';
 
 export function SettingsForm({ initial }: { initial: TorrentSettings }) {
   const [values, set_values] = useState(() => to_values(initial));
+  const admin = use_admin();
   const [touched, set_touched] = useState(false);
   const [pending, set_pending] = useState(false);
   const [saved, set_saved] = useState(false);
@@ -43,12 +46,12 @@ export function SettingsForm({ initial }: { initial: TorrentSettings }) {
   return <form className="cache-form" onSubmit={save} noValidate>
     <fieldset disabled={pending}>
       <legend className="sr-only">Torrent settings</legend>
-      <div className="cache-field folder-field">
-        <label htmlFor="download_dir">Download folder</label>
-        <div className="cache-input"><input id="download_dir" value={values.download_dir} spellCheck={false} aria-describedby="download_dir-hint"
-          aria-invalid={touched && folder_error ? true : undefined} onChange={event => change('download_dir', event.target.value)} /></div>
-        {hint('download_dir-hint', folder_error, 'A folder on the computer running the server.')}
-      </div>
+      <FolderField id="download_dir" label="Download folder" hint="A folder on the computer running the server." value={values.download_dir}
+        invalid={touched ? folder_error : ''} admin={admin} on_change={value => change('download_dir', value)} />
+      <FolderField id="movie_dir" label="Movies folder" hint="Leave empty to use the download folder." value={values.movie_dir}
+        placeholder="Same as download folder" admin={admin} on_change={value => change('movie_dir', value)} />
+      <FolderField id="series_dir" label="Shows folder" hint="Leave empty to use the download folder." value={values.series_dir}
+        placeholder="Same as download folder" admin={admin} on_change={value => change('series_dir', value)} />
       {NUMBER_FIELDS.map(field => <div className="cache-field" key={field.key}>
         <label htmlFor={field.key}>{field.label}</label>
         <div className="cache-input">

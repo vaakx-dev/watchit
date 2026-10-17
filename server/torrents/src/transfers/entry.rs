@@ -8,6 +8,7 @@ use super::record::{FileRecord, Record};
 use crate::engine::Handle;
 use crate::queue::Slot;
 use crate::readiness::Tracker;
+use crate::locations::Moving;
 
 pub struct Entry {
     pub record: Record,
@@ -23,6 +24,8 @@ pub struct Entry {
     pub focus: Option<usize>,
     pub sent: Option<Transfer>,
     pub readiness: Tracker,
+    pub relocation: Option<Moving>,
+    pub move_error: Option<String>,
 }
 
 pub struct Progress {
@@ -48,6 +51,8 @@ impl Entry {
             focus: None,
             sent: None,
             readiness: Tracker::default(),
+            relocation: None,
+            move_error: None,
         }
     }
 

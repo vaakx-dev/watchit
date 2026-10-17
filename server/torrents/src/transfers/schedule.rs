@@ -1,4 +1,5 @@
-use std::collections::{BTreeSet, HashSet};
+use std::collections::{BTreeSet, HashMap, HashSet};
+use std::path::PathBuf;
 use std::future::Future;
 use std::time::{Duration, Instant};
 
@@ -8,6 +9,7 @@ use super::Transfers;
 use super::entry::Entry;
 use super::model::Kind;
 use crate::engine::Handle;
+use crate::locations::root_of;
 use crate::queue;
 
 const TICK: Duration = Duration::from_secs(1);
@@ -71,8 +73,8 @@ impl Transfers {
     fn plan(&self) -> Vec<Action> {
         let settings = self.settings();
         let mut entries = self.entries();
-        let used_bytes: u64 = entries.values().map(|entry| entry.progress().downloaded_bytes).sum();
-        queue::assign_slots(&mut entries, &settings, used_bytes);
+        let used = queue::used_by_drive(&entries);
+        queue::assign_slots(&mut entries, &settings, used.clone());
         let mut actions = Vec::new();
 
         for entry in entries.values() {
@@ -92,15 +94,16 @@ impl Transfers {
         }
 
         if let Some(budget) = settings.disk_budget_bytes {
-            let mut over = used_bytes.saturating_sub(budget);
+            let mut over: HashMap<PathBuf, u64> = used.into_iter().map(|(drive, bytes)| (drive, bytes.saturating_sub(budget))).collect();
             let mut evictable: Vec<&Entry> =
-                entries.values().filter(|entry| entry.record.kind == Kind::Stream && entry.readers == 0).collect();
+                entries.values().filter(|entry| entry.record.kind == Kind::Stream && entry.readers == 0 && entry.relocation.is_none()).collect();
             evictable.sort_by_key(|entry| entry.record.last_used_at);
             for entry in evictable {
-                if over == 0 {
-                    break;
+                let excess = over.entry(root_of(&entry.record.download_dir)).or_insert(0);
+                if *excess == 0 {
+                    continue;
                 }
-                over = over.saturating_sub(entry.progress().downloaded_bytes);
+                *excess = excess.saturating_sub(entry.progress().downloaded_bytes);
                 actions.push(Action::Evict(entry.record.info_hash.clone()));
             }
         }
