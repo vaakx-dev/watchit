@@ -1,0 +1,21 @@
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { ProfileGate } from './profiles/profile_gate';
+import '@fontsource-variable/archivo/wdth.css';
+import './styles/tokens.css';
+import './styles/base.css';
+import './styles/icons.css';
+import './styles/shell.css';
+import './styles/catalog.css';
+import './styles/tonight.css';
+import './styles/discover.css';
+import './styles/title.css';
+import './styles/playback.css';
+import './styles/personal.css';
+import './styles/my_shows.css';
+import './styles/rankings.css';
+import './styles/settings.css';
+import './styles/profiles.css';
+import './styles/loading.css';
+
+createRoot(document.getElementById('root')!).render(<StrictMode><ProfileGate /></StrictMode>);

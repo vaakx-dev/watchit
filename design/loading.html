@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Streamit · Loading states</title>
+<style>
+*{box-sizing:border-box}html{background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif}body{margin:0;padding:28px clamp(16px,2.6vw,48px) 36px}a{color:#fff;text-underline-offset:4px}.document-header{max-width:1740px;margin:0 auto 28px;display:flex;align-items:baseline;justify-content:space-between;gap:18px;flex-wrap:wrap}h1{font-size:26px;letter-spacing:-.6px;margin:0}.choice-links{display:flex;gap:20px;font-size:13px}.comparison{max-width:1740px;margin:auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}.option{min-width:0}h2{margin:0 0 14px;font-size:20px;display:flex;align-items:baseline;gap:14px}h2 span{font-size:15px;font-weight:400}.preview{border-top:1px solid #333;border-bottom:1px solid #333;background:#000;overflow:hidden}.app-header{display:flex;align-items:center;gap:17px;height:56px;padding:0 18px;background:#000}.brand{color:#e50914;font-family:Impact,'Arial Narrow',sans-serif;font-size:23px;letter-spacing:-.8px;white-space:nowrap}.brand span{color:#fff}.app-navigation{display:flex;gap:12px;white-space:nowrap;font-size:9px}.feature{height:300px;position:relative;padding:27px 22px 44px}.backdrop{position:absolute;inset:0 0 12px;background:#121212}.feature-copy{position:relative;width:85%;max-width:350px}.bone{background:#292929;display:block;border-radius:2px}.eyebrow{min-height:23px;margin:0 0 15px;display:flex;align-items:center;gap:8px;font-size:8px;font-weight:700;letter-spacing:1.8px}.eyebrow b{color:#e50914;font-size:19px;letter-spacing:-1px}.eyebrow-bar{height:7px;width:105px}.heading-bones{height:72px}.heading-one{height:29px;width:91%;max-width:225px}.heading-two{height:29px;width:67%;max-width:165px;margin-top:8px}.feature-meta{height:14px;margin:15px 0 12px;font-size:9px;display:flex;align-items:center}.feature-meta-bar{height:6px;width:155px}.synopsis-bones{height:30px;max-width:240px}.synopsis-bones .bone{height:6px;margin-bottom:7px}.synopsis-bones .bone:last-child{width:82%}.actions{display:flex;gap:9px;align-items:center;margin-top:17px}.button-bone{width:109px;height:28px;border-radius:2px}.button-bone.short{width:83px}.shelves{padding:0 20px 24px;position:relative}.shelf+.shelf{margin-top:25px}.shelf-heading{display:flex;justify-content:space-between;align-items:center;height:30px;margin-bottom:5px}.shelf-heading h3{margin:0;font-size:14px;font-weight:600}.shelf-heading>span{font-size:16px}.posters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.movie{min-width:0}.poster{width:100%;aspect-ratio:2/3;background:#222;border-radius:2px}.metadata{display:flex;align-items:center;gap:4px;margin:8px 0 6px;min-height:8px;font-size:9px;white-space:nowrap;overflow:hidden;color:#b8b8b8}.meta-bar{height:4px;background:#242424;width:68%}.card-title{height:7px;width:88%}.movie:nth-child(2n) .card-title{width:64%}.movie:nth-child(3n) .meta-bar{width:83%}.movie-title{font-size:11px;line-height:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.option-description{font-size:13px;line-height:1.6;margin:13px 0 0}.option-b .backdrop{background:#000;border-bottom:1px solid #181818}.option-b .poster{background:#080808;border:1px solid #303030}.option-b .bone{background:#181818}.option-b .button-bone{background:#0c0c0c;border:1px solid #242424}.option-c .poster{background:#1a1a1a}.feature-title{font-family:Impact,'Arial Narrow',sans-serif;font-size:clamp(32px,3vw,48px);font-weight:900;letter-spacing:-.6px;line-height:1;height:72px;margin:0;display:flex;align-items:center}.synopsis{height:30px;max-width:245px;font-size:11px;line-height:1.5;margin:0}.action{display:flex;align-items:center;justify-content:center;height:28px;padding:0 11px;font-size:9px;font-weight:600;border-radius:2px;white-space:nowrap}.action.primary{background:#fff;color:#000}.action.secondary{background:#303030;color:#fff}.document-footer{max-width:1740px;margin:28px auto 0;border-top:1px solid #252525;padding-top:16px;font-size:13px;line-height:1.7}.document-footer p{margin:0}
+@media(max-width:1250px) and (min-width:1001px){.app-header{padding:0 12px;gap:12px}.app-navigation{gap:7px;font-size:8px}.brand{font-size:20px}.shelves{padding-left:14px;padding-right:14px}.posters{gap:8px}.metadata{font-size:8px}.movie-title{font-size:9px}}
+@media(max-width:1000px){.comparison{grid-template-columns:1fr;gap:32px;max-width:700px}.document-header,.document-footer{max-width:700px}.feature-title{font-size:46px}}
+@media(max-width:440px){body{padding:20px 14px}.app-header{padding:0 12px;gap:12px}.app-navigation{gap:7px;font-size:8px}.brand{font-size:20px}.feature{padding-left:17px;padding-right:17px}.feature-copy{width:92%}.shelves{padding-left:16px;padding-right:16px}.posters{gap:10px}.feature-title{font-size:40px}.metadata{font-size:8px}.movie-title{font-size:10px}}
+</style>
+</head>
+<body>
+<header class="document-header"><h1>Loading states</h1><nav class="choice-links" aria-label="Options"><a href="#a">A</a><a href="#b">B</a><a href="#c">C</a></nav></header>
+<main class="comparison">
+<section class="option option-a" id="a" aria-labelledby="label-a">
+<h2 id="label-a">A <span>Solid template</span></h2>
+<div class="preview" role="img" aria-label="Solid placeholders for the banner, title, controls, and portrait movie cards">
+<div class="app-header"><span class="brand">STREAM<span>IT</span></span><div class="app-navigation"><span>Home</span><span>Movies</span><span>Series</span><span>Anime</span><span>My list</span></div></div>
+<div class="feature"><div class="backdrop"></div><div class="feature-copy"><div class="eyebrow"><span class="bone eyebrow-bar"></span></div><div class="heading-bones"><div class="bone heading-one"></div><div class="bone heading-two"></div></div><div class="feature-meta"><span class="bone feature-meta-bar"></span></div><div class="synopsis-bones"><div class="bone"></div><div class="bone"></div></div><div class="actions"><span class="bone button-bone"></span><span class="bone button-bone short"></span></div></div></div>
+<div class="shelves">
+<section class="shelf"><div class="shelf-heading"><h3>Movies</h3><span aria-hidden="true">‹ &nbsp; ›</span></div><div class="posters">
+<div class="movie"><div class="poster"></div><div class="metadata"><span class="bone meta-bar"></span></div><div class="bone card-title"></div></div>
+<div class="movie"><div class="poster"></div><div class="metadata"><span class="bone meta-bar"></span></div><div class="bone card-title"></div></div>
+<div class="movie"><div class="poster"></div><div class="metadata"><span class="bone meta-bar"></span></div><div class="bone card-title"></div></div>
+<div class="movie"><div class="poster"></div><div class="metadata"><span class="bone meta-bar"></span></div><div class="bone card-title"></div></div>
+</div></section>
+<section class="shelf"><div class="shelf-heading"><h3>Series</h3><span aria-hidden="true">‹ &nbsp; ›</span></div><div class="posters">
+<div class="movie"><div class="poster"></div><div class="metadata"><span class="bone meta-bar"></span></div><div class="bone card-title"></div></div>
+<div class="movie"><div class="poster"></div><div class="metadata"><span class="bone meta-bar"></span></div><div class="bone card-title"></div></div>
+<div class="movie"><div class="poster"></div><div class="metadata"><span class="bone meta-bar"></span></div><div class="bone card-title"></div></div>
+<div class="movie"><div class="poster"></div><div class="metadata"><span class="bone meta-bar"></span></div><div class="bone card-title"></div></div>
+</div></section></div></div>
+<p class="option-description">Full placeholders for the first load. Closest to YouTube.</p>
+</section>
+<section class="option option-b" id="b" aria-labelledby="label-b">
+<h2 id="label-b">B <span>Quiet template</span></h2>
+<div class="preview" role="img" aria-label="Subtle outlined poster slots, dim text placeholders, and a black banner area">
+<div class="app-header"><span class="brand">STREAM<span>IT</span></span><div class="app-navigation"><span>Home</span><span>Movies</span><span>Series</span><span>Anime</span><span>My list</span></div></div>
+<div class="feature"><div class="backdrop"></div><div class="feature-copy"><div class="eyebrow"><span class="bone eyebrow-bar"></span></div><div class="heading-bones"><div class="bone heading-one"></div><div class="bone heading-two"></div></div><div class="feature-meta"><span class="bone feature-meta-bar"></span></div><div class="synopsis-bones"><div class="bone"></div><div class="bone"></div></div><div class="actions"><span class="bone button-bone"></span><span class="bone button-bone short"></span></div></div></div>
+<div class="shelves">
+<section class="shelf"><div class="shelf-heading"><h3>Movies</h3><span aria-hidden="true">‹ &nbsp; ›</span></div><div class="posters">
+<div class="movie"><div class="poster"></div><div class="metadata"><span class="bone meta-bar"></span></div><div class="bone card-title"></div></div>
+<div class="movie"><div class="poster"></div><div class="metadata"><span class="bone meta-bar"></span></div><div class="bone card-title"></div></div>
+<div class="movie"><div class="poster"></div><div class="metadata"><span class="bone meta-bar"></span></div><div class="bone card-title"></div></div>
+<div class="movie"><div class="poster"></div><div class="metadata"><span class="bone meta-bar"></span></div><div class="bone card-title"></div></div>
+</div></section>
+<section class="shelf"><div class="shelf-heading"><h3>Series</h3><span aria-hidden="true">‹ &nbsp; ›</span></div><div class="posters">
+<div class="movie"><div class="poster"></div><div class="metadata"><span class="bone meta-bar"></span></div><div class="bone card-title"></div></div>
+<div class="movie"><div class="poster"></div><div class="metadata"><span class="bone meta-bar"></span></div><div class="bone card-title"></div></div>
+<div class="movie"><div class="poster"></div><div class="metadata"><span class="bone meta-bar"></span></div><div class="bone card-title"></div></div>
+<div class="movie"><div class="poster"></div><div class="metadata"><span class="bone meta-bar"></span></div><div class="bone card-title"></div></div>
+</div></section></div></div>
+<p class="option-description">Outlined image slots and dim text bars. Less gray on screen.</p>
+</section>
+<section class="option option-c" id="c" aria-labelledby="label-c">
+<h2 id="label-c">C <span>Content first</span></h2>
+<div class="preview" role="img" aria-label="Loaded movie titles and controls with placeholders only for images that are still loading">
+<div class="app-header"><span class="brand">STREAM<span>IT</span></span><div class="app-navigation"><span>Home</span><span>Movies</span><span>Series</span><span>Anime</span><span>My list</span></div></div>
+<div class="feature"><div class="backdrop"></div><div class="feature-copy"><div class="eyebrow"><b>S</b> TONIGHT’S PICK</div><h3 class="feature-title">THE MATRIX</h3><div class="feature-meta">1999 &nbsp; · &nbsp; 136 min &nbsp; · &nbsp; Sci-fi</div><p class="synopsis">A hacker discovers that the world he knows is a simulation.</p><div class="actions"><span class="action primary">▶ &nbsp; Player options</span><span class="action secondary">ⓘ &nbsp; More info</span></div></div></div>
+<div class="shelves">
+<section class="shelf"><div class="shelf-heading"><h3>Movies</h3><span aria-hidden="true">‹ &nbsp; ›</span></div><div class="posters">
+<div class="movie"><div class="poster"></div><div class="metadata">Sci-fi · 1999</div><div class="movie-title">The Matrix</div></div>
+<div class="movie"><div class="poster"></div><div class="metadata">Sci-fi · 2016</div><div class="movie-title">Arrival</div></div>
+<div class="movie"><div class="poster"></div><div class="metadata">Sci-fi · 2014</div><div class="movie-title">Interstellar</div></div>
+<div class="movie"><div class="poster"></div><div class="metadata">Adventure · 2021</div><div class="movie-title">Dune</div></div>
+</div></section>
+<section class="shelf"><div class="shelf-heading"><h3>Series</h3><span aria-hidden="true">‹ &nbsp; ›</span></div><div class="posters">
+<div class="movie"><div class="poster"></div><div class="metadata">Drama · 2008</div><div class="movie-title">Breaking Bad</div></div>
+<div class="movie"><div class="poster"></div><div class="metadata">Drama · 2022</div><div class="movie-title">Severance</div></div>
+<div class="movie"><div class="poster"></div><div class="metadata">Mystery · 2017</div><div class="movie-title">Dark</div></div>
+<div class="movie"><div class="poster"></div><div class="metadata">Drama · 2022</div><div class="movie-title">The Bear</div></div>
+</div></section></div></div>
+<p class="option-description">Titles and controls appear as soon as metadata is ready. Only images remain placeholders.</p>
+</section>
+</main>
+<footer class="document-footer"><p>Static shapes. No shimmer or pulse. Each item loads independently, with its space reserved.</p><p>A is the recommended starting point. It can become C as metadata arrives.</p></footer>
+</body>
+</html>

@@ -1,0 +1,16 @@
+.discover-filters { display: grid; grid-template-columns: max-content max-content max-content minmax(0, 1fr); align-items: baseline; gap: var(--space-3) var(--space-4); margin-bottom: var(--space-6); }
+.discover-filters > .choices { justify-self: start; }
+.discover-filters > .genre-choices, .discover-filters > .chips { grid-column: 2 / -1; }
+.filter-label { color: var(--t3); font-size: var(--type-meta); font-weight: 600; }
+.genre-choices { position: relative; min-width: 0; }
+.chips > .more-genres { border: 1px dashed var(--s3); background: none; }
+.chips > .more-genres:hover { border-color: var(--t3); }
+.discover-filters .chips .icon { width: 13px; height: 13px; }
+
+@media (max-width: 640px) {
+  .discover-filters { grid-template-columns: max-content minmax(0, 1fr); }
+  .discover-filters > .genre-choices, .discover-filters > .chips { grid-column: 2; }
+  .genre-choices { overflow-x: auto; scrollbar-width: none; margin-right: calc(var(--gutter) * -1); padding: 2px var(--gutter) 2px 2px; }
+  .genre-choices::-webkit-scrollbar { display: none; }
+  .genre-choices > .choices { flex-wrap: nowrap; }
+}

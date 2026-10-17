@@ -1,0 +1,90 @@
+.title-hero { position: relative; isolation: isolate; overflow: hidden; display: flex; flex-direction: column; min-height: clamp(460px, 62vh, 640px); padding: var(--space-4) var(--gutter) var(--space-6); }
+.title-hero::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, var(--bg) 0%, rgb(10 10 11 / .86) 42%, rgb(10 10 11 / .15) 80%), linear-gradient(0deg, var(--bg) 2%, rgb(10 10 11 / 0) 50%); }
+.title-hero-art { position: absolute; inset: 0; z-index: -2; }
+.title-hero-art .artwork { position: absolute; inset: 0; object-position: center 25%; }
+.title-hero-art.blurred .artwork-image { filter: blur(32px) brightness(.7); transform: scale(1.2); }
+.title-hero-art.skeleton-block { border-radius: 0; background: var(--s1); }
+.title-back { align-self: flex-start; }
+.title-hero-body { display: grid; grid-template-columns: 180px minmax(0, 1fr); align-items: end; gap: 32px; margin-top: auto; padding-top: var(--space-6); }
+.title-poster { position: relative; aspect-ratio: 2 / 3; overflow: hidden; border-radius: var(--radius-poster); background: var(--s1); box-shadow: 0 12px 32px rgb(0 0 0 / .5); }
+.title-poster .artwork { position: absolute; inset: 0; }
+.title-copy { max-width: 720px; min-width: 0; }
+.title-hero h1.long-title { font-size: 44px; }
+.title-hero .meta { margin-top: var(--space-3); font-size: var(--type-card); }
+.genre-list { display: flex; flex-wrap: wrap; gap: 6px; margin: var(--space-3) 0 0; padding: 0; list-style: none; }
+.genre-list li { padding: 3px 10px; border-radius: var(--radius-full); background: rgb(255 255 255 / .1); font-size: var(--type-meta); font-weight: 500; }
+.title-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-top: var(--space-4); }
+.your-rating { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-4); color: var(--t2); font-size: var(--type-meta); }
+.your-rating .rating-control { --star-size: 22px; }
+.credits { display: grid; grid-template-columns: 70px 1fr; gap: var(--space-1) var(--space-3); margin: var(--space-4) 0 0; font-size: var(--type-card); }
+.credits div { display: contents; }
+.credits dt { color: var(--t3); }
+.credits dd { margin: 0; color: var(--t1); }
+
+.trailer-dialog { width: min(960px, calc(100vw - 2 * var(--gutter)), calc((100dvh - 150px) * 16 / 9)); max-width: none; max-height: none; padding: 0; border: 0; border-radius: var(--radius-panel); background: var(--s1); color: var(--t1); box-shadow: 0 24px 64px rgb(0 0 0 / .6); }
+.trailer-dialog::backdrop { background: rgb(0 0 0 / .8); }
+.trailer-panel { display: grid; gap: var(--space-3); padding: var(--space-2) var(--space-3) var(--space-4) var(--space-4); }
+.trailer-bar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.trailer-bar h2 { min-width: 0; overflow: hidden; font-size: var(--type-section); font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.trailer-frame { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--radius-still); background: #000; }
+.trailer-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+.title-sections { padding-bottom: var(--space-7); }
+.title-episodes { margin-top: var(--space-5); scroll-margin-top: calc(var(--bar-height) + 16px); }
+.season-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--line); }
+.season-picker { min-width: 0; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.season-name { font-size: var(--type-card); font-weight: 700; }
+.season-select { height: 32px; padding: 0 8px 0 12px; border: 0; border-radius: var(--radius-full); background: var(--s2); color: var(--t1); font-size: var(--type-card); }
+.season-summary { color: var(--t2); font-size: var(--type-meta); }
+.season-rating { display: flex; align-items: center; gap: var(--space-3); margin-left: auto; color: var(--t2); font-size: var(--type-meta); }
+.episodes-note { padding: var(--space-4) 0; color: var(--t2); font-size: var(--type-card); }
+
+.episode-rows { margin: 0; padding: 0; list-style: none; }
+.episode-row { display: grid; grid-template-columns: 128px minmax(0, 1fr) auto auto auto; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.episode-still { position: relative; width: 128px; aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--radius-still); background: var(--s1); }
+.episode-still .artwork { position: absolute; inset: 0; }
+.episode-copy { min-width: 0; }
+.episode-copy h3 { font-size: var(--type-card); font-weight: 600; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.episode-copy h3 a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.episode-number { margin-right: var(--space-2); color: var(--t3); font-variant-numeric: tabular-nums; }
+.episode-note { margin-top: 3px; color: var(--t3); font-size: var(--type-meta); }
+.up-next { color: var(--watching); font-weight: 700; }
+.episode-rating .rating-control { --star-size: 14px; }
+.episode-watched .eye { width: 22px; height: 22px; }
+.episode-watched .eye .icon { width: 100%; height: 100%; }
+.episode-watched[aria-pressed="true"] { background: transparent; color: inherit; }
+.episode-watched[aria-pressed="true"]:hover:not(:disabled) { background: var(--s2); }
+.episode-row[data-watched] .episode-still { opacity: .55; }
+.episode-row[data-watched] h3 { color: var(--t2); }
+.episode-row[data-up-next] { margin-left: -10px; padding-left: 10px; background: linear-gradient(90deg, color-mix(in srgb, var(--watching) 9%, transparent), transparent 60%); box-shadow: inset 2px 0 0 var(--watching); }
+.episode-row[data-up-next] .episode-play { background: var(--t1); color: var(--bg); }
+
+@media (max-width: 640px) {
+  .title-hero { display: block; min-height: 0; padding: 0; }
+  .title-hero::before { display: none; }
+  .title-hero-art { position: relative; aspect-ratio: 16 / 10; }
+  .title-hero-art::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, var(--bg) 4%, rgb(10 10 11 / 0) 55%); }
+  .title-back { position: absolute; top: var(--space-3); left: var(--gutter); z-index: 1; padding: 6px 12px 6px 8px; border-radius: var(--radius-full); background: var(--scrim); backdrop-filter: blur(6px); color: var(--t1); }
+  .title-hero-body { display: block; position: relative; margin-top: -56px; padding: 0 var(--gutter); }
+  .title-poster { display: none; }
+  .title-hero h1 { font-size: 40px; }
+  .title-hero h1.long-title { font-size: 32px; }
+  .title-actions .button.primary { flex: 1; }
+  .title-actions .status-trigger.labelled > span:not(.status-eye, .icon) { display: none; }
+  .trailer-dialog { width: 100vw; border-radius: 0; }
+  .trailer-panel { padding: var(--space-2) 0 var(--space-4); }
+  .trailer-bar, .trailer-panel .choices { padding: 0 var(--space-2) 0 var(--gutter); }
+  .trailer-frame { border-radius: 0; }
+  .season-rating { width: 100%; margin-left: 0; }
+  .episode-row { grid-template-columns: 104px minmax(0, 1fr) auto auto; gap: var(--space-3); }
+  .episode-still { width: 104px; }
+  .episode-rating { display: none; }
+}
+
+.shelf-row > .franchise-card { width: var(--poster-width); }
+.franchise-step { display: block; margin-bottom: var(--space-2); color: var(--t3); font-size: var(--type-meta); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.franchise-card[aria-current] .franchise-step { color: var(--t1); }
+.franchise-card[aria-current] .card-image { outline: 2px solid var(--t1); outline-offset: 2px; }
+
+.season-watched .eye { width: 18px; height: 18px; }
+.season-watched .eye .icon { width: 100%; height: 100%; }

@@ -1,0 +1,46 @@
+.watch { display: grid; grid-template-columns: minmax(0, 1fr) 320px; align-items: start; gap: var(--space-5) 28px; padding-top: var(--space-4); padding-bottom: var(--space-6); }
+.watch-single { grid-template-columns: minmax(0, 1fr); width: 100%; max-width: max(640px, calc((100dvh - var(--bar-height) - 200px) * 16 / 9 + 2 * var(--gutter))); margin-inline: auto; }
+.watch-main { min-width: 0; }
+.watch-main > .back-link { margin-bottom: var(--space-3); }
+.player-surface { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--radius-button); background: #000; }
+.player-surface iframe { position: absolute; inset: 0; display: block; width: 100%; height: 100%; border: 0; }
+.player-unavailable { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; color: var(--t2); font-size: var(--type-card); text-align: center; }
+
+.watch-heading { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--space-3) var(--space-4); margin-top: var(--space-4); }
+.watch-name { min-width: 0; }
+.watch-name h1 { font-size: var(--type-section); font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
+.watch-name .meta { margin-top: 2px; }
+.watch-neighbors { display: flex; gap: var(--space-2); }
+.watch-next-word { display: none; }
+
+.watch-sources { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); margin-top: var(--space-4); color: var(--t2); font-size: var(--type-meta); }
+.watch-note { color: var(--t3); font-size: var(--type-meta); line-height: 1.5; }
+.finished { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); margin-top: var(--space-4); padding: var(--space-2) var(--space-4); border-radius: var(--radius-panel); background: var(--s1); font-size: var(--type-card); }
+.finished-question { font-weight: 600; }
+.finished .button .eye { width: 18px; height: 18px; }
+.finished-rating { display: flex; align-items: center; gap: var(--space-2); color: var(--t2); font-size: var(--type-meta); }
+
+.watch-episodes { position: sticky; top: calc(var(--bar-height) + var(--space-4)); display: flex; flex-direction: column; min-width: 0; max-height: calc(100dvh - var(--bar-height) - 2 * var(--space-6)); }
+.watch-episodes-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-3); margin-bottom: var(--space-2); }
+.watch-episode-list { min-height: 0; margin: 0; padding: 0; overflow-y: auto; list-style: none; scrollbar-width: thin; scrollbar-color: var(--s3) transparent; }
+.watch-episode { display: grid; grid-template-columns: 96px minmax(0, 1fr); align-items: center; gap: 10px; padding: 6px; border-radius: var(--radius-button); }
+a.watch-episode:hover { background: var(--s1); }
+a.watch-episode:focus-visible { outline-offset: -2px; }
+.watch-episode[aria-current="true"] { background: var(--s2); }
+.watch-episode-still { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 4px; background: var(--s1); }
+.watch-episode-still .artwork { position: absolute; inset: 0; }
+.watch-episode-copy { min-width: 0; }
+.watch-episode-title { font-size: var(--type-meta); font-weight: 600; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.watch-episode-note { display: flex; align-items: center; gap: 5px; margin-top: 2px; color: var(--t3); font-size: 11px; }
+.watch-episode-note .eye { width: 14px; height: 14px; }
+.watch-episode-note.now-playing { color: var(--watching); font-weight: 600; }
+.watch-episodes .pagination { justify-content: space-between; gap: var(--space-3); margin-top: var(--space-3); }
+
+@media (max-width: 760px) {
+  .watch { grid-template-columns: minmax(0, 1fr); padding-top: var(--space-3); }
+  .player-surface { margin-inline: calc(var(--gutter) * -1); border-radius: 0; }
+  .watch-neighbors { width: 100%; }
+  .watch-next { flex: 1; }
+  .watch-next-word { display: inline; }
+  .watch-episodes { position: static; max-height: none; }
+}

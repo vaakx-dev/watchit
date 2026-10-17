@@ -1,0 +1,91 @@
+.profile-avatar { position: relative; display: grid; place-items: center; width: var(--avatar); height: var(--avatar); overflow: hidden; border-radius: var(--radius-panel); background: var(--s2); color: var(--t2); }
+.profile-avatar svg, .profile-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.profile-avatar .icon { width: 36%; height: 36%; }
+
+.profile-gate { display: flex; flex-direction: column; min-height: 100dvh; padding-top: var(--space-4); }
+.profile-gate > .brand { align-self: flex-start; }
+.profile-gate > .profiles, .profile-gate > .profile-form, .profile-gate > .pin-pad, .profile-gate > .profile-manage, .profile-gate > .catalog-status { margin-block: auto; }
+
+.profiles { display: flex; flex-direction: column; align-items: center; gap: var(--space-6); padding: var(--space-7) 0; text-align: center; }
+.profiles h1, .profile-form h1 { font-size: var(--type-page); font-weight: 800; line-height: 1.15; letter-spacing: -.02em; }
+.profile-tiles { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-5) var(--space-6); margin: 0; padding: 0; list-style: none; }
+.profile-tile { --avatar: 120px; position: relative; display: grid; justify-items: center; gap: var(--space-3); width: var(--avatar); border-radius: var(--radius-panel); color: var(--t2); }
+.profile-tile:hover:not(:disabled) .profile-avatar { filter: brightness(1.12); }
+.profile-tile:hover, .profile-tile[aria-current] { color: var(--t1); }
+.profile-label { max-width: 100%; font-size: var(--type-body); font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+.profile-badge-corner { position: absolute; top: -7px; right: -7px; display: grid; place-items: center; width: 26px; height: 26px; border-radius: var(--radius-full); background: var(--t1); color: var(--bg); box-shadow: 0 0 0 3px var(--bg); }
+.profile-badge-corner.locked { background: var(--s3); color: var(--t1); }
+.profile-badge-corner .icon { width: 14px; height: 14px; }
+
+.profile-form { display: grid; gap: var(--space-6); width: min(100%, 440px); margin-inline: auto; padding: var(--space-7) 0; }
+.profile-form form { display: grid; gap: var(--space-5); }
+.profile-form fieldset { display: grid; gap: var(--space-5); min-width: 0; margin: 0; padding: 0; border: 0; }
+.profile-picture { --avatar: 96px; display: flex; align-items: center; gap: var(--space-5); }
+.profile-picture fieldset { gap: var(--space-2); }
+.profile-picture label:has(input:focus-visible) { outline: 2px solid #fff; outline-offset: 3px; }
+.profile-name-field { display: grid; gap: var(--space-2); }
+.profile-name-field label { font-size: var(--type-card); font-weight: 600; }
+.profile-name-field input, .pin-field input, .profile-confirm input { height: 44px; padding: 0 12px; border: 1px solid transparent; border-radius: var(--radius-button); background: var(--s2); font-size: var(--type-body); }
+.profile-name-field input[aria-invalid="true"] { border-color: var(--dropped); }
+.profile-error { color: var(--dropped); font-size: var(--type-card); }
+.profile-saved { color: var(--watching); font-size: var(--type-card); }
+.profile-error:empty, .profile-saved:empty { display: none; }
+.profile-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.profile-section, .profile-delete { display: grid; justify-items: start; gap: var(--space-3); padding-top: var(--space-5); border-top: 1px solid var(--line); }
+.profile-section form, .profile-section fieldset { display: grid; gap: var(--space-3); justify-self: stretch; }
+.profile-section h2 { font-size: var(--type-section); font-weight: 700; }
+.profile-note { max-width: 46ch; color: var(--t2); font-size: var(--type-card); line-height: 1.5; }
+
+.profile-link { --avatar: 30px; display: inline-flex; flex: none; border-radius: 7px; }
+.profile-link .profile-avatar { border-radius: 7px; }
+.profile-link[aria-current] .profile-avatar { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--t1); }
+
+@media (max-width: 640px) {
+  .profiles { gap: var(--space-5); padding: var(--space-6) 0; }
+  .profile-tiles { gap: var(--space-5); }
+  .profile-tile { --avatar: 96px; }
+}
+
+.pin-fields { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+.pin-field, .profile-confirm { display: grid; gap: var(--space-2); }
+.pin-field label, .profile-confirm label { font-size: var(--type-card); font-weight: 600; }
+.pin-field input { width: 128px; font-size: 20px; letter-spacing: .4em; text-align: center; }
+.profile-confirm { justify-self: stretch; }
+
+.pin-pad { --avatar: 88px; display: flex; flex-direction: column; align-items: center; gap: var(--space-4); padding: var(--space-6) 0; text-align: center; }
+.pin-pad h1 { font-size: var(--type-page); font-weight: 800; line-height: 1.15; letter-spacing: -.02em; }
+.pin-dots { display: flex; gap: 18px; margin-top: var(--space-2); }
+.pin-dots span { width: 14px; height: 14px; border: 2px solid var(--t3); border-radius: var(--radius-full); }
+.pin-dots .filled { border-color: var(--t1); background: var(--t1); }
+.pin-dots.wrong { animation: pin-shake .4s ease-in-out; }
+.pin-dots.wrong span { border-color: var(--dropped); }
+@keyframes pin-shake { 20%, 60% { transform: translateX(-9px); } 40%, 80% { transform: translateX(9px); } }
+.pin-message { min-height: 1.5em; max-width: 34ch; color: var(--t2); font-size: var(--type-card); line-height: 1.5; }
+.pin-dots.wrong + .pin-message { color: var(--dropped); }
+.pin-message.locked { color: var(--paused); font-variant-numeric: tabular-nums; }
+.pin-keys { --key: 68px; display: grid; grid-template-columns: repeat(3, var(--key)); gap: var(--space-4) var(--space-5); margin-top: var(--space-2); }
+.pin-key { display: grid; place-items: center; width: var(--key); height: var(--key); border-radius: var(--radius-full); background: var(--s2); font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pin-key:hover:not(:disabled) { background: var(--s3); }
+.pin-key:active:not(:disabled) { transform: scale(.95); }
+.pin-key-text { background: none; color: var(--t2); font-size: var(--type-card); }
+.pin-key-text:hover:not(:disabled) { background: var(--s2); color: var(--t1); }
+.pin-key .icon { width: 26px; height: 26px; }
+
+.profile-manage { display: grid; gap: var(--space-5); width: min(100%, 560px); margin-inline: auto; padding: var(--space-7) 0; }
+.profile-manage h1 { font-size: var(--type-page); font-weight: 800; line-height: 1.15; letter-spacing: -.02em; }
+.profile-rows { margin: 0; padding: 0; list-style: none; }
+.profile-row { --avatar: 48px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid var(--rule); }
+.profile-row-text { display: grid; gap: var(--space-1); min-width: 0; }
+.profile-row-name { display: flex; align-items: baseline; gap: var(--space-2); font-size: var(--type-body); font-weight: 600; overflow-wrap: anywhere; }
+.profile-you { color: var(--t3); font-size: var(--type-meta); font-weight: 600; }
+.profile-row-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); color: var(--t3); font-size: var(--type-meta); }
+.profile-badge { padding: 3px 8px; border-radius: var(--radius-full); background: var(--s3); color: var(--t1); font-weight: 700; }
+.profile-pin-on { display: inline-flex; align-items: center; gap: 4px; color: var(--t2); }
+.profile-pin-on .icon { width: 12px; height: 12px; }
+
+@media (max-width: 640px) {
+  .pin-pad { --avatar: 72px; gap: var(--space-3); padding: var(--space-5) 0; }
+  .pin-keys { --key: 76px; gap: var(--space-3) var(--space-5); }
+}
+
+@media (prefers-reduced-motion: reduce) { .pin-dots.wrong { animation: none; } }

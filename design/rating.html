@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Streamit · Star rating</title>
+<style>
+*{box-sizing:border-box}html{background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif}body{margin:0;padding:28px clamp(18px,4vw,60px);line-height:1.5}main{max-width:1320px;margin:auto}h1{font-size:26px;letter-spacing:-.6px;margin:0 0 8px}p{font-size:14px;margin:0}header{margin-bottom:28px}.options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:30px}.option{min-width:0}h2{font-size:20px;margin:0 0 16px;display:flex;align-items:baseline;gap:14px}h2 span{font-size:15px;font-weight:400}.sample{border-block:1px solid #282828;padding:24px 0;min-height:275px}.eyebrow{font-size:10px;letter-spacing:3px;font-weight:700;margin:0 0 15px}.title{font-family:Impact,'Arial Narrow',sans-serif;font-size:40px;line-height:1;letter-spacing:-.5px;margin:0 0 28px}.rating-label{font-size:12px;display:flex;gap:12px;margin:0 0 9px}.value{color:#bcbcbc}.rating-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.stars{display:flex;gap:2px;flex:none}.stars svg{width:24px;height:24px;display:block;fill:none;stroke:#aaa;stroke-width:1}.stars .full{fill:#fff;stroke:#fff}.actions{display:flex;align-items:center;gap:16px;font-size:12px}.clear{color:#aaa}.description{font-size:13px;margin-top:14px}.b .stars svg{width:28px;height:28px}.b .rating-label{margin:0 0 10px}.b .rating-row{gap:12px}.b .value{font-size:12px}.b .actions{margin-top:12px}.c .stars{gap:4px}.c .stars svg{width:36px;height:36px}.c .rating-row{gap:16px}.c .value{font-size:13px}.c .actions{margin-top:14px}.c .rating-label{margin-bottom:8px}.behavior{margin-top:30px;padding-top:20px;border-top:1px solid #282828}.behavior p+p{margin-top:5px}.state{margin-top:25px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}.state .stars svg{width:24px;height:24px}.state-label{font-size:12px;color:#bbb}.definition{position:absolute;width:0;height:0;overflow:hidden}@media(max-width:1000px){.options{grid-template-columns:1fr;max-width:640px}.sample{min-height:0;padding:24px 0 28px}.title{font-size:42px}.option+.option{margin-top:4px}.rating-row{gap:18px}}
+</style>
+</head>
+<body>
+<svg class="definition" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><path id="star" d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01Z"/><linearGradient id="half"><stop offset="50%" stop-color="#fff"/><stop offset="50%" stop-color="#000"/></linearGradient></defs></svg>
+<main>
+<header><h1>Stars as the slider</h1><p>No separate track. Half-star steps. The red S is removed in every option.</p></header>
+<div class="options">
+<section class="option a" aria-labelledby="option-a">
+<h2 id="option-a">A <span>Keep it compact</span></h2>
+<div class="sample">
+<p class="eyebrow">SERIES</p><h3 class="title">ALLEY CATS</h3>
+<p class="rating-label">Your rating <span class="value">3.5 / 5</span></p>
+<div class="rating-row"><div class="stars" role="img" aria-label="Three and a half out of five stars"><svg viewBox="0 0 24 24"><use href="#star" class="full"/></svg><svg viewBox="0 0 24 24"><use href="#star" class="full"/></svg><svg viewBox="0 0 24 24"><use href="#star" class="full"/></svg><svg viewBox="0 0 24 24"><use href="#star" fill="url(#half)"/></svg><svg viewBox="0 0 24 24"><use href="#star"/></svg></div><div class="actions"><span>Save rating</span><span class="clear">Clear rating</span></div></div>
+</div>
+<p class="description">Current star size and control placement. Remove only the separate slider.</p>
+</section>
+<section class="option b" aria-labelledby="option-b">
+<h2 id="option-b">B <span>Clearer value</span></h2>
+<div class="sample">
+<p class="eyebrow">SERIES</p><h3 class="title">ALLEY CATS</h3>
+<p class="rating-label">Your rating</p>
+<div class="rating-row"><div class="stars" role="img" aria-label="Three and a half out of five stars"><svg viewBox="0 0 24 24"><use href="#star" class="full"/></svg><svg viewBox="0 0 24 24"><use href="#star" class="full"/></svg><svg viewBox="0 0 24 24"><use href="#star" class="full"/></svg><svg viewBox="0 0 24 24"><use href="#star" fill="url(#half)"/></svg><svg viewBox="0 0 24 24"><use href="#star"/></svg></div><span class="value">3.5 / 5</span></div>
+<div class="actions"><span>Save rating</span><span class="clear">Clear rating</span></div>
+</div>
+<p class="description">Slightly larger stars. Value alongside them, actions below.</p>
+</section>
+<section class="option c" aria-labelledby="option-c">
+<h2 id="option-c">C <span>Larger targets</span></h2>
+<div class="sample">
+<p class="eyebrow">SERIES</p><h3 class="title">ALLEY CATS</h3>
+<p class="rating-label">Your rating</p>
+<div class="rating-row"><div class="stars" role="img" aria-label="Three and a half out of five stars"><svg viewBox="0 0 24 24"><use href="#star" class="full"/></svg><svg viewBox="0 0 24 24"><use href="#star" class="full"/></svg><svg viewBox="0 0 24 24"><use href="#star" class="full"/></svg><svg viewBox="0 0 24 24"><use href="#star" fill="url(#half)"/></svg><svg viewBox="0 0 24 24"><use href="#star"/></svg></div><span class="value">3.5 / 5</span></div>
+<div class="actions"><span>Save rating</span><span class="clear">Clear rating</span></div>
+</div>
+<p class="description">Larger stars and more space for touch input.</p>
+</section>
+</div>
+<section class="behavior" aria-label="Interaction">
+<p>Tap or drag across the stars to choose 0.5 to 5. Arrow keys adjust by half a star. Save and Clear keep their current behavior.</p>
+<p>Static previews. No animation. A makes the smallest change.</p>
+<div class="state"><div class="stars" role="img" aria-label="Five empty stars"><svg viewBox="0 0 24 24"><use href="#star"/></svg><svg viewBox="0 0 24 24"><use href="#star"/></svg><svg viewBox="0 0 24 24"><use href="#star"/></svg><svg viewBox="0 0 24 24"><use href="#star"/></svg><svg viewBox="0 0 24 24"><use href="#star"/></svg></div><span class="state-label">Not rated</span></div>
+</section>
+</main>
+</body>
+</html>
