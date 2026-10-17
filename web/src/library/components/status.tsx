@@ -1,6 +1,6 @@
 import { useId, useLayoutEffect, useRef, useState } from 'react';
 import type { CatalogEntry } from '../../catalog/types';
-import { Icon } from '../../ui/icon';
+import { ChevronDown } from 'lucide-react';
 import { menu_step, popover_position } from '../menu';
 import { STATUS_LABELS } from '../status_labels';
 import type { Status } from '../types';
@@ -75,7 +75,7 @@ export function StatusControls({ title, library, labelled = false }: { title: Ca
         if (menu.current?.matches(':popover-open')) close();
         else show();
       }}><StatusEye status={status} favorite={favorite} recommended={recommended} />{labelled && <>
-        <span>{trigger_text(status, favorite)}</span><Icon name="chevron" className="down" size={13} />
+        <span>{trigger_text(status, favorite)}</span><ChevronDown />
       </>}</button>
     <div id={id} ref={menu} className="status-menu" popover="auto" role="dialog" aria-label={`Watch status for ${title.title}`}
       onToggle={event => set_open(event.newState === 'open')}

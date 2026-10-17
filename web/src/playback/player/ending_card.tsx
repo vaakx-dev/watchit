@@ -2,7 +2,7 @@ import { Artwork } from '../../catalog/components/artwork';
 import { episode_code } from '../../catalog/episodes';
 import type { EpisodeEntry, Title } from '../../catalog/types';
 import type { Library } from '../../library/use_library';
-import { Icon } from '../../ui/icon';
+import { Play } from 'lucide-react';
 import { FinishedPrompt } from '../finished';
 
 export const ENDING_SECONDS = 35;
@@ -19,7 +19,7 @@ export function EndingCard({ title, next, library, on_dismiss }: { title: Title;
     <FinishedPrompt title={title} library={library} />
     <div className="ending-actions">
       <button type="button" className="button ghost small" onClick={on_dismiss}>Dismiss</button>
-      {next && <a className="button primary small" href={`#/watch/${next.id}`}><Icon name="play" />Watch now</a>}
+      {next && <a className="button primary small" href={`#/watch/${next.id}`}><Play fill="currentColor" />Watch now</a>}
     </div>
   </section>;
 }

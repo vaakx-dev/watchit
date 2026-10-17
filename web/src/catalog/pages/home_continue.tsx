@@ -1,4 +1,4 @@
-import { Icon } from '../../ui/icon';
+import { Play } from 'lucide-react';
 import { Artwork } from '../components/artwork';
 import { Shelf } from '../components/shelf';
 import { CatalogStatus } from '../components/status';
@@ -17,7 +17,7 @@ function ContinueCard({ item, library }: { item: LibraryItem; library: Library }
   return <article className="continue-card">
     <a className="continue-image" href={play ?? `#/title/${title.id}`} aria-label={`${play ? 'Play ' : ''}${title.title}, ${line}`}>
       <Artwork src={progress?.next?.artwork || title.artwork} label={title.title} />
-      {play && <span className="icon-button small on-image continue-play" aria-hidden="true"><Icon name="play" /></span>}
+      {play && <span className="icon-button small on-image continue-play" aria-hidden="true"><Play fill="currentColor" /></span>}
     </a>
     <div className="card-status continue-status"><StatusControls title={title} library={library} /></div>
     <h3><a href={`#/title/${title.id}`}>{title.title}</a></h3>

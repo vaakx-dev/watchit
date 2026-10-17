@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Icon } from '../../ui/icon';
+import { Play } from 'lucide-react';
 import { resolution_label } from '../../torrents/quality';
 
 type Props = {
@@ -25,7 +25,7 @@ export function SourceRow({ resolution, hdr, name, details, current, on_play, ac
         <span className="source-name">{name}</span>
         {meta.length > 0 && <span className="meta">{meta.map(item => <span key={String(item)}>{item}</span>)}</span>}
       </span>
-      <Icon name="play" className="source-state" />
+      <Play className="source-state" fill="currentColor" />
     </button>
     {action}
   </li>;

@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import { bytes, eta, percent, speed } from '../torrents/format';
 import type { Transfer } from '../torrents/types';
-import { Icon } from '../ui/icon';
+import { ArrowDown, ArrowUp, Clock, Play, Users } from 'lucide-react';
 import { finished, STATE_LABELS } from './states';
 import { TransferActions } from './transfer_actions';
 
@@ -17,10 +17,10 @@ function Stats({ transfer }: { transfer: Transfer }) {
     <span>{STATE_LABELS[transfer.state]}</span>
     <span>{percent(transfer.progress)}{finished(transfer) ? '' : ` of ${bytes(transfer.size_bytes)}`}</span>
     {finished(transfer) && <span>{bytes(transfer.size_bytes)}</span>}
-    {active && <span><Icon name="arrow-down" size={12} />{speed(transfer.download_bps)}</span>}
-    {transfer.upload_bps > 0 && <span><Icon name="arrow-up" size={12} />{speed(transfer.upload_bps)}</span>}
-    {active && transfer.eta_seconds !== null && <span><Icon name="clock" size={12} />{eta(transfer.eta_seconds)}</span>}
-    {(active || transfer.state === 'seeding') && <span><Icon name="peers" size={12} />{transfer.peers} {transfer.peers === 1 ? 'peer' : 'peers'}</span>}
+    {active && <span><ArrowDown />{speed(transfer.download_bps)}</span>}
+    {transfer.upload_bps > 0 && <span><ArrowUp />{speed(transfer.upload_bps)}</span>}
+    {active && transfer.eta_seconds !== null && <span><Clock />{eta(transfer.eta_seconds)}</span>}
+    {(active || transfer.state === 'seeding') && <span><Users />{transfer.peers} {transfer.peers === 1 ? 'peer' : 'peers'}</span>}
   </p>;
 }
 
@@ -40,7 +40,7 @@ export function TransferRow({ transfer, on_remove }: { transfer: Transfer; on_re
         <span style={{ '--progress': `${transfer.progress * 100}%` } as CSSProperties} />
       </div>}
     </div>
-    {playable && <a className="icon-button small" href={`#/watch/${transfer.title_id}`} aria-label={`Play ${transfer.name}`} title="Play"><Icon name="play" /></a>}
+    {playable && <a className="icon-button small" href={`#/watch/${transfer.title_id}`} aria-label={`Play ${transfer.name}`} title="Play"><Play fill="currentColor" /></a>}
     <TransferActions transfer={transfer} on_remove={on_remove} />
   </li>;
 }

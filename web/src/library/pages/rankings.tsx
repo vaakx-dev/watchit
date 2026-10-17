@@ -1,3 +1,4 @@
+import { Trophy } from 'lucide-react';
 import { useState } from 'react';
 import { Choices, type Choice } from '../../ui/choices';
 import { EmptyState } from '../../ui/empty_state';
@@ -15,11 +16,11 @@ type View = 'tiers' | 'ranked';
 const VIEWS: readonly Choice<View>[] = [{ value: 'tiers', label: 'Tiers' }, { value: 'ranked', label: 'Ranked' }];
 
 function Empty({ kind, show_all }: { kind: CatalogKind; show_all: () => void }) {
-  if (kind !== 'all') return <EmptyState icon="nav-rankings" title={`No rated ${plural(kind)}`}>
+  if (kind !== 'all') return <EmptyState icon={Trophy} title={`No rated ${plural(kind)}`}>
     <p>Your other ratings may be here. Show every type to check.</p>
     <button type="button" className="button secondary" onClick={show_all}>Show all types</button>
   </EmptyState>;
-  return <EmptyState icon="nav-rankings" title="Nothing rated yet">
+  return <EmptyState icon={Trophy} title="Nothing rated yet">
     <p>Give a title stars on its page and it lines up here by rating. Start with what you’ve watched.</p>
     <a className="button primary" href={mine_route('watched')}>Rate what you’ve watched</a>
   </EmptyState>;

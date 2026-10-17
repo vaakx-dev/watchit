@@ -2,16 +2,17 @@ import { useEffect, useRef, useState, type RefObject } from 'react';
 import { episode_code } from '../../catalog/episodes';
 import type { EpisodeEntry, Title } from '../../catalog/types';
 import type { Library } from '../../library/use_library';
-import { Icon } from '../../ui/icon';
 import { desktop } from '../engine/mpv_bridge';
 import { use_engine } from '../engine/use_engine';
 import type { Panel } from '../panels/panel';
 import { use_progress_report } from '../progress/use_progress_report';
 import { use_session } from '../session/use_session';
-import type { PlaySource } from '../sources/types';
+import { source_label, type PlaySource } from '../sources/types';
 import { use_file_source } from '../sources/use_file_source';
-import { ControlBar, type MenuName } from './control_bar';
+import { Bezel } from './bezel';
+import { ControlBar } from './control_bar';
 import { ENDING_SECONDS, EndingCard } from './ending_card';
+import type { SettingsPage } from './settings_menu';
 import { stage_message } from './stage_message';
 import { StageStatus } from './stage_status';
 import { back_href, TopBar } from './top_bar';
@@ -49,7 +50,8 @@ export function MediaStage({ title, source, start, position, next, library, pane
   const playback = use_session(title.id, file, start);
   const { session } = playback;
   const { audio, subtitles, text_subtitle } = use_tracks(engine, state, playback);
-  const [menu, set_menu] = useState<MenuName | null>(null);
+  const [menu, set_menu] = useState<SettingsPage | null>(null);
+  const [bezel, set_bezel] = useState<{ paused: boolean; count: number } | null>(null);
   const [dragging, set_dragging] = useState(false);
   const [dismissed, set_dismissed] = useState(false);
   const duration = session?.duration_seconds ?? state.duration;
@@ -65,17 +67,22 @@ export function MediaStage({ title, source, start, position, next, library, pane
 
   const toggle_play = () => { if (state.paused) engine?.play(); else engine?.pause(); };
   const seek = (seconds: number) => engine?.seek(Math.min(Math.max(seconds, 0), duration ?? seconds));
-  const clicks = use_surface_clicks(toggle_play, fullscreen.toggle);
+  const toggle_play_with_bezel = () => {
+    set_bezel(current => ({ paused: !state.paused, count: (current?.count ?? 0) + 1 }));
+    toggle_play();
+  };
+  const toggle_subtitles = () => subtitles.select(subtitles.selected === null ? subtitles.options[0]?.id ?? null : null);
+  const clicks = use_surface_clicks(toggle_play_with_bezel, fullscreen.toggle);
 
   use_shortcuts({
-    toggle_play,
+    toggle_play: toggle_play_with_bezel,
     seek_by: seconds => seek(state.time + seconds),
     seek_to: fraction => { if (duration) seek(duration * fraction); },
     volume_by: step => engine?.set_volume(Math.min(Math.max((state.muted ? 0 : state.volume) + step, 0), 100)),
     toggle_mute: () => engine?.set_muted(!state.muted),
     toggle_fullscreen: fullscreen.toggle,
     open_menu: name => set_menu(current => current === name ? null : name),
-    toggle_subtitles: () => subtitles.select(subtitles.selected === null ? subtitles.options[0]?.id ?? null : null),
+    toggle_subtitles,
     next: next ? go_next : null,
     escape: () => {
       if (menu) set_menu(null);
@@ -92,17 +99,18 @@ export function MediaStage({ title, source, start, position, next, library, pane
     <div className="stage-surface" {...clicks} onPointerDown={() => set_menu(null)} />
     <StageStatus message={error ? null : stage_message({ has_file: file !== null, session, state })} error={error} transfer={transfer}
       on_sources={() => on_panel('sources')} />
+    {bezel && <Bezel key={bezel.count} paused={bezel.paused} />}
     <div className="player-overlay" data-shown={idle.shown || undefined}>
-      <div className="player-bar" onPointerEnter={() => idle.hover(true)} onPointerLeave={() => idle.hover(false)}>
-        <TopBar title={title}>
-          <button type="button" className="player-button" aria-label={fullscreen.active ? 'Exit full screen' : 'Full screen'} title={`${fullscreen.active ? 'Exit full screen' : 'Full screen'} (F)`}
-            onClick={fullscreen.toggle}><Icon name={fullscreen.active ? 'fullscreen-exit' : 'fullscreen'} /></button>
-        </TopBar>
+      <div className="player-gradient top" />
+      <div className="player-gradient bottom" />
+      <div className="player-top-bar" onPointerEnter={() => idle.hover(true)} onPointerLeave={() => idle.hover(false)}>
+        <TopBar title={title} />
       </div>
-      <div className="player-bar player-bottom" onPointerEnter={() => idle.hover(true)} onPointerLeave={() => idle.hover(false)}>
-        <ControlBar state={state} duration={duration} audio={audio} subtitles={subtitles} menu={menu} panel={panel} has_episodes={has_episodes}
-          next_label={next ? `Next episode, ${episode_code(next)}` : null} on_menu={set_menu} on_panel={on_panel} on_toggle_play={toggle_play}
-          on_next={go_next} on_seek={seek} on_drag={set_dragging} on_volume={volume => engine?.set_volume(volume)} on_mute={muted => engine?.set_muted(muted)} />
+      <div className="player-bottom" onPointerEnter={() => idle.hover(true)} onPointerLeave={() => idle.hover(false)}>
+        <ControlBar state={state} duration={duration} audio={audio} subtitles={subtitles} source_label={source_label(source)} menu={menu} panel={panel}
+          has_episodes={has_episodes} next_label={next ? `Next episode, ${episode_code(next)}` : null} fullscreen={fullscreen} on_menu={set_menu} on_panel={on_panel}
+          on_toggle_play={toggle_play} on_toggle_subtitles={toggle_subtitles} on_next={go_next} on_seek={seek} on_drag={set_dragging}
+          on_volume={volume => engine?.set_volume(volume)} on_mute={muted => engine?.set_muted(muted)} />
       </div>
     </div>
     {ending && <EndingCard title={title} next={next} library={library} on_dismiss={() => set_dismissed(true)} />}

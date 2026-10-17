@@ -21,7 +21,7 @@
 .transfer-name { min-width: 0; overflow-wrap: anywhere; }
 .transfer-kind { padding: 1px 6px; border-radius: var(--radius-full); background: var(--s2); color: var(--t2); font-size: 11px; font-weight: 600; }
 .transfer-stats { font-variant-numeric: tabular-nums; }
-.transfer-stats .icon { margin-right: 3px; }
+.transfer-stats .lucide { width: 12px; height: 12px; margin-right: 3px; }
 .transfer-failure { color: var(--dropped); font-size: var(--type-meta); font-weight: 500; }
 .transfer-progress { height: 4px; overflow: hidden; border-radius: var(--radius-full); background: var(--s2); }
 .transfer-progress span { display: block; width: var(--progress); height: 100%; border-radius: inherit; background: var(--watching); transition: width .4s; }

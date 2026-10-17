@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Watchit",
+  "identifier": "dev.watchit.app",
+  "build": {
+    "beforeBuildCommand": "npm --prefix web ci && npm --prefix web run build"
+  },
+  "app": {
+    "windows": [],
+    "security": { "csp": null }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "createUpdaterArtifacts": true,
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.ico"],
+    "resources": {
+      "libmpv/libmpv-2.dll": "libmpv-2.dll",
+      "../server/playback/resources/ffmpeg/": "ffmpeg/",
+      "../web/dist/": "web/"
+    },
+    "windows": {
+      "nsis": { "installMode": "currentUser", "installerHooks": "installer/hooks.nsh" }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEIwRDVCOTc0QTFDRkNFRUUKUldUdXpzK2hkTG5Wc01xdHdvcGFwdy9QWVpuenpJcHYreVJOek8zOTJxUjRFbzhOaGx1M3lGcGoK",
+      "endpoints": ["https://github.com/vaakx-dev/watchit/releases/latest/download/latest.json"],
+      "windows": { "installMode": "passive" }
+    }
+  }
+}

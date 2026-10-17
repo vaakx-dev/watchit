@@ -1,3 +1,4 @@
+import { Download } from 'lucide-react';
 import { useState } from 'react';
 import { use_transfers } from '../torrents/transfer_store';
 import type { Transfer } from '../torrents/types';
@@ -34,7 +35,7 @@ export function DownloadsPage() {
       <Notice live={live} error={error} />
       <Choices label="Show downloads" options={options} value={filter} on_change={set_filter} />
       {shown.length ? groups(shown).map(([id, list]) => <TransferGroup key={id} id={id} transfers={list} on_remove={set_removing} />)
-        : <EmptyState icon="downloads" title={filter === 'all' ? 'Nothing downloaded yet.' : `No ${FILTER_LABELS[filter].toLowerCase()} downloads.`}>
+        : <EmptyState icon={Download} title={filter === 'all' ? 'Nothing downloaded yet.' : `No ${FILTER_LABELS[filter].toLowerCase()} downloads.`}>
           {filter === 'all' && <p>Use Download on a movie or episode, or Download season on a series, to keep a copy on this server.</p>}
         </EmptyState>}
       <SettingsSection />

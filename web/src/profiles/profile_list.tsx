@@ -1,4 +1,4 @@
-import { Icon } from '../ui/icon';
+import { Lock, Plus } from 'lucide-react';
 import { ProfileAvatar } from './avatar';
 import type { Profile } from './types';
 
@@ -14,14 +14,14 @@ export function ProfileList({ profiles, viewer, on_edit, on_add, on_done }: Prop
           <span className="profile-row-name">{profile.name}{profile.id === viewer.id && <span className="profile-you">You</span>}</span>
           <span className="profile-row-meta">
             {profile.is_admin && <span className="profile-badge">Admin</span>}
-            {profile.has_pin ? <span className="profile-pin-on"><Icon name="lock" />PIN</span> : <span>No PIN</span>}
+            {profile.has_pin ? <span className="profile-pin-on"><Lock />PIN</span> : <span>No PIN</span>}
           </span>
         </div>
         <button className="button secondary small" type="button" aria-label={`Edit ${profile.name}`} onClick={() => on_edit(profile.id)}>Edit</button>
       </li>)}
     </ul>
     <div className="profile-actions">
-      <button className="button primary" type="button" onClick={on_add}><Icon name="plus" />Add profile</button>
+      <button className="button primary" type="button" onClick={on_add}><Plus />Add profile</button>
       <button className="button ghost" type="button" onClick={on_done}>Done</button>
     </div>
   </section>;

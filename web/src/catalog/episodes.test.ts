@@ -1,14 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { episode_code, navigation_anchor, play_label, season_label, watched_summary } from './episodes';
 import type { PersonalEntry } from '../library/types';
-import type { EpisodeEntry, EpisodeNavigation } from './types';
+import type { EpisodeEntry, EpisodeNavigation, ImportStatus } from './types';
+
+const imports: ImportStatus = { enabled: true, pending: false, running: false, imported: 0, error: null, next_retry_at: null };
 
 function episode(season: number | null, number: number | null): EpisodeEntry {
-  return { id: `tt1:${season}:${number}`, title: `Episode ${number}`, year: 2026, artwork: '', genres: [], kind: 'episode', anime: false, season, episode: number };
+  return { id: `tt1:${season}:${number}`, title: `Episode ${number}`, year: 2026, artwork: '', genres: [], kind: 'episode', anime: false, imdb_rating: null, season, episode: number };
 }
 
 function navigation(items: EpisodeEntry[], page = 1, has_next = false): EpisodeNavigation {
-  return { items, page, has_next, freshness: { updated_at: '', stale: false }, season: 1, seasons: [1], previous: null, next: null };
+  return { items, page, has_next, freshness: { updated_at: '', stale: false }, imports, artwork_status: { pending: false, running: false, error: null }, season: 1, seasons: [1], previous: null, next: null };
 }
 
 const watched: PersonalEntry = { id: 'tt1:1:1', rating: null, status: 'watched', favorite: false, recommended: false, saved: false, last_opened_at: null };

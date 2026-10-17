@@ -39,6 +39,7 @@ export function SeekBar({ time, duration, buffered, on_seek, on_drag }: Props) {
     onPointerLeave={() => set_hover(null)} data-dragging={drag !== null || undefined}>
     <div className="seek-track">
       {length && buffered.map(range => <span key={range.start} className="seek-buffered" style={{ left: share(range.start, length), width: share(range.end - range.start, length) }} />)}
+      {length && hover !== null && hover > shown && <span className="seek-hover" style={{ left: share(shown, length), width: share(hover - shown, length) }} />}
       {length && <span className="seek-played" style={{ width: share(shown, length) }} />}
     </div>
     {length && <span className="seek-thumb" style={{ left: share(shown, length) }} />}

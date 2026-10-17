@@ -20,6 +20,7 @@ const title: CatalogEntry = {
   genres: ['Drama'],
   kind: 'movie',
   anime: false,
+  imdb_rating: null,
 };
 
 const entry: PersonalEntry = {

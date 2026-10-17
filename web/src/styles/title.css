@@ -51,7 +51,7 @@
 .up-next { color: var(--watching); font-weight: 700; }
 .episode-rating .rating-control { --star-size: 14px; }
 .episode-watched .eye { width: 22px; height: 22px; }
-.episode-watched .eye .icon { width: 100%; height: 100%; }
+.episode-watched .eye .eye-mark { width: 100%; height: 100%; }
 .episode-watched[aria-pressed="true"] { background: transparent; color: inherit; }
 .episode-watched[aria-pressed="true"]:hover:not(:disabled) { background: var(--s2); }
 .episode-row[data-watched] .episode-still { opacity: .55; }
@@ -70,7 +70,7 @@
   .title-hero h1 { font-size: 40px; }
   .title-hero h1.long-title { font-size: 32px; }
   .title-actions .button.primary { flex: 1; }
-  .title-actions .status-trigger.labelled > span:not(.status-eye, .icon) { display: none; }
+  .title-actions .status-trigger.labelled > span:not(.status-eye, .lucide) { display: none; }
   .trailer-dialog { width: 100vw; border-radius: 0; }
   .trailer-panel { padding: var(--space-2) 0 var(--space-4); }
   .trailer-bar, .trailer-panel .choices { padding: 0 var(--space-2) 0 var(--gutter); }
@@ -87,4 +87,4 @@
 .franchise-card[aria-current] .card-image { outline: 2px solid var(--t1); outline-offset: 2px; }
 
 .season-watched .eye { width: 18px; height: 18px; }
-.season-watched .eye .icon { width: 100%; height: 100%; }
+.season-watched .eye .eye-mark { width: 100%; height: 100%; }

@@ -5,7 +5,7 @@ import { percent } from '../../torrents/format';
 import { transfers_for, use_transfers } from '../../torrents/transfer_store';
 import type { TorrentResult } from '../../torrents/types';
 import { download_file, use_add_download } from '../../torrents/use_add_download';
-import { Icon } from '../../ui/icon';
+import { ArrowDownToLine, Check } from 'lucide-react';
 
 async function download_best(title_id: string) {
   const { results } = await request<{ results: TorrentResult[] }>(search_url(title_id));
@@ -20,9 +20,9 @@ export function DownloadTitleButton({ title }: { title: Title }) {
   const download = transfers_for(transfers, title.id).find(transfer => transfer.kind === 'download');
 
   if (download) return <a className="button secondary" href="#/downloads">
-    <Icon name={download.progress >= 1 ? 'check' : 'download'} />{download.progress >= 1 ? 'Downloaded' : `Downloading ${percent(download.progress)}`}
+    {download.progress >= 1 ? <Check /> : <ArrowDownToLine />}{download.progress >= 1 ? 'Downloaded' : `Downloading ${percent(download.progress)}`}
   </a>;
   return <button type="button" className="button secondary" disabled={pending} title={error ?? undefined} onClick={() => { void run(title.id); }}>
-    <Icon name="download" />{pending ? 'Finding a torrent…' : error ? 'Download failed, retry' : 'Download'}
+    <ArrowDownToLine />{pending ? 'Finding a torrent…' : error ? 'Download failed, retry' : 'Download'}
   </button>;
 }

@@ -1,4 +1,4 @@
-import { Icon } from '../ui/icon';
+import { Settings } from 'lucide-react';
 import type { Route } from '../navigation/route';
 import { ProfileAvatar } from '../profiles/avatar';
 import type { Profile } from '../profiles/types';
@@ -17,7 +17,7 @@ export function Header({ route, profile }: { route: Route; profile: Profile }) {
       </nav>
       <SearchField query={searching ? route.query : null} />
       <a className="icon-button ghost" href="#/settings" aria-label="Settings" title="Settings"
-        aria-current={route.view === 'settings' ? 'page' : undefined}><Icon name="settings" /></a>
+        aria-current={route.view === 'settings' ? 'page' : undefined}><Settings /></a>
       <a className="profile-link" href="#/profiles" aria-label={`Switch profile (${profile.name})`} title={`Switch profile (${profile.name})`}
         aria-current={route.view === 'profiles' ? 'page' : undefined}><ProfileAvatar profile={profile} /></a>
     </header>

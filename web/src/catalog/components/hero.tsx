@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Icon } from '../../ui/icon';
+import { Info, Play } from 'lucide-react';
 import { Backdrop } from './backdrop';
 import { Heading } from './heading';
 import { ImdbScore } from './imdb_score';
@@ -13,8 +13,8 @@ import { StatusControls } from '../../library/components/status';
 const KINDS: Record<Title['kind'], string> = { movie: 'Movie', series: 'Series', episode: 'Episode' };
 
 function PrimaryAction({ title, progress }: { title: Title; progress: SeriesProgress | null }) {
-  if (title.kind !== 'series') return <a className="button primary" href={`#/watch/${title.id}`}><Icon name="play" />Play</a>;
-  if (progress?.next) return <a className="button primary" href={`#/watch/${progress.next.id}`}><Icon name="play" />{play_label(progress.next, progress.last)}</a>;
+  if (title.kind !== 'series') return <a className="button primary" href={`#/watch/${title.id}`}><Play fill="currentColor" />Play</a>;
+  if (progress?.next) return <a className="button primary" href={`#/watch/${progress.next.id}`}><Play fill="currentColor" />{play_label(progress.next, progress.last)}</a>;
   return <a className="button primary" href={`#/title/${title.id}`}>View episodes</a>;
 }
 
@@ -44,7 +44,7 @@ export function Hero({ title, reason, progress, library }: {
         <div className="hero-actions">
           <PrimaryAction title={title} progress={progress} />
           {title.kind !== 'episode' && <StatusControls title={title} library={library} labelled />}
-          <a className="button secondary" href={`#/title/${title.id}`}><Icon name="info" />Details</a>
+          <a className="button secondary" href={`#/title/${title.id}`}><Info />Details</a>
         </div>
       </div>
     </section>

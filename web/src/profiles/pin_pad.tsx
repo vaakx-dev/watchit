@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { HttpError } from '../catalog/client';
-import { Icon } from '../ui/icon';
+import { Delete } from 'lucide-react';
 import { sign_in } from './api';
 import { ProfileAvatar } from './avatar';
 import { start_session } from './session';
@@ -88,7 +88,7 @@ export function PinPad({ profile, on_cancel }: { profile: Profile; on_cancel: ()
       <button type="button" className="pin-key pin-key-text" onClick={on_cancel}>Cancel</button>
       <button type="button" className="pin-key" disabled={disabled} onClick={() => press('0')}>0</button>
       <button type="button" className="pin-key pin-key-text" disabled={disabled || !digits} onClick={erase} aria-label="Delete last digit">
-        <Icon name="backspace" />
+        <Delete />
       </button>
     </div>
   </section>;

@@ -5,7 +5,7 @@
 .genre-choices { position: relative; min-width: 0; }
 .chips > .more-genres { border: 1px dashed var(--s3); background: none; }
 .chips > .more-genres:hover { border-color: var(--t3); }
-.discover-filters .chips .icon { width: 13px; height: 13px; }
+.discover-filters .chips .lucide { width: 13px; height: 13px; }
 
 @media (max-width: 640px) {
   .discover-filters { grid-template-columns: max-content minmax(0, 1fr); }

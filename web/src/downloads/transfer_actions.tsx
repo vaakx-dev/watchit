@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Icon } from '../ui/icon';
+import { ArrowDownToLine, Pause, Trash2 } from 'lucide-react';
 import { update_transfer } from '../torrents/api';
 import type { Transfer } from '../torrents/types';
 import { finished } from './states';
@@ -20,14 +20,14 @@ export function TransferActions({ transfer, on_remove }: { transfer: Transfer; o
   return <div className="transfer-actions">
     {error && <span className="transfer-error" role="alert">{error}</span>}
     {transfer.kind === 'stream' && <button type="button" className="button ghost small" disabled={pending} onClick={() => patch({ kind: 'download' })}>
-      <Icon name="download" />Keep
+      <ArrowDownToLine />Keep
     </button>}
     {!finished(transfer) && transfer.state !== 'error' && <button type="button" className="button ghost small" disabled={pending}
       aria-label={`${paused ? 'Resume' : 'Pause'} ${transfer.name}`} onClick={() => patch({ paused: !paused })}>
-      <Icon name={paused ? 'download' : 'pause'} />{paused ? 'Resume' : 'Pause'}
+      {paused ? <ArrowDownToLine /> : <Pause />}{paused ? 'Resume' : 'Pause'}
     </button>}
     <button type="button" className="icon-button small ghost" aria-label={`Remove ${transfer.name}`} title="Remove" onClick={on_remove}>
-      <Icon name="trash" />
+      <Trash2 />
     </button>
   </div>;
 }

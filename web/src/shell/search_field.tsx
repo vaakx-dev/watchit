@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Icon } from '../ui/icon';
+import { Search } from 'lucide-react';
 import { search_route } from '../navigation/route';
 
 function typing(target: EventTarget | null) {
@@ -24,7 +24,7 @@ export function SearchField({ query }: { query: string | null }) {
     const value = new FormData(event.currentTarget).get('q');
     if (typeof value === 'string') window.location.hash = search_route(value);
   }}>
-    <Icon name="search" size={15} />
+    <Search />
     <label className="sr-only" htmlFor="search-input">Search titles</label>
     <input ref={input} id="search-input" key={query ?? 'idle'} defaultValue={query ?? ''} name="q" type="search"
       maxLength={200} placeholder="Search titles" autoComplete="off"
