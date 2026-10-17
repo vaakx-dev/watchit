@@ -1,6 +1,7 @@
 export type { DiskUsage as Disk } from '../generated/torrents/DiskUsage';
 export type { Hdr as HdrFormat } from '../generated/torrents/Hdr';
 export type { LocalFile } from '../generated/torrents/LocalFile';
+export type { Readiness } from '../generated/torrents/Readiness';
 export type { Resolution } from '../generated/torrents/Resolution';
 export type { ReadyEvent } from '../generated/torrents/ReadyEvent';
 export type { TorrentResult } from '../generated/torrents/TorrentResult';

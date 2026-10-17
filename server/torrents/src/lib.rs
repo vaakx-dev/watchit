@@ -2,6 +2,7 @@ mod engine;
 mod library;
 mod media;
 mod notify;
+mod readiness;
 mod release;
 mod search;
 mod service;

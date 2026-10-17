@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
+use crate::readiness::Readiness;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, TS)]
 #[serde(rename_all = "lowercase")]
 #[ts(export_to = "torrents/", rename = "TransferKind")]
@@ -65,4 +67,5 @@ pub struct Transfer {
     pub eta_seconds: Option<u64>,
     pub added_at: i64,
     pub notify_when_ready: bool,
+    pub readiness: Readiness,
 }

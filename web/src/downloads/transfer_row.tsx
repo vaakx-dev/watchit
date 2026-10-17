@@ -3,11 +3,18 @@ import { bytes, eta, percent, speed } from '../torrents/format';
 import type { Transfer } from '../torrents/types';
 import { ArrowDown, ArrowUp, Clock, Play, Users } from 'lucide-react';
 import { finished, STATE_LABELS } from './states';
+import { ReadinessNote } from './readiness/readiness_note';
 import { TransferActions } from './transfer_actions';
 
-function episode_label(title_id: string) {
-  const [, season, episode] = title_id.split(':');
-  return season && episode ? `S${season} E${episode}` : null;
+function episode_label(transfer: Transfer) {
+  const ids = transfer.files.length ? transfer.files.map(file => file.title_id ?? transfer.title_id) : [transfer.title_id];
+  const episodes = new Set(ids.filter(id => id.includes(':')));
+  const [only] = episodes;
+  if (!only) return null;
+  const seasons = new Set([...episodes].map(id => id.split(':')[1]));
+  const [season] = seasons;
+  if (episodes.size === 1) return `S${season} E${only.split(':')[2]}`;
+  return seasons.size === 1 ? `S${season} · ${episodes.size} episodes` : `${episodes.size} episodes`;
 }
 
 function Stats({ transfer }: { transfer: Transfer }) {
@@ -25,7 +32,7 @@ function Stats({ transfer }: { transfer: Transfer }) {
 }
 
 export function TransferRow({ transfer, on_remove }: { transfer: Transfer; on_remove: () => void }) {
-  const episode = episode_label(transfer.title_id);
+  const episode = episode_label(transfer);
   const playable = transfer.progress > 0 && transfer.state !== 'error';
   return <li className="transfer-row" data-state={transfer.state}>
     <div className="transfer-copy">
@@ -35,6 +42,7 @@ export function TransferRow({ transfer, on_remove }: { transfer: Transfer; on_re
         {transfer.kind === 'stream' && <span className="transfer-kind">Streaming</span>}
       </h3>
       <Stats transfer={transfer} />
+      <ReadinessNote transfer={transfer} />
       {!finished(transfer) && transfer.state !== 'error' && <div className="transfer-progress" role="progressbar" aria-label={`${transfer.name} progress`}
         aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.floor(transfer.progress * 100)}>
         <span style={{ '--progress': `${transfer.progress * 100}%` } as CSSProperties} />

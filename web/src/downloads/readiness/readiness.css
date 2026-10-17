@@ -1,0 +1,3 @@
+.readiness { display: inline-flex; align-items: center; gap: 4px; color: var(--t2); font-size: var(--type-meta); font-weight: 600; font-variant-numeric: tabular-nums; }
+.readiness .lucide { width: 13px; height: 13px; flex: none; }
+.readiness[data-ready="true"] { color: var(--watching); }

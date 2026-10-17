@@ -23,7 +23,7 @@ use tokio::sync::{Notify, broadcast};
 use watchit_core::{AppResult, Db};
 
 pub use disk::Disk;
-pub use entry::Entry;
+pub use entry::{Entry, Progress};
 pub use events::TransferEvent;
 pub use record::{Choice, Pick};
 pub use store::create_tables;

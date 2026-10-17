@@ -67,5 +67,6 @@ pub fn snapshot(entry: &Entry) -> Transfer {
         eta_seconds,
         added_at: entry.record.added_at,
         notify_when_ready: entry.record.notify_when_ready,
+        readiness: entry.readiness.current.clone(),
     }
 }
