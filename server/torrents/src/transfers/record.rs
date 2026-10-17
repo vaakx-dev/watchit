@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use serde::{Deserialize, Serialize};
 
 use super::model::Kind;
@@ -38,6 +40,7 @@ pub struct Record {
     pub trackers: Vec<String>,
     pub error: Option<String>,
     pub picks: Vec<Pick>,
+    pub download_dir: PathBuf,
 }
 
 #[derive(Clone, Debug)]

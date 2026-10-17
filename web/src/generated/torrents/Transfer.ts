@@ -3,4 +3,4 @@ import type { TransferFile } from "./TransferFile";
 import type { TransferKind } from "./TransferKind";
 import type { TransferState } from "./TransferState";
 
-export type Transfer = { id: string, info_hash: string, name: string, title_id: string, kind: TransferKind, state: TransferState, error: string | null, files: Array<TransferFile>, size_bytes: number, downloaded_bytes: number, progress: number, download_bps: number, upload_bps: number, peers: number, eta_seconds: number | null, added_at: number, };
+export type Transfer = { id: string, info_hash: string, name: string, title_id: string, kind: TransferKind, state: TransferState, error: string | null, files: Array<TransferFile>, size_bytes: number, downloaded_bytes: number, progress: number, download_bps: number, upload_bps: number, peers: number, eta_seconds: number | null, added_at: number, download_dir: string, };

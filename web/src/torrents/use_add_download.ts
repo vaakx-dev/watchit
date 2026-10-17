@@ -23,6 +23,6 @@ export function use_add_download<T extends unknown[]>(start: (...args: T) => Pro
   return { pending, error, run };
 }
 
-export function download_file(info_hash: string, file_index: number | null, title_id: string) {
-  return add_transfer(info_hash, file_index === null ? null : [file_index], title_id, 'download');
+export function download_file(info_hash: string, file_index: number | null, title_id: string, download_dir?: string) {
+  return add_transfer(info_hash, file_index === null ? null : [file_index], title_id, 'download', download_dir);
 }

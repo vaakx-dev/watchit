@@ -24,12 +24,16 @@ fn state(entry: &Entry, progress: &Progress) -> State {
 fn error(entry: &Entry, progress: &Progress, state: State) -> Option<String> {
     match state {
         State::Error => progress.stats.as_ref().and_then(|stats| stats.error.clone()).or_else(|| entry.record.error.clone()),
-        State::Queued => entry.waiting.map(str::to_owned),
-        _ => None,
+        State::Queued => entry.waiting.map(str::to_owned).or_else(|| entry.move_error.clone()),
+        _ => entry.move_error.clone(),
     }
 }
 
 pub fn snapshot(entry: &Entry) -> Transfer {
+    if let Some(moving) = &entry.relocation {
+        let download_dir = moving.target.to_string_lossy().into_owned();
+        return Transfer { state: State::Moving, error: None, download_bps: 0, upload_bps: 0, peers: 0, eta_seconds: None, download_dir, ..moving.before.clone() };
+    }
     let progress = entry.progress();
     let state = state(entry, &progress);
     let live = progress.stats.as_ref().and_then(|stats| stats.live.as_ref());
@@ -66,5 +70,6 @@ pub fn snapshot(entry: &Entry) -> Transfer {
         peers: live.map_or(0, |live| live.snapshot.peer_stats.live),
         eta_seconds,
         added_at: entry.record.added_at,
+        download_dir: entry.record.download_dir.to_string_lossy().into_owned(),
     }
 }

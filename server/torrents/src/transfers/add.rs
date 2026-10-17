@@ -8,6 +8,7 @@ use super::model::{Kind, Transfer};
 use super::pick;
 use super::record::{Pick, Record};
 use super::{Transfers, now};
+use crate::locations::is_series_pick;
 use crate::engine::{self, AddRequest, Metadata};
 
 pub fn valid_info_hash(value: &str) -> AppResult<String> {
@@ -30,13 +31,17 @@ fn output_folder(download_dir: PathBuf, metadata: &Metadata) -> PathBuf {
 }
 
 impl Transfers {
-    pub async fn add(self: &Arc<Self>, info_hash: &str, pick: Pick, kind: Kind) -> AppResult<Transfer> {
+    pub async fn add(self: &Arc<Self>, info_hash: &str, pick: Pick, kind: Kind, folder: Option<PathBuf>) -> AppResult<Transfer> {
         let info_hash = valid_info_hash(info_hash)?;
         let trackers = self.search.trackers(&info_hash);
+        let mut moved_to = None;
+        let mut kept = false;
         let existing = {
             let mut entries = self.entries();
             match entries.get_mut(&info_hash) {
                 Some(entry) => {
+                    kept = entry.record.kind == Kind::Stream && kind == Kind::Download;
+                    moved_to = folder;
                     entry.record.kind = entry.record.kind.max(kind);
                     entry.record.last_used_at = now();
                     if entry.record.trackers.is_empty() {
@@ -64,6 +69,7 @@ impl Transfers {
                         seeded_seconds: 0,
                         trackers,
                         error: None,
+                        download_dir: folder.unwrap_or_else(|| self.settings().folder_for(kind, is_series_pick(&pick))),
                         picks: vec![pick],
                     };
                     entries.insert(info_hash.clone(), Entry::new(record, Vec::new()));
@@ -72,6 +78,13 @@ impl Transfers {
             }
         };
         self.persist(&info_hash).await?;
+        match moved_to {
+            Some(target) => {
+                self.relocate(&info_hash, target).await?;
+            }
+            None if kept => self.move_to_default(&info_hash).await,
+            None => {}
+        }
         if !existing {
             self.fetch_metadata(&info_hash);
         }
@@ -121,7 +134,7 @@ impl Transfers {
                 return Err(AppError::not_found("No files in this torrent match the request."));
             }
             AddRequest {
-                output_folder: output_folder(self.settings().download_dir, &metadata),
+                output_folder: output_folder(entry.record.download_dir.clone(), &metadata),
                 only_files: entry.files.iter().map(|file| file.index).collect(),
                 paused: entry.record.paused || entry.record.kind == Kind::Download,
                 trackers: entry.record.trackers.clone(),

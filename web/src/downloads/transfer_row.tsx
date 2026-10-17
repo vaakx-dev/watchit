@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import { bytes, eta, percent, speed } from '../torrents/format';
 import type { Transfer } from '../torrents/types';
-import { ArrowDown, ArrowUp, Clock, Play, Users } from 'lucide-react';
+import { ArrowDown, ArrowUp, Clock, Folder, Play, Users } from 'lucide-react';
 import { finished, STATE_LABELS } from './states';
 import { TransferActions } from './transfer_actions';
 
@@ -12,7 +12,7 @@ function episode_label(title_id: string) {
 
 function Stats({ transfer }: { transfer: Transfer }) {
   if (transfer.state === 'error') return <p className="transfer-failure">{transfer.error ?? 'This download failed.'}</p>;
-  const active = !finished(transfer) && transfer.state !== 'paused';
+  const active = !finished(transfer) && transfer.state !== 'paused' && transfer.state !== 'moving';
   return <p className="meta transfer-stats">
     <span>{STATE_LABELS[transfer.state]}</span>
     <span>{percent(transfer.progress)}{finished(transfer) ? '' : ` of ${bytes(transfer.size_bytes)}`}</span>
@@ -35,6 +35,8 @@ export function TransferRow({ transfer, on_remove }: { transfer: Transfer; on_re
         {transfer.kind === 'stream' && <span className="transfer-kind">Streaming</span>}
       </h3>
       <Stats transfer={transfer} />
+      {transfer.error && transfer.state !== 'error' && <p className="transfer-failure">{transfer.error}</p>}
+      <p className="meta transfer-location" title={transfer.download_dir}><Folder />{transfer.download_dir}</p>
       {!finished(transfer) && transfer.state !== 'error' && <div className="transfer-progress" role="progressbar" aria-label={`${transfer.name} progress`}
         aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.floor(transfer.progress * 100)}>
         <span style={{ '--progress': `${transfer.progress * 100}%` } as CSSProperties} />

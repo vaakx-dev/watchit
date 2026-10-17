@@ -1,14 +1,15 @@
-use std::collections::{BTreeSet, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::path::{Path, PathBuf};
 use std::future::Future;
 use std::time::{Duration, Instant};
 
 use librqbit::TorrentStatsState;
 
 use super::Transfers;
-use super::disk::free_bytes;
 use super::entry::{Entry, Progress};
 use super::model::Kind;
 use crate::engine::Handle;
+use crate::locations::{free_bytes, root_of};
 use crate::settings::Settings;
 
 const TICK: Duration = Duration::from_secs(1);
@@ -23,34 +24,44 @@ enum Action {
     Evict(String),
 }
 
+struct Room {
+    budget: Option<u64>,
+    disk: u64,
+}
+
 struct Admission {
     slots: u32,
-    budget_room: Option<u64>,
-    disk_room: u64,
+    budget_bytes: Option<u64>,
+    used: BTreeMap<PathBuf, u64>,
+    drives: HashMap<PathBuf, Room>,
 }
 
 impl Admission {
-    fn new(settings: &Settings, used_bytes: u64) -> Self {
-        Self {
-            slots: settings.max_active,
-            budget_room: settings.disk_budget_bytes.map(|budget| budget.saturating_sub(used_bytes)),
-            disk_room: free_bytes(settings.download_dir()),
-        }
+    fn new(settings: &Settings, used: BTreeMap<PathBuf, u64>) -> Self {
+        Self { slots: settings.max_active, budget_bytes: settings.disk_budget_bytes, used, drives: HashMap::new() }
     }
 
-    fn admit(&mut self, remaining: u64) -> Result<(), Option<&'static str>> {
+    fn room(&mut self, drive: &Path) -> &mut Room {
+        self.drives.entry(drive.to_path_buf()).or_insert_with(|| {
+            let used = self.used.get(drive).copied().unwrap_or(0);
+            Room { budget: self.budget_bytes.map(|budget| budget.saturating_sub(used)), disk: free_bytes(drive) }
+        })
+    }
+
+    fn admit(&mut self, drive: &Path, remaining: u64) -> Result<(), Option<&'static str>> {
         if self.slots == 0 {
             return Err(None);
         }
-        if self.budget_room.is_some_and(|room| remaining > room) {
+        let room = self.room(drive);
+        if room.budget.is_some_and(|budget| remaining > budget) {
             return Err(Some(WAITING_FOR_BUDGET));
         }
-        if remaining > self.disk_room {
+        if remaining > room.disk {
             return Err(Some(WAITING_FOR_DISK));
         }
+        room.budget = room.budget.map(|budget| budget - remaining);
+        room.disk -= remaining;
         self.slots -= 1;
-        self.budget_room = self.budget_room.map(|room| room - remaining);
-        self.disk_room -= remaining;
         Ok(())
     }
 }
@@ -110,8 +121,11 @@ impl Transfers {
     fn plan(&self) -> Vec<Action> {
         let settings = self.settings();
         let mut entries = self.entries();
-        let used_bytes: u64 = entries.values().map(|entry| entry.progress().downloaded_bytes).sum();
-        let mut admission = Admission::new(&settings, used_bytes);
+        let mut used: BTreeMap<PathBuf, u64> = BTreeMap::new();
+        for entry in entries.values() {
+            *used.entry(root_of(&entry.record.download_dir)).or_insert(0) += entry.progress().downloaded_bytes;
+        }
+        let mut admission = Admission::new(&settings, used.clone());
         let mut actions = Vec::new();
 
         let mut queue: Vec<&mut Entry> = entries.values_mut().filter(|entry| entry.handle.is_some()).collect();
@@ -135,7 +149,7 @@ impl Transfers {
             } else if entry.record.kind == Kind::Stream {
                 true
             } else {
-                match admission.admit(progress.remaining()) {
+                match admission.admit(&root_of(&entry.record.download_dir), progress.remaining()) {
                     Ok(()) => true,
                     Err(reason) => {
                         entry.waiting = reason;
@@ -151,15 +165,16 @@ impl Transfers {
         }
 
         if let Some(budget) = settings.disk_budget_bytes {
-            let mut over = used_bytes.saturating_sub(budget);
+            let mut over: HashMap<PathBuf, u64> = used.into_iter().map(|(drive, bytes)| (drive, bytes.saturating_sub(budget))).collect();
             let mut evictable: Vec<&Entry> =
-                entries.values().filter(|entry| entry.record.kind == Kind::Stream && entry.readers == 0).collect();
+                entries.values().filter(|entry| entry.record.kind == Kind::Stream && entry.readers == 0 && entry.relocation.is_none()).collect();
             evictable.sort_by_key(|entry| entry.record.last_used_at);
             for entry in evictable {
-                if over == 0 {
-                    break;
+                let excess = over.entry(root_of(&entry.record.download_dir)).or_insert(0);
+                if *excess == 0 {
+                    continue;
                 }
-                over = over.saturating_sub(entry.progress().downloaded_bytes);
+                *excess = excess.saturating_sub(entry.progress().downloaded_bytes);
                 actions.push(Action::Evict(entry.record.info_hash.clone()));
             }
         }

@@ -47,6 +47,14 @@ pub async fn resolve(session: &Arc<Session>, info_hash: &str, trackers: &[String
     Ok(Metadata { name, files, torrent_bytes: listed.torrent_bytes, seen_peers: listed.seen_peers })
 }
 
+impl Metadata {
+    pub fn of(handle: &Handle) -> anyhow::Result<Self> {
+        let torrent_bytes = handle.with_metadata(|metadata| metadata.torrent_bytes.clone())?;
+        let name = handle.name().unwrap_or_else(|| handle.info_hash().as_string());
+        Ok(Self { name, files: files_of(handle)?, torrent_bytes, seen_peers: Vec::new() })
+    }
+}
+
 pub async fn add_resolved(session: &Arc<Session>, metadata: &Metadata, request: AddRequest) -> anyhow::Result<Handle> {
     let options = AddTorrentOptions {
         paused: request.paused,

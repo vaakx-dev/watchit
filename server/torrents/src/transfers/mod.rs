@@ -1,20 +1,20 @@
-mod add;
+pub mod add;
 mod control;
-mod disk;
 mod entry;
 mod events;
 pub mod model;
-mod pick;
+pub mod pick;
 mod reader;
 mod record;
 pub mod routes;
 mod schedule;
 mod season;
-mod snapshot;
+pub mod snapshot;
 mod startup;
 mod store;
 
 use std::collections::HashMap;
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex, MutexGuard, RwLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -22,7 +22,6 @@ use librqbit::Session;
 use tokio::sync::{Notify, broadcast};
 use watchit_core::{AppResult, Db};
 
-pub use disk::Disk;
 pub use entry::Entry;
 pub use events::TransferEvent;
 pub use record::{Choice, Pick};
@@ -39,10 +38,11 @@ pub struct Transfers {
     pub session: Arc<Session>,
     pub search: Search,
     pub titles: Arc<dyn Titles>,
+    pub session_folder: PathBuf,
     settings: RwLock<Settings>,
     entries: Mutex<HashMap<String, Entry>>,
     events: broadcast::Sender<TransferEvent>,
-    resolved: Notify,
+    pub resolved: Notify,
     wake: Notify,
 }
 
@@ -51,12 +51,13 @@ pub fn now() -> i64 {
 }
 
 impl Transfers {
-    pub fn new(db: Db, session: Arc<Session>, search: Search, titles: Arc<dyn Titles>, settings: Settings) -> Arc<Self> {
+    pub fn new(db: Db, session: Arc<Session>, search: Search, titles: Arc<dyn Titles>, session_folder: PathBuf, settings: Settings) -> Arc<Self> {
         Arc::new(Self {
             db,
             session,
             search,
             titles,
+            session_folder,
             settings: RwLock::new(settings),
             entries: Mutex::default(),
             events: broadcast::channel(EVENT_BUFFER).0,
