@@ -1,0 +1,7 @@
+{
+  "identifier": "default",
+  "windows": ["main"],
+  "webviews": ["ui"],
+  "remote": { "urls": ["http://127.0.0.1:*/*"] },
+  "permissions": ["core:default", "allow-mpv-message", "allow-win-set-fullscreen"]
+}
