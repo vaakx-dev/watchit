@@ -62,7 +62,9 @@ export function MediaStage({ title, source, start, position, next, library, pane
 
   use_transparent_window(engine?.kind === 'mpv');
   use_stage_load(engine, session, playback.start, text_subtitle);
-  use_progress_report(title.id, { time: state.time, duration, paused: state.paused, ready: session !== null && !state.waiting });
+  use_progress_report(title.id, { time: state.time, duration, paused: state.paused, ready: session !== null && !state.waiting }, saved => {
+    if (saved.entry.status !== (library.entries[title.id]?.status ?? null)) library.refresh();
+  });
   useEffect(() => { if (session) position.current = state.time; }, [position, session, state.time]);
 
   const toggle_play = () => { if (state.paused) engine?.play(); else engine?.pause(); };
