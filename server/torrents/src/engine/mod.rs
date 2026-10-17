@@ -48,6 +48,7 @@ pub async fn start(folder: &Path, listen_port: Option<u16>, download_dir: &Path,
             listen_addr: SocketAddr::from((Ipv6Addr::UNSPECIFIED, port)),
             ..Default::default()
         }),
+        disable_local_service_discovery: listen_port.is_none(),
         runtime_worker_threads: Some(STREAM_WORKER_THREADS),
         ratelimits: limits,
         trackers: FALLBACK_TRACKERS.iter().map(|tracker| tracker.parse()).collect::<Result<_, _>>()?,
