@@ -1,3 +1,4 @@
+pub mod about;
 mod api;
 mod auth;
 mod compression;

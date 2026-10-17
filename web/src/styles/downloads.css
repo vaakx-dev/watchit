@@ -40,18 +40,10 @@
 .remove-error { margin-top: var(--space-3); color: var(--dropped); font-size: var(--type-card); }
 .remove-actions { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-5); }
 
-.downloads-settings { max-width: 720px; }
-.downloads-settings .folder-field { grid-template-columns: minmax(0, 1fr) minmax(190px, 340px); }
-.downloads-settings .catalog-status { min-height: 120px; }
-
 @media (max-width: 760px) {
   .transfer-row { flex-wrap: wrap; }
   .transfer-copy { flex-basis: 100%; }
   .transfer-actions { margin-left: auto; }
-}
-
-@media (max-width: 640px) {
-  .downloads-settings .folder-field { grid-template-columns: 1fr; }
 }
 
 .notify-switch-group { display: grid; }

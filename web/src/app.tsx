@@ -4,7 +4,6 @@ import { TitlePage, TitleSkeleton } from './catalog/pages/title';
 import { Home } from './catalog/pages/home';
 import { CatalogStatus } from './catalog/components/status';
 import { use_title } from './catalog/api';
-import { Settings } from './cache/settings';
 import { ReadyNotifications } from './downloads/notify/ready_notifications';
 import { DownloadsPage } from './downloads/downloads_page';
 import { MyShows } from './library/pages/my_shows';
@@ -15,6 +14,7 @@ import { use_route } from './navigation/route';
 import { WatchPage } from './playback/watch_page';
 import { ProfilePicker } from './profiles/profile_picker';
 import type { Profile } from './profiles/types';
+import { SettingsPage } from './settings/settings_page';
 import { Header } from './shell/header';
 import { TabBar } from './shell/tab_bar';
 import { EmptyState } from './ui/empty_state';
@@ -30,7 +30,7 @@ export function App({ profile, profiles, on_profiles_changed }: Props) {
   const result = resource.status === 'ready' ? resource.data : undefined;
   const title = result?.title;
   const name = title?.title;
-  const route_key = 'id' in route ? `${route.view}/${route.id}` : route.view === 'search' ? `search:${route.query}` : route.view;
+  const route_key = 'id' in route ? `${route.view}/${route.id}` : route.view === 'search' ? `search:${route.query}` : route.view === 'settings' ? `settings/${route.section}` : route.view;
   const empty_search = route.view === 'search' && !route.query;
   const watching = route.view === 'watch' && title !== undefined && title.kind !== 'series';
 
@@ -58,7 +58,7 @@ export function App({ profile, profiles, on_profiles_changed }: Props) {
       {'id' in route && !title && (route.view === 'title' && resource.status !== 'error'
         ? <TitleSkeleton /> : <CatalogStatus error={resource.status === 'error' ? resource.error : undefined} retry={retry} />)}
       {route.view === 'downloads' && <DownloadsPage />}
-      {route.view === 'settings' && <Settings />}
+      {route.view === 'settings' && <SettingsPage section={route.section} profile={profile} profiles={profiles} on_profiles_changed={on_profiles_changed} />}
       {route.view === 'profiles' && <div className="page-gutter"><ProfilePicker profiles={profiles} current={profile} on_changed={on_profiles_changed} /></div>}
       {route.view === 'missing' && <div className="not-found"><EmptyState title="That page is not in the catalog."><a className="button primary" href="#/">Back to Tonight</a></EmptyState></div>}
     </main>

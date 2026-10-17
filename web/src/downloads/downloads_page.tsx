@@ -8,7 +8,6 @@ import { Page } from '../ui/page';
 import { SpeedMode } from './bandwidth/speed_mode';
 import { QueueSection } from './queue/queue_section';
 import { RemoveDialog } from './remove_dialog';
-import { SettingsSection } from './settings/settings_section';
 import { FILTER_LABELS, FILTERS, matches, type Filter } from './states';
 import { Summary } from './summary';
 import { group_id, TransferGroup } from './transfer_group';
@@ -42,7 +41,6 @@ export function DownloadsPage() {
         : <EmptyState icon={Download} title={filter === 'all' ? 'Nothing downloaded yet.' : `No ${FILTER_LABELS[filter].toLowerCase()} downloads.`}>
           {filter === 'all' && <p>Use Download on a movie or episode, or Download season on a series, to keep a copy on this server.</p>}
         </EmptyState>}
-      <SettingsSection />
     </div>
     {removing && <RemoveDialog key={removing.id} transfer={removing} on_close={() => set_removing(null)} />}
   </Page>;

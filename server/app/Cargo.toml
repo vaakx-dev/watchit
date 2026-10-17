@@ -28,3 +28,4 @@ watchit-profiles = { version = "0.1.0", path = "../profiles" }
 watchit-torrents = { version = "0.1.0", path = "../torrents" }
 watchit-remote = { version = "0.1.0", path = "../remote" }
 async-trait = "0.1.92"
+serde = { version = "1", features = ["derive"] }

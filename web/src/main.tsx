@@ -19,7 +19,6 @@ import './playback/player/player.css';
 import './styles/personal.css';
 import './styles/my_shows.css';
 import './styles/rankings.css';
-import './styles/settings.css';
 import './styles/downloads.css';
 import './downloads/locations/locations.css';
 import './remote/remote.css';

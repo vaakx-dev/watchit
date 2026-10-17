@@ -1,8 +1,6 @@
 .queue-section { display: grid; gap: var(--space-3); }
 .queue-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-3); }
 .queue-head h2 { font-size: var(--type-section); font-weight: 700; }
-.queue-parallel { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
-.queue-stepper { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--type-meta); font-variant-numeric: tabular-nums; }
 .queue-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--rule); }
 .queue-row { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) 0; border-bottom: 1px solid var(--rule); background: var(--bg, transparent); }
 .queue-row[data-dragging] { opacity: .6; }

@@ -1,6 +1,5 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import type { Transfer } from '../../torrents/types';
-import { describe, ParallelControl } from './parallel_control';
 import { move_to, moved, queued } from './queue_order';
 import { QueueRow } from './queue_row';
 import { use_drag_order } from './use_drag_order';
@@ -8,10 +7,8 @@ import './queue.css';
 
 export function QueueSection({ transfers }: { transfers: Transfer[] }) {
   const line = queued(transfers);
-  const [max_active, set_max_active] = useState<number | null>(null);
   const [pending, set_pending] = useState<string[] | null>(null);
   const [failure, set_failure] = useState('');
-  const on_change = useCallback((value: number) => set_max_active(value), []);
 
   function move(from: number, to: number) {
     const transfer = line[from];
@@ -32,9 +29,8 @@ export function QueueSection({ transfers }: { transfers: Transfer[] }) {
     <header className="queue-head">
       <div>
         <h2 id="queue-heading">Queue</h2>
-        {max_active !== null && <p className="meta">{describe(max_active)} Drag to reorder.</p>}
+        <p className="meta">Drag to reorder. <a href="#/settings/downloads">Downloads at once</a> is in Settings.</p>
       </div>
-      <ParallelControl on_change={on_change} />
     </header>
     {failure && <p role="alert" className="transfer-error">{failure}</p>}
     <ol className="queue-list" ref={list}>

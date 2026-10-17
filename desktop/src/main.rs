@@ -32,7 +32,12 @@ fn main() {
             Ok(())
         })
         .on_window_event(window::on_event)
-        .invoke_handler(tauri::generate_handler![player::bridge::mpv_message, title_bar::snap_button::maximize_button_area])
+        .invoke_handler(tauri::generate_handler![
+            player::bridge::mpv_message,
+            title_bar::snap_button::maximize_button_area,
+            updates::check_for_updates,
+            updates::install_update,
+        ])
         .build(tauri::generate_context!())
         .expect("cannot build the Watchit app")
         .run(server::on_run_event);

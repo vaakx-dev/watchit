@@ -40,7 +40,7 @@ pub fn activate(app: &AppHandle) {
         let pending = app.state::<Updates>().pending.lock().unwrap().clone();
         let result = match pending {
             Some(update) => install(&app, update).await,
-            None => check(&app).await,
+            None => check(&app).await.map(|_| ()),
         };
         if let Err(error) = result {
             eprintln!("update failed: {error}");
@@ -48,16 +48,29 @@ pub fn activate(app: &AppHandle) {
     });
 }
 
-async fn check(app: &AppHandle) -> anyhow::Result<()> {
+#[tauri::command]
+pub async fn check_for_updates(app: AppHandle) -> Result<Option<String>, String> {
+    check(&app).await.map_err(|error| error.to_string())
+}
+
+#[tauri::command]
+pub async fn install_update(app: AppHandle) -> Result<(), String> {
+    let pending = app.state::<Updates>().pending.lock().unwrap().clone();
+    let update = pending.ok_or("Check for updates first.")?;
+    install(&app, update).await.map_err(|error| error.to_string())
+}
+
+async fn check(app: &AppHandle) -> anyhow::Result<Option<String>> {
     let state = app.state::<Updates>();
     let update = app.updater()?.check().await?;
-    let label = match &update {
-        Some(update) => format!("Install Watchit {}", update.version),
+    let version = update.as_ref().map(|update| update.version.clone());
+    let label = match &version {
+        Some(version) => format!("Install Watchit {version}"),
         None => "Watchit is up to date".to_string(),
     };
     state.item.set_text(label)?;
     *state.pending.lock().unwrap() = update;
-    Ok(())
+    Ok(version)
 }
 
 async fn install(app: &AppHandle, update: Update) -> anyhow::Result<()> {

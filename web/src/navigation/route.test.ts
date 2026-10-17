@@ -18,7 +18,7 @@ it('parses the main destinations and their filters', () => {
   expect(parse_route('#/mine?status=favorite')).toEqual({ view: 'mine', shelf: 'favorite' });
   expect(parse_route('#/mine?view=recent')).toEqual({ view: 'mine', shelf: 'recent' });
   expect(parse_route('#/rankings')).toEqual({ view: 'rankings' });
-  expect(parse_route('#/settings')).toEqual({ view: 'settings' });
+  expect(parse_route('#/settings')).toEqual({ view: 'settings', section: null });
   expect(parse_route('#/profiles')).toEqual({ view: 'profiles' });
 });
 
