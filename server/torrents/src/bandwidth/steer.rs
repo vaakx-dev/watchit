@@ -1,30 +1,15 @@
-use std::collections::HashMap;
 use std::time::Instant;
 
 use chrono::Local;
 use watchit_core::AppResult;
 
-use super::{Observation, SpeedStatus, store};
+use super::{SpeedStatus, store};
 use crate::engine;
-use crate::transfers::model::Kind;
 use crate::transfers::Transfers;
 
 impl Transfers {
-    fn observe(&self) -> Observation {
-        let mut reading = false;
-        let mut background = HashMap::new();
-        for entry in self.entries().values() {
-            let progress = entry.progress();
-            if progress.finished() {
-                continue;
-            }
-            if entry.readers > 0 {
-                reading = true;
-            } else if entry.record.kind == Kind::Download && !entry.record.paused {
-                background.insert(entry.record.info_hash.clone(), progress.downloaded_bytes);
-            }
-        }
-        Observation { reading, background }
+    fn reading(&self) -> bool {
+        self.entries().values().any(|entry| entry.readers > 0 && !entry.progress().finished())
     }
 
     async fn save_alternative(&self, alternative: bool) -> AppResult<()> {
@@ -32,7 +17,7 @@ impl Transfers {
     }
 
     pub async fn steer_bandwidth(&self) {
-        let steering = self.bandwidth.steer(&self.settings(), &Local::now(), Instant::now(), self.observe());
+        let steering = self.bandwidth.steer(&self.settings(), &Local::now(), Instant::now(), self.reading());
         if let Some(limits) = steering.limits {
             engine::set_limits(&self.session, limits);
         }

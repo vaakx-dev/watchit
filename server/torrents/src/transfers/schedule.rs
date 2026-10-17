@@ -76,9 +76,7 @@ impl Transfers {
         let mut entries = self.entries();
         let used = queue::used_by_drive(&entries);
         queue::assign_slots(&mut entries, &settings, used.clone());
-        if let Some(reason) = self.bandwidth.hold() {
-            bandwidth::hold_background(&mut entries, reason);
-        }
+        bandwidth::steer_background(&mut entries, self.bandwidth.background());
         let mut actions = Vec::new();
 
         for entry in entries.values() {

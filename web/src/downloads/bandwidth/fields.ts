@@ -12,7 +12,7 @@ export const BACKGROUND_FIELD: NumberField = {
   key: 'while_watching_bps',
   label: 'Background speed',
   unit: 'MiB/s',
-  hint: 'Background downloads run in turns that average this speed.',
+  hint: 'Shared by the downloads running in the background.',
   scale: MIB,
   optional: false,
   integer: false,

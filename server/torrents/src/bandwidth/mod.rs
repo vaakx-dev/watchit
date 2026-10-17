@@ -1,12 +1,10 @@
-mod hold;
-mod pacer;
+mod background;
 pub mod routes;
 mod schedule;
 mod status;
 mod steer;
 mod store;
 
-use std::collections::HashMap;
 use std::num::NonZeroU32;
 use std::sync::{Mutex, MutexGuard};
 use std::time::{Duration, Instant};
@@ -14,22 +12,14 @@ use std::time::{Duration, Instant};
 use chrono::{DateTime, Local};
 use librqbit::limits::LimitsConfig;
 
-pub use hold::hold_background;
+pub use background::{Background, steer_background};
 pub use schedule::Schedule;
 pub use status::{SpeedMode, SpeedStatus, WhileWatching};
 pub use store::{create_table, load};
 
 use crate::settings::Settings;
-use pacer::Pacer;
 
 const WATCHING_GRACE: Duration = Duration::from_secs(15);
-const PAUSED_WHILE_WATCHING: &str = "Paused while you're watching.";
-const LIMITED_WHILE_WATCHING: &str = "Waiting its turn while you're watching.";
-
-pub struct Observation {
-    pub reading: bool,
-    pub background: HashMap<String, u64>,
-}
 
 #[derive(Default)]
 pub struct Steering {
@@ -73,8 +63,7 @@ struct State {
     alternative: bool,
     scheduled: Option<bool>,
     watching_until: Option<Instant>,
-    pacer: Option<Pacer>,
-    hold: Option<&'static str>,
+    background: Background,
     applied: LimitsConfig,
     status: SpeedStatus,
 }
@@ -101,19 +90,12 @@ impl State {
         settings.while_watching != WhileWatching::None && self.watching_until.is_some_and(|until| now < until)
     }
 
-    fn hold(&mut self, settings: &Settings, watching: bool, now: Instant, background: HashMap<String, u64>) -> Option<&'static str> {
-        if !watching || settings.while_watching != WhileWatching::Throttle {
-            self.pacer = None;
+    fn background(&self, settings: &Settings, watching: bool) -> Background {
+        match settings.while_watching {
+            _ if !watching => Background::Free,
+            WhileWatching::Throttle => Background::Limited(background_limit(settings, self.alternative)),
+            WhileWatching::Pause | WhileWatching::None => Background::Paused,
         }
-        if !watching {
-            return None;
-        }
-        if settings.while_watching != WhileWatching::Throttle {
-            return Some(PAUSED_WHILE_WATCHING);
-        }
-        let bps = background_limit(settings, self.alternative);
-        let pacer = self.pacer.get_or_insert_with(|| Pacer::new(now));
-        pacer.holds(bps, now, background).then_some(LIMITED_WHILE_WATCHING)
     }
 }
 
@@ -128,8 +110,7 @@ impl Bandwidth {
                 alternative,
                 scheduled: None,
                 watching_until: None,
-                pacer: None,
-                hold: None,
+                background: Background::Free,
                 applied: limits(settings, alternative),
                 status: status(settings, alternative, false),
             }),
@@ -148,8 +129,8 @@ impl Bandwidth {
         self.state().status
     }
 
-    pub fn hold(&self) -> Option<&'static str> {
-        self.state().hold
+    pub fn background(&self) -> Background {
+        self.state().background
     }
 
     pub fn set_alternative(&self, alternative: bool) {
@@ -160,11 +141,11 @@ impl Bandwidth {
         self.state().scheduled = None;
     }
 
-    pub fn steer(&self, settings: &Settings, local: &DateTime<Local>, now: Instant, observation: Observation) -> Steering {
+    pub fn steer(&self, settings: &Settings, local: &DateTime<Local>, now: Instant, reading: bool) -> Steering {
         let mut state = self.state();
         let alternative = state.follow_schedule(&settings.schedule, local);
-        let watching = state.watching(settings, now, observation.reading);
-        state.hold = state.hold(settings, watching, now, observation.background);
+        let watching = state.watching(settings, now, reading);
+        state.background = state.background(settings, watching);
         let applied = limits(settings, state.alternative);
         let status = status(settings, state.alternative, watching);
         let steering = Steering {
