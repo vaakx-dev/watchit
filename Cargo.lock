@@ -1035,6 +1035,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "if-addrs"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c0a05c691e1fae256cf7013d99dad472dc52d5543322761f83ec8d47eab40d2b"
+dependencies = [
+ "libc",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
 name = "image"
 version = "0.25.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1427,6 +1437,12 @@ name = "pxfm"
 version = "0.1.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d55d956fa96f5ec02be2e13af0e20391a5aa83d6a074e3ad368959d0fab299ea"
+
+[[package]]
+name = "qrcode"
+version = "0.14.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d68782463e408eb1e668cf6152704bd856c78c5b6417adaee3203d8f4c1fc9ec"
 
 [[package]]
 name = "quick-error"
@@ -2505,6 +2521,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "watchit-playback"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "ts-rs",
+ "uuid",
+ "watchit-core",
+]
+
+[[package]]
 name = "watchit-profiles"
 version = "0.1.0"
 dependencies = [
@@ -2527,6 +2559,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "watchit-remote"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "if-addrs",
+ "qrcode",
+ "serde",
+ "serde_json",
+ "tokio",
+ "ts-rs",
+ "watchit-core",
+]
+
+[[package]]
 name = "watchit-server"
 version = "0.1.0"
 dependencies = [
@@ -2544,7 +2590,9 @@ dependencies = [
  "watchit-catalog",
  "watchit-core",
  "watchit-library",
+ "watchit-playback",
  "watchit-profiles",
+ "watchit-remote",
 ]
 
 [[package]]

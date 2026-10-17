@@ -1,3 +1,4 @@
+use std::net::SocketAddr;
 use std::sync::Arc;
 
 use axum::Router;
@@ -10,6 +11,7 @@ use watchit_catalog::Catalog;
 use watchit_core::{AppError, AppResult, Context};
 use watchit_library::Library;
 use watchit_profiles::Profiles;
+use watchit_remote::Remote;
 
 use crate::auth::{Auth, authenticate, require_viewer};
 use crate::origin::reject_cross_origin_writes;
@@ -18,7 +20,7 @@ async fn not_found() -> AppError {
     AppError::not_found("API route not found.")
 }
 
-pub fn router(context: &Context) -> AppResult<Router> {
+pub fn router(context: &Context, listen: SocketAddr) -> AppResult<Router> {
     let profiles = Profiles::open(context)?;
     let auth = Auth { profiles: profiles.clone(), tokens: context.tokens.clone() };
     let artwork = Artwork::open(context)?;
@@ -29,6 +31,7 @@ pub fn router(context: &Context) -> AppResult<Router> {
         .merge(watchit_artwork::status_router(artwork.clone()))
         .merge(watchit_catalog::router(catalog))
         .merge(watchit_library::router(library))
+        .merge(watchit_remote::router(Remote::new(listen)))
         .layer(middleware::from_fn(require_viewer));
     let router = Router::new()
         .merge(watchit_profiles::router(profiles))

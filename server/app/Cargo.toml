@@ -23,4 +23,6 @@ watchit-artwork = { version = "0.1.0", path = "../artwork" }
 watchit-catalog = { version = "0.1.0", path = "../catalog" }
 watchit-core = { version = "0.1.0", path = "../core" }
 watchit-library = { version = "0.1.0", path = "../library" }
+watchit-playback = { version = "0.1.0", path = "../playback" }
 watchit-profiles = { version = "0.1.0", path = "../profiles" }
+watchit-remote = { version = "0.1.0", path = "../remote" }

@@ -42,13 +42,13 @@ impl Server {
 
 pub async fn start(config: Config) -> anyhow::Result<Server> {
     let context = Context::open(config.data_dir)?;
-    let mut router = api::router(&context)?;
+    let listener = TcpListener::bind(config.listen).await?;
+    let addr = listener.local_addr()?;
+    let mut router = api::router(&context, addr)?;
     if let Some(web_dir) = &config.web_dir {
         router = router.merge(web::router(web_dir));
     }
     let app = router.layer(compression::layer()).into_make_service_with_connect_info::<SocketAddr>();
-    let listener = TcpListener::bind(config.listen).await?;
-    let addr = listener.local_addr()?;
     let stopping = context.background.stopping();
     let http = tokio::spawn(async move {
         if let Err(error) = axum::serve(listener, app).with_graceful_shutdown(stopping).await {

@@ -7,10 +7,12 @@ fn main() -> anyhow::Result<()> {
         std::fs::remove_dir_all(&out_dir)?;
     }
     let config = ts_rs::Config::new().with_large_int("number").with_out_dir(&out_dir);
+    watchit_playback::export_types(&config)?;
     watchit_profiles::export_types(&config)?;
     watchit_artwork::export_types(&config)?;
     watchit_catalog::export_types(&config)?;
     watchit_library::export_types(&config)?;
+    watchit_remote::export_types(&config)?;
     println!("TypeScript types written to {}", out_dir.display());
     Ok(())
 }
