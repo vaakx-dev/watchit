@@ -28,6 +28,7 @@ pub use events::TransferEvent;
 pub use record::{Choice, Pick};
 pub use store::create_tables;
 
+use crate::bandwidth::Bandwidth;
 use crate::search::Search;
 use crate::settings::Settings;
 use crate::titles::Titles;
@@ -39,6 +40,7 @@ pub struct Transfers {
     pub session: Arc<Session>,
     pub search: Search,
     pub titles: Arc<dyn Titles>,
+    pub bandwidth: Bandwidth,
     pub session_folder: PathBuf,
     settings: RwLock<Settings>,
     entries: Mutex<HashMap<String, Entry>>,
@@ -52,12 +54,21 @@ pub fn now() -> i64 {
 }
 
 impl Transfers {
-    pub fn new(db: Db, session: Arc<Session>, search: Search, titles: Arc<dyn Titles>, session_folder: PathBuf, settings: Settings) -> Arc<Self> {
+    pub fn new(
+        db: Db,
+        session: Arc<Session>,
+        search: Search,
+        titles: Arc<dyn Titles>,
+        session_folder: PathBuf,
+        settings: Settings,
+        bandwidth: Bandwidth,
+    ) -> Arc<Self> {
         Arc::new(Self {
             db,
             session,
             search,
             titles,
+            bandwidth,
             session_folder,
             settings: RwLock::new(settings),
             entries: Mutex::default(),
@@ -98,8 +109,8 @@ impl Transfers {
         let settings = settings.validated()?;
         let saved = settings.clone();
         self.db.run(move |conn| crate::settings::save(conn, &saved)).await?;
-        crate::engine::apply_limits(&self.session, &settings);
         *self.settings.write().expect("settings lock") = settings.clone();
+        self.bandwidth.reschedule();
         self.wake();
         Ok(settings)
     }

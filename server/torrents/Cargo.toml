@@ -9,9 +9,10 @@ anyhow = "1.0.104"
 async-trait = "0.1.92"
 axum = "0.8.9"
 bytes = "1.12.1"
+chrono = { version = "0.4.45", default-features = false, features = ["std", "clock"] }
 fs4 = "1.1.0"
 futures = "0.3.34"
-librqbit = { git = "https://github.com/vaakx-dev/rqbit", rev = "7d5f2c758b93362189c37b5b01342932201d0089" }
+librqbit = { git = "https://github.com/vaakx-dev/rqbit", rev = "1c6fa36b0eb43e0a0aec9dfc2947201e57007023" }
 regex = "1.13.1"
 reqwest = { version = "0.13.5", features = ["json"] }
 rusqlite = "0.40.2"

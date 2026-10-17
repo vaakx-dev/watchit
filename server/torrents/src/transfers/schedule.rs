@@ -10,6 +10,7 @@ use super::entry::Entry;
 use super::model::Kind;
 use crate::engine::Handle;
 use crate::locations::root_of;
+use crate::bandwidth;
 use crate::queue;
 
 const TICK: Duration = Duration::from_secs(1);
@@ -75,6 +76,9 @@ impl Transfers {
         let mut entries = self.entries();
         let used = queue::used_by_drive(&entries);
         queue::assign_slots(&mut entries, &settings, used.clone());
+        if let Some(reason) = self.bandwidth.hold() {
+            bandwidth::hold_background(&mut entries, reason);
+        }
         let mut actions = Vec::new();
 
         for entry in entries.values() {
@@ -111,6 +115,7 @@ impl Transfers {
     }
 
     pub async fn reconcile(&self) {
+        self.steer_bandwidth().await;
         for action in self.plan() {
             let outcome = match action {
                 Action::Pause(handle) => self.session.pause(&handle).await,

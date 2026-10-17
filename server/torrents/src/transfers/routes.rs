@@ -15,6 +15,7 @@ use super::control::Change;
 use super::model::{Kind, Transfer};
 use super::record::{Choice, Pick};
 use super::TransferEvent;
+use crate::bandwidth::SpeedStatus;
 use crate::locations::{Disk, chosen_folder};
 use crate::service::Torrents;
 use crate::title_id::TitleId;
@@ -24,6 +25,7 @@ use crate::title_id::TitleId;
 pub struct TransferList {
     transfers: Vec<Transfer>,
     disks: Vec<Disk>,
+    speed: SpeedStatus,
 }
 
 #[derive(Deserialize, TS)]
@@ -82,7 +84,7 @@ pub struct DeleteQuery {
 
 pub async fn list(State(torrents): State<Torrents>) -> AppResult<Json<TransferList>> {
     let transfers = torrents.transfers().await?;
-    Ok(Json(TransferList { transfers: transfers.all(), disks: transfers.disks() }))
+    Ok(Json(TransferList { transfers: transfers.all(), disks: transfers.disks(), speed: transfers.bandwidth.status() }))
 }
 
 pub async fn create(State(torrents): State<Torrents>, viewer: Viewer, JsonBody(body): JsonBody<NewTransfer>) -> AppResult<Json<Transfer>> {
@@ -138,6 +140,7 @@ fn sse_event(event: TransferEvent) -> Option<Event> {
         TransferEvent::Changed(transfer) => Event::default().event("transfer").json_data(transfer).ok(),
         TransferEvent::Removed { id } => Event::default().event("removed").json_data(json!({ "id": id })).ok(),
         TransferEvent::Ready(notice) => Event::default().event("ready").json_data(notice).ok(),
+        TransferEvent::Speed(status) => Event::default().event("speed").json_data(status).ok(),
     }
 }
 
@@ -145,7 +148,8 @@ pub async fn events(State(torrents): State<Torrents>) -> AppResult<Sse<impl Stre
     let transfers = torrents.transfers().await?;
     let stopping = torrents.stopping();
     let live = BroadcastStream::new(transfers.subscribe()).filter_map(|event| future::ready(event.ok()));
-    let current = futures::stream::iter(transfers.all().into_iter().map(TransferEvent::Changed));
+    let speed = TransferEvent::Speed(transfers.bandwidth.status());
+    let current = futures::stream::iter(transfers.all().into_iter().map(TransferEvent::Changed).chain([speed]));
     let stream = current
         .chain(live)
         .filter_map(|event| future::ready(sse_event(event).map(Ok)))

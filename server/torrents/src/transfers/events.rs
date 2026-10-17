@@ -1,4 +1,5 @@
 use super::Transfers;
+use crate::bandwidth::SpeedStatus;
 use super::model::Transfer;
 use super::snapshot::snapshot;
 use crate::notify::{ReadyNotice, take_due};
@@ -9,6 +10,7 @@ pub enum TransferEvent {
     Changed(Transfer),
     Removed { id: String },
     Ready(ReadyNotice),
+    Speed(SpeedStatus),
 }
 
 impl Transfers {
@@ -38,6 +40,10 @@ impl Transfers {
         for notice in ready {
             let _ = self.events.send(TransferEvent::Ready(notice));
         }
+    }
+
+    pub fn emit_speed(&self, status: SpeedStatus) {
+        let _ = self.events.send(TransferEvent::Speed(status));
     }
 
     pub fn emit_removed(&self, id: &str) {

@@ -2903,7 +2903,7 @@ dependencies = [
 [[package]]
 name = "librqbit"
 version = "9.0.1"
-source = "git+https://github.com/vaakx-dev/rqbit?rev=7d5f2c758b93362189c37b5b01342932201d0089#7d5f2c758b93362189c37b5b01342932201d0089"
+source = "git+https://github.com/vaakx-dev/rqbit?rev=1c6fa36b0eb43e0a0aec9dfc2947201e57007023#1c6fa36b0eb43e0a0aec9dfc2947201e57007023"
 dependencies = [
  "anyhow",
  "arc-swap",
@@ -2966,7 +2966,7 @@ dependencies = [
 [[package]]
 name = "librqbit-bencode"
 version = "9.0.1"
-source = "git+https://github.com/vaakx-dev/rqbit?rev=7d5f2c758b93362189c37b5b01342932201d0089#7d5f2c758b93362189c37b5b01342932201d0089"
+source = "git+https://github.com/vaakx-dev/rqbit?rev=1c6fa36b0eb43e0a0aec9dfc2947201e57007023#1c6fa36b0eb43e0a0aec9dfc2947201e57007023"
 dependencies = [
  "anyhow",
  "arrayvec",
@@ -2982,7 +2982,7 @@ dependencies = [
 [[package]]
 name = "librqbit-buffers"
 version = "9.0.1"
-source = "git+https://github.com/vaakx-dev/rqbit?rev=7d5f2c758b93362189c37b5b01342932201d0089#7d5f2c758b93362189c37b5b01342932201d0089"
+source = "git+https://github.com/vaakx-dev/rqbit?rev=1c6fa36b0eb43e0a0aec9dfc2947201e57007023#1c6fa36b0eb43e0a0aec9dfc2947201e57007023"
 dependencies = [
  "bytes",
  "librqbit-clone-to-owned",
@@ -2993,7 +2993,7 @@ dependencies = [
 [[package]]
 name = "librqbit-clone-to-owned"
 version = "9.0.1"
-source = "git+https://github.com/vaakx-dev/rqbit?rev=7d5f2c758b93362189c37b5b01342932201d0089#7d5f2c758b93362189c37b5b01342932201d0089"
+source = "git+https://github.com/vaakx-dev/rqbit?rev=1c6fa36b0eb43e0a0aec9dfc2947201e57007023#1c6fa36b0eb43e0a0aec9dfc2947201e57007023"
 dependencies = [
  "bytes",
 ]
@@ -3001,7 +3001,7 @@ dependencies = [
 [[package]]
 name = "librqbit-core"
 version = "9.0.1"
-source = "git+https://github.com/vaakx-dev/rqbit?rev=7d5f2c758b93362189c37b5b01342932201d0089#7d5f2c758b93362189c37b5b01342932201d0089"
+source = "git+https://github.com/vaakx-dev/rqbit?rev=1c6fa36b0eb43e0a0aec9dfc2947201e57007023#1c6fa36b0eb43e0a0aec9dfc2947201e57007023"
 dependencies = [
  "anyhow",
  "bytes",
@@ -3030,7 +3030,7 @@ dependencies = [
 [[package]]
 name = "librqbit-dht"
 version = "9.0.1"
-source = "git+https://github.com/vaakx-dev/rqbit?rev=7d5f2c758b93362189c37b5b01342932201d0089#7d5f2c758b93362189c37b5b01342932201d0089"
+source = "git+https://github.com/vaakx-dev/rqbit?rev=1c6fa36b0eb43e0a0aec9dfc2947201e57007023#1c6fa36b0eb43e0a0aec9dfc2947201e57007023"
 dependencies = [
  "anyhow",
  "backon",
@@ -3077,7 +3077,7 @@ dependencies = [
 [[package]]
 name = "librqbit-lsd"
 version = "9.0.1"
-source = "git+https://github.com/vaakx-dev/rqbit?rev=7d5f2c758b93362189c37b5b01342932201d0089#7d5f2c758b93362189c37b5b01342932201d0089"
+source = "git+https://github.com/vaakx-dev/rqbit?rev=1c6fa36b0eb43e0a0aec9dfc2947201e57007023#1c6fa36b0eb43e0a0aec9dfc2947201e57007023"
 dependencies = [
  "anyhow",
  "atoi",
@@ -3096,7 +3096,7 @@ dependencies = [
 [[package]]
 name = "librqbit-peer-protocol"
 version = "9.0.1"
-source = "git+https://github.com/vaakx-dev/rqbit?rev=7d5f2c758b93362189c37b5b01342932201d0089#7d5f2c758b93362189c37b5b01342932201d0089"
+source = "git+https://github.com/vaakx-dev/rqbit?rev=1c6fa36b0eb43e0a0aec9dfc2947201e57007023#1c6fa36b0eb43e0a0aec9dfc2947201e57007023"
 dependencies = [
  "anyhow",
  "bitvec",
@@ -3116,7 +3116,7 @@ dependencies = [
 [[package]]
 name = "librqbit-sha1-wrapper"
 version = "9.0.1"
-source = "git+https://github.com/vaakx-dev/rqbit?rev=7d5f2c758b93362189c37b5b01342932201d0089#7d5f2c758b93362189c37b5b01342932201d0089"
+source = "git+https://github.com/vaakx-dev/rqbit?rev=1c6fa36b0eb43e0a0aec9dfc2947201e57007023#1c6fa36b0eb43e0a0aec9dfc2947201e57007023"
 dependencies = [
  "assert_cfg",
  "crypto-hash",
@@ -3125,7 +3125,7 @@ dependencies = [
 [[package]]
 name = "librqbit-tracker-comms"
 version = "9.0.1"
-source = "git+https://github.com/vaakx-dev/rqbit?rev=7d5f2c758b93362189c37b5b01342932201d0089#7d5f2c758b93362189c37b5b01342932201d0089"
+source = "git+https://github.com/vaakx-dev/rqbit?rev=1c6fa36b0eb43e0a0aec9dfc2947201e57007023#1c6fa36b0eb43e0a0aec9dfc2947201e57007023"
 dependencies = [
  "anyhow",
  "async-stream",
@@ -3153,7 +3153,7 @@ dependencies = [
 [[package]]
 name = "librqbit-upnp"
 version = "9.0.1"
-source = "git+https://github.com/vaakx-dev/rqbit?rev=7d5f2c758b93362189c37b5b01342932201d0089#7d5f2c758b93362189c37b5b01342932201d0089"
+source = "git+https://github.com/vaakx-dev/rqbit?rev=1c6fa36b0eb43e0a0aec9dfc2947201e57007023#1c6fa36b0eb43e0a0aec9dfc2947201e57007023"
 dependencies = [
  "anyhow",
  "bstr",
@@ -6868,6 +6868,7 @@ dependencies = [
  "async-trait",
  "axum",
  "bytes",
+ "chrono",
  "fs4",
  "futures",
  "librqbit",
