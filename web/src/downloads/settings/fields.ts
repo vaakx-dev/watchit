@@ -1,8 +1,6 @@
 import type { TorrentSettings } from '../../torrents/types';
 import { BANDWIDTH_FIELDS } from '../bandwidth/fields';
 
-export const FOLDER_KEYS = ['download_dir', 'movie_dir', 'series_dir'] as const;
-
 export type NumberKey = Exclude<{ [K in keyof TorrentSettings]: TorrentSettings[K] extends number | null ? K : never }[keyof TorrentSettings], 'max_active'>;
 
 export type NumberField = { key: NumberKey; label: string; unit: string; hint: string; scale: number; optional: boolean; integer: boolean };
@@ -20,7 +18,7 @@ export const NUMBER_FIELDS: NumberField[] = [
 
 const FIELDS = [...NUMBER_FIELDS, ...BANDWIDTH_FIELDS];
 
-export type Values = Record<NumberKey | typeof FOLDER_KEYS[number], string>;
+export type Values = Record<NumberKey | 'download_dir', string>;
 
 export type Errors = Record<NumberKey, string>;
 
@@ -31,7 +29,7 @@ function shown(value: number | null, scale: number) {
 
 export function to_values(settings: TorrentSettings): Values {
   const numbers = Object.fromEntries(FIELDS.map(field => [field.key, shown(settings[field.key], field.scale)]));
-  return { ...numbers, download_dir: settings.download_dir, movie_dir: settings.movie_dir ?? '', series_dir: settings.series_dir ?? '' } as Values;
+  return { ...numbers, download_dir: settings.download_dir } as Values;
 }
 
 function field_error(field: NumberField, text: string) {
@@ -54,6 +52,5 @@ export function to_settings(values: Values): Partial<TorrentSettings> {
     return field.scale > 1 ? Math.round(Number(text) * field.scale) : Number(text);
   };
   const numbers = Object.fromEntries(FIELDS.map(field => [field.key, read(field)]));
-  const optional = (text: string) => text.trim() || null;
-  return { ...numbers, download_dir: values.download_dir.trim(), movie_dir: optional(values.movie_dir), series_dir: optional(values.series_dir) } as Partial<TorrentSettings>;
+  return { ...numbers, download_dir: values.download_dir.trim() } as Partial<TorrentSettings>;
 }

@@ -26,5 +26,5 @@ export function use_add_download<T extends unknown[]>(start: (...args: T) => Pro
 }
 
 export function download_file(info_hash: string, file_index: number | null, title_id: string, notify_when_ready = false) {
-  return add_transfer(info_hash, file_index === null ? null : [file_index], title_id, 'download', undefined, notify_when_ready);
+  return add_transfer(info_hash, file_index === null ? null : [file_index], title_id, 'download', notify_when_ready);
 }

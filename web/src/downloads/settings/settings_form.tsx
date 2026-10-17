@@ -59,12 +59,8 @@ export function SettingsForm({ initial }: { initial: TorrentSettings }) {
   return <form className="cache-form" onSubmit={save} noValidate>
     <fieldset disabled={pending}>
       <legend className="sr-only">Torrent settings</legend>
-      <FolderField id="download_dir" label="Download folder" hint="A folder on the computer running the server." value={values.download_dir}
+      <FolderField id="download_dir" label="Download folder" hint="Everything downloads here. Finished downloads are sorted into Movies and Shows folders, ready for Plex or Jellyfin. Changing it moves existing downloads." value={values.download_dir}
         invalid={touched ? folder_error : ''} admin={admin} on_change={value => change('download_dir', value)} />
-      <FolderField id="movie_dir" label="Movies folder" hint="Leave empty to use the download folder." value={values.movie_dir}
-        placeholder="Same as download folder" admin={admin} on_change={value => change('movie_dir', value)} />
-      <FolderField id="series_dir" label="Shows folder" hint="Leave empty to use the download folder." value={values.series_dir}
-        placeholder="Same as download folder" admin={admin} on_change={value => change('series_dir', value)} />
       {NUMBER_FIELDS.map(field => <NumberRow key={field.key} field={field} value={values[field.key]} error={errors[field.key]}
         touched={touched} on_change={value => change(field.key, value)} />)}
       <AlternativeFields values={values} errors={errors} schedule={speed.schedule} touched={touched}
