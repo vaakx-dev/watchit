@@ -175,10 +175,30 @@ pub(crate) fn detail_fresh(conn: &Connection, id: &str, series_only: bool, metad
     Ok((0..metadata_ms).contains(&age) && (!series_only || kind == "series"))
 }
 
+pub(crate) fn verified_kind(conn: &Connection, id: &str) -> AppResult<Option<MediaKind>> {
+    let kind: Option<String> = conn
+        .prepare_cached("SELECT kind FROM titles WHERE id = ?1 AND verified_at IS NOT NULL")?
+        .query_row([id], |row| row.get(0))
+        .optional()?;
+    Ok(kind.as_deref().and_then(MediaKind::parse))
+}
+
 pub(crate) fn kind_of(conn: &Connection, id: &str) -> AppResult<Option<MediaKind>> {
     let kind: Option<String> =
         conn.prepare_cached("SELECT kind FROM titles WHERE id = ?1")?.query_row([id], |row| row.get(0)).optional()?;
     Ok(kind.as_deref().and_then(MediaKind::parse))
+}
+
+pub(crate) fn runtime_minutes(conn: &Connection, id: &str) -> AppResult<Option<u32>> {
+    let minutes: Option<i64> = conn
+        .prepare_cached(
+            "SELECT COALESCE(json_extract(titles.detail, '$.minutes'), json_extract(series.detail, '$.minutes'))
+             FROM titles LEFT JOIN titles AS series ON series.id = titles.series_id WHERE titles.id = ?1",
+        )?
+        .query_row([id], |row| row.get(0))
+        .optional()?
+        .flatten();
+    Ok(minutes.and_then(|minutes| u32::try_from(minutes).ok()))
 }
 
 pub(crate) fn browsable_count(conn: &Connection) -> AppResult<i64> {

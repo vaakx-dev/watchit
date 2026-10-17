@@ -106,7 +106,7 @@ impl Source {
         let kinds = match (parts.next(), kind) {
             (Some(_), _) => vec![MediaKind::Series],
             (None, Some(kind)) if kind != MediaKind::Episode => vec![kind],
-            _ => vec![MediaKind::Movie, MediaKind::Series],
+            _ => vec![MediaKind::Series, MediaKind::Movie],
         };
         for candidate in kinds {
             let response: MetaResponse = match self.client.get(&meta_url(candidate, parent)).await {
