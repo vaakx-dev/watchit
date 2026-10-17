@@ -22,3 +22,4 @@ ts-rs = "12.0.1"
 watchit-core = { version = "0.1.0", path = "../core" }
 watchit-profiles = { version = "0.1.0", path = "../profiles" }
 watchit-torrents = { version = "0.1.0", path = "../torrents" }
+watchit-remote = { version = "0.1.0", path = "../remote" }

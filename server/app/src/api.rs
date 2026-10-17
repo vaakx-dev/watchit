@@ -1,3 +1,4 @@
+use std::net::SocketAddr;
 use std::sync::Arc;
 
 use axum::Router;
@@ -8,6 +9,7 @@ use tower_http::set_header::SetResponseHeaderLayer;
 use watchit_core::{AppError, AppResult, Context};
 use watchit_profiles::Profiles;
 use watchit_torrents::{NoTitles, Torrents};
+use watchit_remote::Remote;
 
 use crate::auth::{Auth, authenticate, require_viewer};
 use crate::origin::reject_cross_origin_writes;
@@ -16,11 +18,12 @@ async fn not_found() -> AppError {
     AppError::not_found("API route not found.")
 }
 
-pub fn router(context: &Context) -> AppResult<Router> {
+pub fn router(context: &Context, listen: SocketAddr) -> AppResult<Router> {
     let profiles = Profiles::open(context)?;
     let auth = Auth { profiles: profiles.clone(), tokens: context.tokens.clone() };
     let signed_in = Router::new()
         .merge(watchit_torrents::router(Torrents::open(context, Arc::new(NoTitles))?))
+        .merge(watchit_remote::router(Remote::new(listen)))
         .layer(middleware::from_fn(require_viewer));
     let router = Router::new()
         .merge(watchit_profiles::router(profiles))
