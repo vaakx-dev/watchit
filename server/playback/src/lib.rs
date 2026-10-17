@@ -11,9 +11,14 @@ mod source;
 mod subtitles;
 mod urls;
 
+use ts_rs::{Config, ExportError, TS};
+
 pub use api::{AudioTrack, ClientProfile, CreateSession, Mode, PlaybackSession, Player, Protocol, SubtitleTrack, VideoInfo};
-pub use ffmpeg::Tools;
 pub use routes::router;
-pub use service::{Playback, PlaybackConfig};
+pub use service::Playback;
 pub use source::{SourceFuture, SourceInput, SourceRef, SourceResolver};
-pub use urls::StreamTokens;
+
+pub fn export_types(config: &Config) -> Result<(), ExportError> {
+    CreateSession::export_all(config)?;
+    PlaybackSession::export_all(config)
+}

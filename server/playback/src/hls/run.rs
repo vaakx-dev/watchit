@@ -6,6 +6,8 @@ use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::{Child, ChildStderr};
 use tokio::sync::oneshot;
 
+use watchit_core::Background;
+
 use crate::ffmpeg::Tools;
 
 const TAIL_LINES: usize = 30;
@@ -22,13 +24,13 @@ pub enum RunExit {
     Failed(String),
 }
 
-pub fn spawn(tools: &Tools, directory: &Path, args: &[String], stop: oneshot::Receiver<()>, on_event: impl Fn(RunEvent) + Send + Sync + 'static) -> std::io::Result<()> {
+pub fn spawn(tools: &Tools, background: &Background, directory: &Path, args: &[String], stop: oneshot::Receiver<()>, on_event: impl Fn(RunEvent) + Send + Sync + 'static) -> std::io::Result<()> {
     std::fs::create_dir_all(directory)?;
     tracing::debug!(args = %args.join(" "), "ffmpeg");
     let mut child = tools.ffmpeg().args(args).current_dir(directory).stdout(Stdio::null()).stderr(Stdio::piped()).spawn()?;
     let stderr = child.stderr.take().expect("stderr is piped");
     let directory = directory.to_path_buf();
-    tokio::spawn(async move {
+    background.spawn(async move {
         let reading = read_stderr(stderr, directory, &on_event);
         let (status, stopped, tail) = supervise(child, stop, reading).await;
         let exit = match status {

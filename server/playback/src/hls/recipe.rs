@@ -10,7 +10,8 @@ use crate::source::SourceInput;
 
 const RUN_SECONDS: f64 = 900.0;
 const DEFAULT_FRAME_RATE: f64 = 24.0;
-const KEYFRAME_SEEK_OFFSET: f64 = 0.001;
+const KEYFRAME_SEEK_OFFSET: f64 = 0.5;
+const KEYFRAME_SEEK_MARGIN: f64 = 0.04;
 
 #[derive(Clone, Debug)]
 enum Video {
@@ -22,7 +23,7 @@ enum Video {
 pub struct Recipe {
     pub input: SourceInput,
     pub segments: Vec<Segment>,
-    exact_cuts: bool,
+    keyframes: Option<Vec<f64>>,
     video: Option<Video>,
     audio: Option<(u32, AudioPlan)>,
 }
@@ -30,24 +31,25 @@ pub struct Recipe {
 impl Recipe {
     pub fn new(input: SourceInput, media: &Media, decision: &Decision, keyframes: Option<Vec<f64>>, encoders: Encoders) -> AppResult<Self> {
         let duration = media.duration.ok_or_else(|| AppError::new(StatusCode::UNPROCESSABLE_ENTITY, "The video has no known duration."))?;
-        let (video, segments, exact_cuts) = match (decision.video, &media.video) {
+        let (video, segments, keyframes) = match (decision.video, &media.video) {
             (Some(VideoPlan::Copy), Some(stream)) => {
                 let video = Video::Copy { stream: stream.index, strip_dolby_vision: stream.dolby_vision.is_some() && stream.codec == "hevc" };
-                match keyframes {
-                    Some(keyframes) => (Some(video), keyframe_segments(&keyframes, duration), true),
-                    None => (Some(video), equal_segments(duration, SEGMENT_SECONDS), false),
-                }
+                let segments = match &keyframes {
+                    Some(keyframes) => keyframe_segments(keyframes, duration),
+                    None => equal_segments(duration, SEGMENT_SECONDS),
+                };
+                (Some(video), segments, keyframes)
             }
             (Some(VideoPlan::Encode(target)), Some(stream)) => {
                 let frame_rate = stream.frame_rate.unwrap_or(DEFAULT_FRAME_RATE);
                 let gop = gop_frames(frame_rate);
                 let nvenc = if target.keep_hdr.is_some() { encoders.hevc_nvenc } else { encoders.h264_nvenc };
                 let encode = Encode::new(stream, target, nvenc, gop, decision.burn_in);
-                (Some(Video::Encode(encode)), equal_segments(duration, f64::from(gop) / frame_rate), true)
+                (Some(Video::Encode(encode)), equal_segments(duration, f64::from(gop) / frame_rate), None)
             }
-            _ => (None, equal_segments(duration, SEGMENT_SECONDS), true),
+            _ => (None, equal_segments(duration, SEGMENT_SECONDS), None),
         };
-        Ok(Self { input, segments, exact_cuts, video, audio: decision.audio })
+        Ok(Self { input, segments, keyframes, video, audio: decision.audio })
     }
 
     pub fn run_end(&self, first: usize) -> usize {
@@ -87,8 +89,9 @@ impl Recipe {
 
     fn seek(&self, first: usize) -> f64 {
         let start = self.segments[first].start;
-        let copies_keyframes = self.exact_cuts && matches!(self.video, Some(Video::Copy { .. }));
-        if start > 0.0 && copies_keyframes { start + KEYFRAME_SEEK_OFFSET } else { start }
+        let Some(keyframes) = self.keyframes.as_ref().filter(|_| start > 0.0) else { return start };
+        let next = keyframes.iter().find(|keyframe| **keyframe > start).copied().unwrap_or(f64::INFINITY);
+        start + KEYFRAME_SEEK_OFFSET.min(next - start - KEYFRAME_SEEK_MARGIN).max(0.0)
     }
 
     fn video_args(&self) -> Vec<String> {

@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex, Weak};
 use std::time::Duration;
 
 use tokio::sync::OnceCell;
-use watchit_core::{AppError, AppResult, Viewer};
+use watchit_core::{AppError, AppResult, Background, Context, StreamTokens, Viewer};
 
 use crate::api::{CreateSession, Mode, PlaybackSession, Player};
 use crate::decide::{VideoPlan, decide};
@@ -16,24 +16,20 @@ use crate::probe::{Media, probe};
 use crate::session::{Session, SessionParts};
 use crate::source::{SourceRef, SourceResolver};
 use crate::subtitles::Subtitles;
-use crate::urls::StreamTokens;
+use crate::urls::{raw_path, session_prefix};
 
 const SWEEP_EVERY: Duration = Duration::from_secs(15);
 const JOB_IDLE: Duration = Duration::from_secs(60);
 const SESSION_IDLE: Duration = Duration::from_secs(60 * 60);
 
-pub struct PlaybackConfig {
-    pub tools: Tools,
-    pub work_dir: PathBuf,
-}
-
 type Cache<K, V> = Mutex<HashMap<K, Arc<OnceCell<V>>>>;
 
 pub struct Playback {
     tools: Tools,
+    background: Background,
     sessions_dir: PathBuf,
     sources: Arc<dyn SourceResolver>,
-    tokens: Arc<dyn StreamTokens>,
+    tokens: StreamTokens,
     encoders: Arc<OnceCell<Encoders>>,
     media: Cache<SourceRef, Arc<Media>>,
     keyframes: Cache<SourceRef, Option<Vec<f64>>>,
@@ -42,35 +38,38 @@ pub struct Playback {
 }
 
 impl Playback {
-    pub fn new(config: PlaybackConfig, sources: Arc<dyn SourceResolver>, tokens: Arc<dyn StreamTokens>) -> std::io::Result<Arc<Self>> {
-        let sessions_dir = config.work_dir.join("sessions");
+    pub fn open(context: &Context, sources: Arc<dyn SourceResolver>) -> AppResult<Arc<Self>> {
+        let tools = Tools::from_env();
+        let work_dir = context.paths.folder("playback")?;
+        let sessions_dir = work_dir.join("sessions");
         if sessions_dir.exists() {
             std::fs::remove_dir_all(&sessions_dir)?;
         }
         std::fs::create_dir_all(&sessions_dir)?;
         let playback = Arc::new(Self {
-            subtitles: Subtitles::new(config.tools.clone(), config.work_dir.join("subtitles")),
-            tools: config.tools,
+            subtitles: Subtitles::new(tools.clone(), work_dir.join("subtitles")),
+            tools,
+            background: context.background.clone(),
             sessions_dir,
             sources,
-            tokens,
+            tokens: context.tokens.clone(),
             encoders: Arc::new(OnceCell::new()),
             media: Mutex::default(),
             keyframes: Mutex::default(),
             sessions: Mutex::default(),
         });
         let (tools, encoders) = (playback.tools.clone(), playback.encoders.clone());
-        tokio::spawn(async move {
+        context.background.spawn(async move {
             encoders.get_or_init(|| detect(&tools)).await;
         });
-        tokio::spawn(sweep(Arc::downgrade(&playback)));
+        context.background.spawn(sweep(Arc::downgrade(&playback), context.background.stopping()));
         Ok(playback)
     }
 
     pub async fn create(&self, viewer: &Viewer, request: CreateSession) -> AppResult<PlaybackSession> {
         let encoders = *self.encoders.get_or_init(|| detect(&self.tools)).await;
         let source = request.source.clone();
-        let input = self.sources.resolve(&source).await?;
+        let input = self.sources.resolve(viewer, &source).await?;
         let media = cached(&self.media, &source, || async { probe(&self.tools, &input).await.map(Arc::new) }).await?;
         let decision = decide(&media, &request, encoders)?;
         let id = uuid::Uuid::new_v4().simple().to_string();
@@ -82,12 +81,14 @@ impl Playback {
                 let keyframes = if copies_video { cached(&self.keyframes, &source, || async { Ok(keyframes(&input, &media).await) }).await? } else { None };
                 let recipe = Recipe::new(input.clone(), &media, &decision, keyframes, encoders)?;
                 let first = segment_at(&recipe.segments, request.start_seconds.unwrap_or(0.0));
-                Some(Job::start(recipe, self.tools.clone(), self.sessions_dir.join(&id), first)?)
+                Some(Job::start(recipe, self.tools.clone(), self.background.clone(), self.sessions_dir.join(&id), first)?)
             }
         };
-        let token = self.tokens.mint(viewer);
+        let token = self.tokens.mint(viewer.profile, &session_prefix(&id));
+        let direct_url = self.tokens.url(viewer.profile, &raw_path(&source));
         let converts_subtitles = request.client.player == Player::Browser;
-        let session = Session::new(SessionParts { id: id.clone(), owner: viewer.profile, source, input, media, mode: decision.mode, job, token, converts_subtitles });
+        let parts = SessionParts { id: id.clone(), owner: viewer.profile, source, input, media, mode: decision.mode, job, token, direct_url, converts_subtitles };
+        let session = Session::new(parts);
         let response = session.response.clone();
         self.lock_sessions().insert(id, Arc::new(session));
         Ok(response)
@@ -105,10 +106,10 @@ impl Playback {
         Ok(())
     }
 
-    pub fn playlist(&self, id: &str, token: Option<&str>) -> AppResult<String> {
+    pub fn playlist(&self, id: &str) -> AppResult<String> {
         let session = self.session(id)?;
         let job = session.job.as_ref().ok_or_else(not_found)?;
-        Ok(vod_playlist(&job.recipe().segments, token))
+        Ok(vod_playlist(&job.recipe().segments, &session.token))
     }
 
     pub async fn segment(&self, id: &str, index: usize) -> AppResult<PathBuf> {
@@ -131,10 +132,10 @@ impl Playback {
         self.subtitles.webvtt(&session.source, &session.input, stream).await
     }
 
-    pub fn shutdown(&self) {
+    fn shutdown(&self) {
         let sessions: Vec<_> = self.lock_sessions().drain().map(|(_, session)| session).collect();
-        for session in sessions {
-            self.discard(session);
+        for job in sessions.iter().filter_map(|session| session.job.as_ref()) {
+            job.pause();
         }
     }
 
@@ -153,7 +154,7 @@ impl Playback {
             job.pause();
         }
         let directory = self.sessions_dir.join(&session.id);
-        tokio::spawn(async move {
+        self.background.spawn(async move {
             drop(session);
             for _ in 0..10 {
                 tokio::time::sleep(Duration::from_secs(1)).await;
@@ -180,12 +181,19 @@ impl Playback {
     }
 }
 
-async fn sweep(playback: Weak<Playback>) {
+async fn sweep(playback: Weak<Playback>, stopping: impl Future<Output = ()>) {
     let mut interval = tokio::time::interval(SWEEP_EVERY);
+    tokio::pin!(stopping);
     loop {
-        interval.tick().await;
+        tokio::select! {
+            _ = interval.tick() => {}
+            _ = &mut stopping => break,
+        }
         let Some(playback) = playback.upgrade() else { return };
         playback.sweep_once();
+    }
+    if let Some(playback) = playback.upgrade() {
+        playback.shutdown();
     }
 }
 

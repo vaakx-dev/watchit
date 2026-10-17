@@ -12,7 +12,7 @@ fn vint(bytes: &[u8], position: usize, keep_marker: bool) -> Option<(u64, usize)
     }
     let length = first.leading_zeros() as usize + 1;
     let tail = bytes.get(position + 1..position + length)?;
-    let head = if keep_marker { u64::from(first) } else { u64::from(first & (0xff >> length)) };
+    let head = if keep_marker { u64::from(first) } else { u64::from(first) & (0xff_u64 >> length) };
     Some((tail.iter().fold(head, |value, byte| (value << 8) | u64::from(*byte)), length))
 }
 

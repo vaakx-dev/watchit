@@ -1,17 +1,18 @@
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use crate::api::{AudioTrack, Mode, PlaybackSession, Protocol, SubtitleTrack, VideoInfo};
 use crate::hls::Job;
 use crate::probe::{Media, SubtitleKind};
 use crate::source::{SourceInput, SourceRef};
-use crate::urls::{media_url, raw_path, session_path};
+use crate::urls::{session_prefix, tokenized};
 
 pub struct Session {
     pub id: String,
     pub owner: i64,
     pub source: SourceRef,
     pub input: SourceInput,
+    pub token: String,
     pub response: PlaybackSession,
     pub job: Option<Job>,
     last_access: Mutex<Instant>,
@@ -22,18 +23,19 @@ pub struct SessionParts {
     pub owner: i64,
     pub source: SourceRef,
     pub input: SourceInput,
-    pub media: std::sync::Arc<Media>,
+    pub media: Arc<Media>,
     pub mode: Mode,
     pub job: Option<Job>,
     pub token: String,
+    pub direct_url: String,
     pub converts_subtitles: bool,
 }
 
 impl Session {
     pub fn new(parts: SessionParts) -> Self {
         let response = describe(&parts);
-        let SessionParts { id, owner, source, input, job, .. } = parts;
-        Self { id, owner, source, input, response, job, last_access: Mutex::new(Instant::now()) }
+        let SessionParts { id, owner, source, input, job, token, .. } = parts;
+        Self { id, owner, source, input, token, response, job, last_access: Mutex::new(Instant::now()) }
     }
 
     pub fn touch(&self) {
@@ -47,10 +49,11 @@ impl Session {
 }
 
 fn describe(parts: &SessionParts) -> PlaybackSession {
-    let SessionParts { id, source, media, mode, token, converts_subtitles, .. } = parts;
+    let SessionParts { id, media, mode, token, direct_url, converts_subtitles, .. } = parts;
+    let prefix = session_prefix(id);
     let (protocol, url) = match mode {
-        Mode::Direct => (Protocol::File, media_url(&raw_path(source), token)),
-        _ => (Protocol::Hls, media_url(&session_path(id, "hls/main.m3u8"), token)),
+        Mode::Direct => (Protocol::File, direct_url.clone()),
+        _ => (Protocol::Hls, tokenized(&format!("{prefix}hls/main.m3u8"), token)),
     };
     PlaybackSession {
         id: id.clone(),
@@ -58,7 +61,7 @@ fn describe(parts: &SessionParts) -> PlaybackSession {
         protocol,
         url,
         duration_seconds: media.duration,
-        video: media.video.as_ref().map(|video| VideoInfo { codec: video.codec.clone(), width: video.width, height: video.height, hdr: video.hdr_label() }),
+        video: media.video.as_ref().map(|video| VideoInfo { codec: video.codec.clone(), width: video.width, height: video.height, hdr: video.hdr_label().map(str::to_owned) }),
         audio_tracks: media
             .audio
             .iter()
@@ -73,7 +76,7 @@ fn describe(parts: &SessionParts) -> PlaybackSession {
                 title: subtitle.title.clone(),
                 codec: subtitle.codec.clone(),
                 default: subtitle.default,
-                url: (*converts_subtitles && subtitle.kind == SubtitleKind::Text).then(|| media_url(&session_path(id, &format!("subtitles/{}.vtt", subtitle.index)), token)),
+                url: (*converts_subtitles && subtitle.kind == SubtitleKind::Text).then(|| tokenized(&format!("{prefix}subtitles/{}.vtt", subtitle.index), token)),
             })
             .collect(),
     }

@@ -3,9 +3,11 @@ use std::path::PathBuf;
 use std::pin::Pin;
 
 use serde::Deserialize;
-use watchit_core::AppResult;
+use ts_rs::TS;
+use watchit_core::{AppResult, Viewer};
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Hash, TS)]
+#[ts(export_to = "playback/")]
 pub struct SourceRef {
     pub info_hash: String,
     pub file_index: u32,
@@ -29,5 +31,5 @@ impl SourceInput {
 pub type SourceFuture<'a> = Pin<Box<dyn Future<Output = AppResult<SourceInput>> + Send + 'a>>;
 
 pub trait SourceResolver: Send + Sync + 'static {
-    fn resolve<'a>(&'a self, source: &'a SourceRef) -> SourceFuture<'a>;
+    fn resolve<'a>(&'a self, viewer: &'a Viewer, source: &'a SourceRef) -> SourceFuture<'a>;
 }

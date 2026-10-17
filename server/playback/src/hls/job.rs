@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex, MutexGuard, Weak};
 use std::time::{Duration, Instant};
 
 use tokio::sync::{Notify, oneshot};
-use watchit_core::{AppError, AppResult};
+use watchit_core::{AppError, AppResult, Background};
 
 use super::recipe::Recipe;
 use super::run::{RunEvent, RunExit, spawn};
@@ -23,6 +23,7 @@ pub struct Job {
 struct Inner {
     recipe: Recipe,
     tools: Tools,
+    background: Background,
     directory: PathBuf,
     state: Mutex<State>,
     changed: Notify,
@@ -60,9 +61,9 @@ impl Run {
 }
 
 impl Job {
-    pub fn start(recipe: Recipe, tools: Tools, directory: PathBuf, first: usize) -> AppResult<Self> {
+    pub fn start(recipe: Recipe, tools: Tools, background: Background, directory: PathBuf, first: usize) -> AppResult<Self> {
         let state = State { ready: BTreeMap::new(), run: None, runs: 0, last_request: first, last_access: Instant::now(), waiting: 0 };
-        let inner = Arc::new(Inner { recipe, tools, directory, state: Mutex::new(state), changed: Notify::new() });
+        let inner = Arc::new(Inner { recipe, tools, background, directory, state: Mutex::new(state), changed: Notify::new() });
         inner.start_run(&mut inner.lock(), first)?;
         Ok(Self { inner })
     }
@@ -131,7 +132,7 @@ impl Inner {
         let (stop, stopped) = oneshot::channel();
         let directory = self.directory.join(format!("run-{id}"));
         let weak = Arc::downgrade(self);
-        spawn(&self.tools, &directory, &self.recipe.arguments(first, end), stopped, move |event| on_event(&weak, id, event)).map_err(AppError::internal)?;
+        spawn(&self.tools, &self.background, &directory, &self.recipe.arguments(first, end), stopped, move |event| on_event(&weak, id, event)).map_err(AppError::internal)?;
         state.run = Some(Run { id, first, end, latest: None, exit: None, stop: Some(stop) });
         Ok(())
     }
