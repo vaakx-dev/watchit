@@ -132,6 +132,8 @@ export function use_library() {
     });
   }, [mutate]);
 
+  const refresh = useCallback(() => set_revision(value => value + 1), []);
+
   const retry = useCallback(() => {
     publish({ ...model.current, error: null });
     set_load_error(null);
@@ -141,8 +143,8 @@ export function use_library() {
 
   const error = state.error ?? load_error;
   return useMemo(() => ({
-    ...snapshot, ready, loading, pending, error, update, update_season, mark_season_watched, toggle_saved, remember, retry,
-  }), [snapshot, ready, loading, pending, error, update, update_season, mark_season_watched, toggle_saved, remember, retry]);
+    ...snapshot, ready, loading, pending, error, update, update_season, mark_season_watched, toggle_saved, remember, refresh, retry,
+  }), [snapshot, ready, loading, pending, error, update, update_season, mark_season_watched, toggle_saved, remember, refresh, retry]);
 }
 
 export type Library = ReturnType<typeof use_library>;
