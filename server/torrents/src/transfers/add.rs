@@ -30,7 +30,7 @@ fn output_folder(download_dir: PathBuf, metadata: &Metadata) -> PathBuf {
 }
 
 impl Transfers {
-    pub async fn add(self: &Arc<Self>, info_hash: &str, pick: Pick, kind: Kind) -> AppResult<Transfer> {
+    pub async fn add(self: &Arc<Self>, info_hash: &str, pick: Pick, kind: Kind, notify_when_ready: bool) -> AppResult<Transfer> {
         let info_hash = valid_info_hash(info_hash)?;
         let trackers = self.search.trackers(&info_hash);
         let existing = {
@@ -38,6 +38,7 @@ impl Transfers {
             match entries.get_mut(&info_hash) {
                 Some(entry) => {
                     entry.record.kind = entry.record.kind.max(kind);
+                    entry.record.notify_when_ready |= notify_when_ready;
                     entry.record.last_used_at = now();
                     if entry.record.trackers.is_empty() {
                         entry.record.trackers = trackers;
@@ -65,6 +66,7 @@ impl Transfers {
                         trackers,
                         error: None,
                         picks: vec![pick],
+                        notify_when_ready,
                     };
                     entries.insert(info_hash.clone(), Entry::new(record, Vec::new()));
                     false

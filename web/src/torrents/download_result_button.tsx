@@ -2,6 +2,7 @@ import { ArrowDownToLine, Check } from 'lucide-react';
 import { percent } from './format';
 import { use_transfers } from './transfer_store';
 import type { TorrentResult } from './types';
+import { notify_wanted } from '../downloads/notify/notify_choice';
 import { download_file, use_add_download } from './use_add_download';
 
 export function DownloadResultButton({ result, title_id }: { result: TorrentResult; title_id: string }) {
@@ -12,7 +13,7 @@ export function DownloadResultButton({ result, title_id }: { result: TorrentResu
 
   return <button type="button" className="icon-button small ghost source-download" aria-label={label} title={label}
     disabled={pending || Boolean(transfer)} data-failed={error ? true : undefined}
-    onClick={() => { void run(result.info_hash, result.file_index, title_id); }}>
+    onClick={() => { void run(result.info_hash, result.file_index, title_id, notify_wanted()); }}>
     {transfer?.progress === 1 ? <Check /> : <ArrowDownToLine />}
   </button>;
 }

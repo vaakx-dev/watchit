@@ -10,6 +10,7 @@ use super::model::{Kind, Transfer};
 pub struct Change {
     pub paused: Option<bool>,
     pub kind: Option<Kind>,
+    pub notify_when_ready: Option<bool>,
 }
 
 impl Transfers {
@@ -20,6 +21,9 @@ impl Transfers {
             let entry = entries.get_mut(&info_hash).ok_or_else(|| AppError::not_found("Transfer not found."))?;
             if let Some(kind) = change.kind {
                 entry.record.kind = entry.record.kind.max(kind);
+            }
+            if let Some(notify) = change.notify_when_ready {
+                entry.record.notify_when_ready = notify;
             }
             let resume = change.paused == Some(false);
             if let Some(paused) = change.paused {
@@ -62,7 +66,7 @@ impl Transfers {
     pub async fn resume_for_playback(self: &Arc<Self>, info_hash: &str) -> AppResult<()> {
         let paused = self.entries().get(info_hash).is_some_and(|entry| entry.record.paused);
         if paused {
-            self.change(info_hash, Change { paused: Some(false), kind: None }).await?;
+            self.change(info_hash, Change { paused: Some(false), kind: None, notify_when_ready: None }).await?;
         }
         Ok(())
     }

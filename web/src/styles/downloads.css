@@ -52,3 +52,9 @@
 @media (max-width: 640px) {
   .downloads-settings .folder-field { grid-template-columns: 1fr; }
 }
+
+.notify-switch-group { display: grid; }
+.notify-switch { min-height: 42px; }
+.notify-switch .lucide { width: 18px; height: 18px; color: var(--t2); }
+.notify-switch[aria-checked="true"] .lucide { color: var(--watching); }
+.notify-switch[aria-checked="true"] .switch { background: var(--watching); }

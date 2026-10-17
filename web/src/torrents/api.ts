@@ -11,15 +11,15 @@ export function list_transfers(signal?: AbortSignal) {
   return request<TransferList>('/api/transfers', { signal });
 }
 
-export function add_transfer(info_hash: string, file_indexes: number[] | null, title_id: string, kind: TransferKind) {
-  return send<Transfer>('/api/transfers', 'POST', { info_hash, file_indexes, title_id, kind });
+export function add_transfer(info_hash: string, file_indexes: number[] | null, title_id: string, kind: TransferKind, notify_when_ready = false) {
+  return send<Transfer>('/api/transfers', 'POST', { info_hash, file_indexes, title_id, kind, notify_when_ready });
 }
 
 export function add_season(series_id: string, season: number) {
   return send<Transfer[]>('/api/transfers/season', 'POST', { series_id, season });
 }
 
-export function update_transfer(id: string, patch: { paused?: boolean; kind?: 'download' }) {
+export function update_transfer(id: string, patch: { paused?: boolean; kind?: 'download'; notify_when_ready?: boolean }) {
   return send<unknown>(`/api/transfers/${id_path(id)}`, 'PATCH', patch);
 }
 

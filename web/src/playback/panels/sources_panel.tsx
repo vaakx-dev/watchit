@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { NotifySwitch } from '../../downloads/notify/notify_switch';
 import { bytes, percent } from '../../torrents/format';
 import { DownloadResultButton } from '../../torrents/download_result_button';
 import type { Sources } from '../sources/use_sources';
@@ -51,6 +52,7 @@ export function SourcesPanel({ sources, title_id }: { sources: Sources; title_id
   const rows = (list: PlaySource[]) => list.map(source => <Row key={source_key(source)} source={source} sources={sources} title_id={title_id} />);
   return <div className="sources-panel">
     {sources.local.length > 0 && <Group title="On this server">{rows(sources.local)}</Group>}
+    <NotifySwitch />
     <Group title="Torrents" note={<TorrentNote sources={sources} />}>{rows(sources.torrents)}</Group>
     {sources.embeds.length > 0 && <Group title="Embedded players">{rows(sources.embeds)}</Group>}
     <p className="watch-note" role={sources.save_error ? 'alert' : undefined}>

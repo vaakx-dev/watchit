@@ -64,4 +64,5 @@ pub struct Transfer {
     pub peers: u32,
     pub eta_seconds: Option<u64>,
     pub added_at: i64,
+    pub notify_when_ready: bool,
 }

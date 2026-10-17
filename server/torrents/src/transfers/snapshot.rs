@@ -66,5 +66,6 @@ pub fn snapshot(entry: &Entry) -> Transfer {
         peers: live.map_or(0, |live| live.snapshot.peer_stats.live),
         eta_seconds,
         added_at: entry.record.added_at,
+        notify_when_ready: entry.record.notify_when_ready,
     }
 }

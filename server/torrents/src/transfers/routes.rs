@@ -33,6 +33,9 @@ pub struct NewTransfer {
     file_indexes: Option<Vec<usize>>,
     title_id: String,
     kind: Kind,
+    #[serde(default)]
+    #[ts(optional)]
+    notify_when_ready: Option<bool>,
 }
 
 #[derive(Deserialize, TS)]
@@ -53,6 +56,9 @@ pub struct TransferPatch {
     #[serde(default)]
     #[ts(optional, type = "'download'")]
     kind: Option<Kind>,
+    #[serde(default)]
+    #[ts(optional)]
+    notify_when_ready: Option<bool>,
 }
 
 #[derive(Deserialize)]
@@ -77,7 +83,7 @@ pub async fn create(State(torrents): State<Torrents>, JsonBody(body): JsonBody<N
     };
     let pick = Pick::files_or(&title, body.file_indexes, fallback);
     let transfers = torrents.transfers().await?;
-    transfers.add(&body.info_hash, pick, body.kind).await.map(Json)
+    transfers.add(&body.info_hash, pick, body.kind, body.notify_when_ready.unwrap_or(false)).await.map(Json)
 }
 
 pub async fn season(State(torrents): State<Torrents>, JsonBody(body): JsonBody<SeasonDownload>) -> AppResult<Json<Vec<Transfer>>> {
@@ -94,7 +100,7 @@ pub async fn update(
         return Err(AppError::bad_request("A transfer can only be changed into a download."));
     }
     let transfers = torrents.transfers().await?;
-    transfers.change(&id, Change { paused: body.paused, kind: body.kind }).await.map(Json)
+    transfers.change(&id, Change { paused: body.paused, kind: body.kind, notify_when_ready: body.notify_when_ready }).await.map(Json)
 }
 
 pub async fn remove(State(torrents): State<Torrents>, Path(id): Path<String>, Query(query): Query<DeleteQuery>) -> AppResult<StatusCode> {
@@ -107,6 +113,7 @@ fn sse_event(event: TransferEvent) -> Option<Event> {
     match event {
         TransferEvent::Changed(transfer) => Event::default().event("transfer").json_data(transfer).ok(),
         TransferEvent::Removed { id } => Event::default().event("removed").json_data(json!({ "id": id })).ok(),
+        TransferEvent::Ready(notice) => Event::default().event("ready").json_data(notice).ok(),
     }
 }
 

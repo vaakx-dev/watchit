@@ -1,6 +1,7 @@
 mod engine;
 mod library;
 mod media;
+mod notify;
 mod release;
 mod search;
 mod service;
@@ -36,6 +37,7 @@ pub fn export_types(config: &Config) -> Result<(), ExportError> {
     transfers::routes::NewTransfer::export_all(config)?;
     transfers::routes::SeasonDownload::export_all(config)?;
     transfers::routes::TransferPatch::export_all(config)?;
+    notify::ReadyNotice::export_all(config)?;
     settings::Settings::export_all(config)?;
     library::routes::LocalFiles::export_all(config)
 }
