@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { Choices, type Choice } from '../../ui/choices';
-import { Icon } from '../../ui/icon';
+import { Check } from 'lucide-react';
 import { HIDDEN_STATUSES, type DiscoverQuery, type HiddenStatus } from '../../navigation/discover';
 import type { CatalogKind, CatalogSort, GenreOption } from '../types';
 
@@ -50,7 +50,7 @@ function Hidden({ value, on_change }: { value: HiddenStatus[]; on_change: Change
 
   return <div className="choices chips" role="group" aria-label="Hide">
     {HIDDEN_STATUSES.map(status => <button type="button" key={status} aria-pressed={value.includes(status)} onClick={() => toggle(status)}>
-      {value.includes(status) && <Icon name="check" />}{HIDDEN_LABELS[status]}
+      {value.includes(status) && <Check />}{HIDDEN_LABELS[status]}
     </button>)}
   </div>;
 }

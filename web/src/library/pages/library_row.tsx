@@ -1,6 +1,6 @@
 import { Artwork } from '../../catalog/components/artwork';
 import { episode_code } from '../../catalog/episodes';
-import { Icon } from '../../ui/icon';
+import { Play, Star } from 'lucide-react';
 import { StatusControls } from '../components/status';
 import { TitleRating } from '../components/title_rating';
 import { opened_ago } from '../opened';
@@ -12,18 +12,18 @@ function SeasonRatings({ ratings }: { ratings?: Record<number, Rating> }) {
   const seasons = Object.entries(ratings ?? {}).map(([season, rating]) => [Number(season), rating] as const).sort(([a], [b]) => a - b);
   if (!seasons.length) return null;
   return <ul className="season-ratings" aria-label="Season ratings">
-    {seasons.map(([season, rating]) => <li key={season}>S{season} <Icon name="star" size={10} /><b>{rating}</b></li>)}
+    {seasons.map(([season, rating]) => <li key={season}>S{season} <Star fill="currentColor" /><b>{rating}</b></li>)}
   </ul>;
 }
 
-function Play({ item, entry }: { item: LibraryItem; entry: PersonalEntry }) {
+function PlayAction({ item, entry }: { item: LibraryItem; entry: PersonalEntry }) {
   const next = item.progress?.next;
   if (next) {
     const code = episode_code(next);
-    return <a className="button primary small" href={`#/watch/${next.id}`} aria-label={`Play ${item.title.title} ${code}`}><Icon name="play" />{code}</a>;
+    return <a className="button primary small" href={`#/watch/${next.id}`} aria-label={`Play ${item.title.title} ${code}`}><Play fill="currentColor" />{code}</a>;
   }
   if (item.title.kind !== 'movie' || entry.status === 'watched' || entry.status === 'dropped') return null;
-  return <a className="button primary small" href={`#/watch/${item.title.id}`} aria-label={`Play ${item.title.title}`}><Icon name="play" />Play</a>;
+  return <a className="button primary small" href={`#/watch/${item.title.id}`} aria-label={`Play ${item.title.title}`}><Play fill="currentColor" />Play</a>;
 }
 
 export function LibraryRow({ item, library }: { item: LibraryItem; library: Library }) {
@@ -46,6 +46,6 @@ export function LibraryRow({ item, library }: { item: LibraryItem; library: Libr
     </div>
     <div className="library-rating"><TitleRating title={title} library={library} /></div>
     <StatusControls title={title} library={library} />
-    <div className="library-play"><Play item={item} entry={entry} /></div>
+    <div className="library-play"><PlayAction item={item} entry={entry} /></div>
   </li>;
 }

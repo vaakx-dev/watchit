@@ -1,9 +1,9 @@
+import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { Icon, type IconName } from './icon';
 
-export function EmptyState({ icon, title, children }: { icon?: IconName; title: string; children?: ReactNode }) {
+export function EmptyState({ icon: Glyph, title, children }: { icon?: LucideIcon; title: string; children?: ReactNode }) {
   return <div className="empty-state">
-    {icon && <Icon name={icon} />}
+    {Glyph && <Glyph />}
     <h2>{title}</h2>
     {children}
   </div>;

@@ -1,4 +1,4 @@
-import { Icon } from '../../ui/icon';
+import { Bookmark, ChevronLeft, Play } from 'lucide-react';
 import { Artwork } from '../components/artwork';
 import { Backdrop } from '../components/backdrop';
 import { Heading } from '../components/heading';
@@ -24,14 +24,14 @@ function show_episodes() {
 }
 
 function BackLink({ title }: { title: Title }) {
-  const content = (label: string) => <><Icon name="chevron" className="previous" /><span>{label}</span></>;
+  const content = (label: string) => <><ChevronLeft /><span>{label}</span></>;
   if (title.series) return <a className="back-link title-back" href={`#/title/${title.series.id}`}>{content(title.series.title)}</a>;
   const kind = title.anime ? 'anime' : title.kind === 'movie' ? 'movie' : 'series';
   return <a className="back-link title-back" href={discover_route(kind)}>{content('Discover')}</a>;
 }
 
 function PlayAction({ title, progress }: { title: Title; progress: SeriesProgress | null }) {
-  const play = <Icon name="play" />;
+  const play = <Play fill="currentColor" />;
   if (title.kind !== 'series') return <a className="button primary" href={`#/watch/${title.id}`}>{play}Play</a>;
   if (progress?.next) return <a className="button primary" href={`#/watch/${progress.next.id}`}>{play}{play_label(progress.next, progress.last)}</a>;
   return <button className="button primary" onClick={show_episodes}>View episodes</button>;
@@ -63,7 +63,7 @@ export function TitleHero({ title, progress, seasons, library }: { title: Title;
           <TrailerAction title={title.title} trailers={title.trailers ?? []} />
           {title.kind !== 'series' && <DownloadTitleButton title={title} />}
           <button type="button" className="icon-button" disabled={!library.ready} aria-label="Save" title="Save"
-            aria-pressed={saved} onClick={() => { void library.toggle_saved(title); }}><Icon name="nav-lists" /></button>
+            aria-pressed={saved} onClick={() => { void library.toggle_saved(title); }}><Bookmark /></button>
         </div>
         <div className="your-rating"><span>{RATING_LABELS[title.kind]}</span><TitleRating title={title} library={library} /></div>
         {(title.director || title.cast) && <dl className="credits">

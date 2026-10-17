@@ -20,7 +20,7 @@
 .library-next { color: var(--status, var(--t1)); font-weight: 600; }
 .season-ratings { display: flex; flex-wrap: wrap; gap: var(--space-1); margin: 2px 0 0; padding: 0; list-style: none; }
 .season-ratings li { display: inline-flex; align-items: center; gap: 3px; padding: 1px 6px; border-radius: 4px; background: var(--s2); color: var(--t2); font-size: 11px; font-weight: 500; }
-.season-ratings .icon { color: var(--star); }
+.season-ratings .lucide { width: 10px; height: 10px; color: var(--star); }
 .season-ratings b { color: var(--t1); font-weight: 600; }
 .library-rating .rating-control { --star-size: 14px; }
 .library-play { display: flex; justify-content: flex-end; }

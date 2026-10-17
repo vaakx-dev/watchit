@@ -1,5 +1,5 @@
 import { useRef, type PointerEvent } from 'react';
-import { Icon } from '../../ui/icon';
+import { Check, X } from 'lucide-react';
 import { STATUS_LABELS } from '../status_labels';
 import { STATUSES, type Status } from '../types';
 import { StatusEye } from './eye';
@@ -37,7 +37,7 @@ function SheetHeader({ title, on_close }: { title: string; on_close: () => void 
       <span className="status-sheet-handle" aria-hidden="true" />
       <h2>{title}</h2>
     </div>
-    <button type="button" className="icon-button ghost" aria-label="Close" onClick={on_close}><Icon name="close" /></button>
+    <button type="button" className="icon-button ghost" aria-label="Close" onClick={on_close}><X /></button>
   </div>;
 }
 
@@ -57,7 +57,7 @@ export function StatusMenu({ title, status, favorite, recommended, disabled, on_
     <div className="status-options" role="group" aria-label="Watch status">
       {STATUSES.map(option => <button type="button" key={option} className="status-option" data-status={option} disabled={disabled}
         aria-pressed={status === option} onClick={() => on_status(status === option ? null : option)}>
-        <StatusEye status={option} /><span>{STATUS_LABELS[option]}</span><Icon name="check" size={16} className="status-check" />
+        <StatusEye status={option} /><span>{STATUS_LABELS[option]}</span><Check className="status-check" />
       </button>)}
     </div>
     <button type="button" role="switch" className="flag-switch" data-flag="favorite" disabled={disabled} aria-checked={favorite} onClick={on_favorite}>

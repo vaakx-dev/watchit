@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Choices, type Choice } from '../../ui/choices';
 import { EmptyState } from '../../ui/empty_state';
-import { Icon } from '../../ui/icon';
+import { Bookmark, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Page } from '../../ui/page';
 import { TitleGrid } from '../../catalog/components/title_grid';
 import { GridSkeleton } from '../../catalog/components/skeleton';
@@ -62,7 +62,7 @@ function default_sort(shelf: Shelf): LibrarySort {
 function shelf_icon(shelf: Shelf) {
   if (shelf === 'favorite') return <StatusEye status={null} favorite />;
   if (shelf === 'recommended') return <StatusEye status={null} recommended />;
-  if (shelf === 'saved') return <Icon name="nav-lists" size={18} />;
+  if (shelf === 'saved') return <Bookmark />;
   if (shelf === 'recent') return undefined;
   return <StatusEye status={shelf} />;
 }
@@ -133,9 +133,9 @@ export function MyShows({ shelf, library }: { shelf: Shelf; library: Library }) 
       {resource.status !== 'error' && !data && (view === 'grid' ? <GridSkeleton /> : <ListSkeleton />)}
       {data && (data.items.length ? <Titles data={data} view={view} library={library} /> : <Empty shelf={shelf} kind={kind} show_all={() => change_kind('all')} />)}
       {data && (current.page > 1 || data.has_next) && <nav className="pagination" aria-label={`${LABELS[shelf]} pages`}>
-        <button className="button secondary" disabled={current.page === 1} onClick={() => change_page(current.page - 1)}><Icon name="chevron" className="previous" />Previous</button>
+        <button className="button secondary" disabled={current.page === 1} onClick={() => change_page(current.page - 1)}><ChevronLeft />Previous</button>
         <span aria-live="polite">Page {data.page} of {Math.max(1, Math.ceil(data.total / PAGE_SIZE))}</span>
-        <button className="button secondary" disabled={!data.has_next} onClick={() => change_page(current.page + 1)}>Next<Icon name="chevron" /></button>
+        <button className="button secondary" disabled={!data.has_next} onClick={() => change_page(current.page + 1)}>Next<ChevronRight /></button>
       </nav>}
     </div>
   </Page>;

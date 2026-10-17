@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Icon } from '../ui/icon';
+import { Check, Lock, Plus } from 'lucide-react';
 import { sign_in, sign_out } from './api';
 import { ProfileAvatar } from './avatar';
 import { PinPad } from './pin_pad';
@@ -48,14 +48,14 @@ export function ProfilePicker({ profiles, current, on_changed }: Props) {
         <button type="button" className="profile-tile" disabled={action.pending} onClick={() => pick(profile)}
           aria-label={tile_label(profile, current)} aria-current={profile.id === current?.id ? 'true' : undefined}>
           <ProfileAvatar profile={profile} />
-          {profile.id === current?.id && <span className="profile-badge-corner"><Icon name="check" /></span>}
-          {profile.id !== current?.id && profile.has_pin && <span className="profile-badge-corner locked"><Icon name="lock" /></span>}
+          {profile.id === current?.id && <span className="profile-badge-corner"><Check /></span>}
+          {profile.id !== current?.id && profile.has_pin && <span className="profile-badge-corner locked"><Lock /></span>}
           <span className="profile-label">{profile.name}</span>
         </button>
       </li>)}
       {(current?.is_admin || !profiles.length) && <li>
         <button type="button" className="profile-tile" onClick={() => set_panel({ view: 'edit', id: null })}>
-          <span className="profile-avatar"><Icon name="plus" /></span>
+          <span className="profile-avatar"><Plus /></span>
           <span className="profile-label">Add profile</span>
         </button>
       </li>}

@@ -1,4 +1,5 @@
 import type { LocalFile, TorrentResult } from '../../torrents/types';
+import { resolution_label } from '../../torrents/quality';
 import type { Provider } from '../providers';
 
 export type PlaySource =
@@ -16,4 +17,10 @@ export function source_key(source: PlaySource) {
 
 export function preference(source: PlaySource) {
   return source.kind === 'embed' ? source.provider.id : TORRENT_PREFERENCE;
+}
+
+export function source_label(source: PlaySource) {
+  if (source.kind === 'embed') return source.provider.name;
+  const { resolution, hdr } = source.kind === 'local' ? source.file : source.result;
+  return [resolution_label(resolution) ?? 'Unknown', hdr[0]].filter(Boolean).join(' ');
 }

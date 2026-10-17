@@ -1,6 +1,6 @@
 import type { Title } from '../../catalog/types';
 import type { Library } from '../../library/use_library';
-import { Icon } from '../../ui/icon';
+import { Layers, ListVideo } from 'lucide-react';
 import { FinishedPrompt } from '../finished';
 import type { Panel } from '../panels/panel';
 import { FRAME_PERMISSIONS, type Provider } from '../providers';
@@ -14,8 +14,8 @@ export function EmbedStage({ title, provider, library, panel, has_episodes, on_p
   return <div className="stage embed-stage">
     <div className="embed-bar">
       <TopBar title={title}>
-        <button type="button" className="player-button" aria-label="Sources" title="Sources" aria-pressed={panel === 'sources'} onClick={() => toggle('sources')}><Icon name="sources" /></button>
-        {has_episodes && <button type="button" className="player-button" aria-label="Episodes" title="Episodes" aria-pressed={panel === 'episodes'} onClick={() => toggle('episodes')}><Icon name="episodes" /></button>}
+        <button type="button" className="icon-button ghost" aria-label="Sources" title="Sources" aria-pressed={panel === 'sources'} onClick={() => toggle('sources')}><Layers /></button>
+        {has_episodes && <button type="button" className="icon-button ghost" aria-label="Episodes" title="Episodes" aria-pressed={panel === 'episodes'} onClick={() => toggle('episodes')}><ListVideo /></button>}
       </TopBar>
     </div>
     <div className="embed-frame">

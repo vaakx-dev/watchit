@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
-import { Icon } from '../../ui/icon';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { SectionHeader } from '../../ui/section_header';
 
 export function Shelf({ title, link, children }: { title: string; link?: { href: string; label: string }; children: ReactNode }) {
@@ -34,8 +34,8 @@ export function Shelf({ title, link, children }: { title: string; link?: { href:
     <section className="shelf" aria-labelledby={`${id}-heading`}>
       <SectionHeader id={`${id}-heading`} title={title} link={link}>
         <span className="shelf-controls">
-          <button className="icon-button ghost small" aria-label={`Previous ${title}`} aria-controls={id} disabled={edges.start} onClick={() => scroll(-1)}><Icon name="chevron" className="previous" /></button>
-          <button className="icon-button ghost small" aria-label={`Next ${title}`} aria-controls={id} disabled={edges.end} onClick={() => scroll(1)}><Icon name="chevron" /></button>
+          <button className="icon-button ghost small" aria-label={`Previous ${title}`} aria-controls={id} disabled={edges.start} onClick={() => scroll(-1)}><ChevronLeft /></button>
+          <button className="icon-button ghost small" aria-label={`Next ${title}`} aria-controls={id} disabled={edges.end} onClick={() => scroll(1)}><ChevronRight /></button>
         </span>
       </SectionHeader>
       <div className="shelf-row" ref={row} id={id} onScroll={update_edges}>{children}</div>

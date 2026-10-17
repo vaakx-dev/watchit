@@ -1,3 +1,4 @@
+import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
 
 export function CopyButton({ text, label }: { text: string; label: string }) {
@@ -10,5 +11,5 @@ export function CopyButton({ text, label }: { text: string; label: string }) {
     setTimeout(() => set_copied(false), 1800);
   }
 
-  return <button className="button secondary small" type="button" aria-label={`Copy ${label}`} onClick={() => void copy()}>{copied ? 'Copied' : 'Copy'}</button>;
+  return <button className="button secondary small" type="button" aria-label={`Copy ${label}`} onClick={() => void copy()}>{copied ? <><Check />Copied</> : <><Copy />Copy</>}</button>;
 }

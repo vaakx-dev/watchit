@@ -1,4 +1,4 @@
-import { Icon } from '../../ui/icon';
+import { Play } from 'lucide-react';
 import { Artwork } from '../components/artwork';
 import { StatusEye } from '../../library/components/eye';
 import { TitleRating } from '../../library/components/title_rating';
@@ -27,6 +27,6 @@ export function EpisodeRow({ episode, up_next, library }: { episode: EpisodeEntr
       onClick={() => { void library.update(episode.id, { status: watched ? null : 'watched' }); }}>
       <StatusEye status={watched ? 'watched' : null} />
     </button>
-    <a className="icon-button small episode-play" href={`#/watch/${episode.id}`} aria-label={`Play ${name}`}><Icon name="play" /></a>
+    <a className="icon-button small episode-play" href={`#/watch/${episode.id}`} aria-label={`Play ${name}`}><Play fill="currentColor" /></a>
   </li>;
 }

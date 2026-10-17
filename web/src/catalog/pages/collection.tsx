@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Icon } from '../../ui/icon';
+import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 import { EmptyState } from '../../ui/empty_state';
 import { Page } from '../../ui/page';
 import { SectionHeader } from '../../ui/section_header';
@@ -53,19 +53,19 @@ export function Collection({ route, library }: { route: Extract<Route, { view: '
     <Page title={page_title(searching, query)}>
       <CollectionFilters filters={filters} genres={genres} on_change={change} />
       {!searching && <SectionHeader id="results-title" title={results_title(filters, genres)} />}
-      {searching && !query ? <EmptyState icon="search" title="Search the catalog"><p>Type a title in the search field and press Enter.</p></EmptyState>
+      {searching && !query ? <EmptyState icon={Search} title="Search the catalog"><p>Type a title in the search field and press Enter.</p></EmptyState>
         : resource.status === 'error' ? <CatalogStatus error={resource.error} retry={retry} />
         : awaiting_items(resource) ? <GridSkeleton />
         : titles.length ? <TitleGrid entries={titles} library={library} />
         : resource.status === 'ready' && resource.data.imports?.error ? <CatalogStatus error={resource.data.imports.error} retry={retry} />
-        : <EmptyState icon="search" title="No titles found">
+        : <EmptyState icon={Search} title="No titles found">
           <p>{filtered ? 'Change or reset the filters.' : 'Try a different spelling or a shorter title.'}</p>
-          {filtered && <button className="button secondary" onClick={reset}><Icon name="close" />Reset filters</button>}
+          {filtered && <button className="button secondary" onClick={reset}><X />Reset filters</button>}
         </EmptyState>}
       {resource.status === 'ready' && (filters.page > 1 || resource.data.has_next) && <nav className="pagination" aria-label="Catalog pages">
-        <button className="button secondary" disabled={filters.page === 1} onClick={() => change_page(filters.page - 1)}><Icon name="chevron" className="previous" />Previous</button>
+        <button className="button secondary" disabled={filters.page === 1} onClick={() => change_page(filters.page - 1)}><ChevronLeft />Previous</button>
         <span aria-live="polite">Page {resource.data.page}</span>
-        <button className="button secondary" disabled={!resource.data.has_next} onClick={() => change_page(filters.page + 1)}>Next<Icon name="chevron" /></button>
+        <button className="button secondary" disabled={!resource.data.has_next} onClick={() => change_page(filters.page + 1)}>Next<ChevronRight /></button>
       </nav>}
     </Page>
   );

@@ -1,5 +1,5 @@
 import { useRef, useState, type PointerEvent } from 'react';
-import { Icon } from '../../ui/icon';
+import { Star } from 'lucide-react';
 import { at, step } from '../rating';
 import type { Rating } from '../types';
 
@@ -63,8 +63,8 @@ export function RatingControl({ value, on_change, disabled = false, title }: {
       onLostPointerCapture={cancel}>
       <span className="rating-stars" aria-hidden="true">
         {[0, 1, 2, 3, 4].map(index => <span className="rating-star" key={index}>
-          <Icon name="star" className="rating-empty" />
-          <span className="rating-fill" style={{ width: `${Math.max(0, Math.min(1, (displayed ?? 0) - index)) * 100}%` }}><Icon name="star" /></span>
+          <Star className="rating-empty" fill="currentColor" />
+          <span className="rating-fill" style={{ width: `${Math.max(0, Math.min(1, (displayed ?? 0) - index)) * 100}%` }}><Star fill="currentColor" /></span>
         </span>)}
       </span>
     </div>

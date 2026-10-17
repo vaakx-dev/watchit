@@ -1,3 +1,4 @@
+import { QrCode } from 'lucide-react';
 import { useState } from 'react';
 import { CopyButton } from './copy_button';
 import type { Address } from './types';
@@ -20,7 +21,7 @@ export function AddressList({ addresses }: { addresses: Address[] }) {
         </div>
         <div className="remote-address-actions">
           <CopyButton text={address.url} label={address.url} />
-          {address.qr && <button className="button secondary small" type="button" aria-pressed={address === shown} onClick={() => select(index)}>QR code</button>}
+          {address.qr && <button className="button secondary small" type="button" aria-pressed={address === shown} onClick={() => select(index)}><QrCode />QR code</button>}
         </div>
       </li>)}
     </ul>
