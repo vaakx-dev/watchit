@@ -6,6 +6,7 @@ import { ImdbScore } from '../components/imdb_score';
 import { TrailerAction } from '../components/trailer';
 import { episode_code, play_label } from '../episodes';
 import { runtime } from '../format';
+import { came_from } from '../../navigation/came_from';
 import { discover_route } from '../../navigation/route';
 import { DownloadTitleButton } from '../../downloads/actions/download_title_button';
 import { StatusControls } from '../../library/components/status';
@@ -26,6 +27,8 @@ function show_episodes() {
 function BackLink({ title }: { title: Title }) {
   const content = (label: string) => <><ChevronLeft /><span>{label}</span></>;
   if (title.series) return <a className="back-link title-back" href={`#/title/${title.series.id}`}>{content(title.series.title)}</a>;
+  const previous = came_from();
+  if (previous) return <button type="button" className="back-link title-back" onClick={() => window.history.back()}>{content(previous.label)}</button>;
   const kind = title.anime ? 'anime' : title.kind === 'movie' ? 'movie' : 'series';
   return <a className="back-link title-back" href={discover_route(kind)}>{content('Discover')}</a>;
 }
