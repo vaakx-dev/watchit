@@ -1,5 +1,5 @@
-.settings { display: grid; grid-template-columns: 220px minmax(0, 760px); gap: var(--space-7); align-items: start; padding-bottom: var(--space-7); }
-.settings-side { position: sticky; top: calc(var(--bar-height) + var(--space-5)); }
+.settings { display: grid; padding-top: var(--space-6); grid-template-columns: 220px minmax(0, 760px); gap: var(--space-7); align-items: start; padding-bottom: var(--space-7); }
+.settings-side { position: sticky; top: var(--space-6); }
 .settings-side .page-title { margin-bottom: var(--space-5); }
 
 .settings-nav { display: grid; gap: var(--space-5); }
@@ -11,7 +11,7 @@
 .settings-nav .lucide { width: 17px; height: 17px; }
 .settings-nav .settings-nav-open { display: none; margin-left: auto; color: var(--t3); }
 
-.settings-back { display: none; margin: 0 0 var(--space-3) -6px; }
+.settings-back { display: none; margin-bottom: var(--space-3); }
 .settings-content { min-width: 0; padding-top: calc(var(--type-page) + var(--space-5) + 6px); }
 
 .settings-section { display: grid; gap: var(--space-5); }
@@ -73,7 +73,7 @@
   .settings { display: block; }
   .settings-side { position: static; }
   .settings[data-picked="true"] .settings-side, .settings[data-picked="false"] .settings-content { display: none; }
-  .settings-content { padding-top: var(--space-4); }
+  .settings-content { padding-top: 0; }
   .settings-back { display: inline-flex; }
   .settings-nav a { height: 48px; padding: 0 var(--space-4); background: var(--s1); border-radius: 0; font-size: var(--type-body); }
   .settings-nav ul { gap: 1px; overflow: hidden; border-radius: var(--radius-panel); }

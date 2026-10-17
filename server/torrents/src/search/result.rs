@@ -18,6 +18,7 @@ pub struct TorrentResult {
     pub seeders: Option<u32>,
     pub site: Option<String>,
     pub languages: Vec<String>,
+    pub season_pack: bool,
 }
 
 #[derive(Clone, Debug)]

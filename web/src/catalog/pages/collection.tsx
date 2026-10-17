@@ -1,3 +1,4 @@
+import { scroll_to_top } from '../../navigation/scroll';
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 import { EmptyState } from '../../ui/empty_state';
@@ -42,7 +43,7 @@ export function Collection({ route, library }: { route: Extract<Route, { view: '
 
   function change_page(page: number) {
     change({ page });
-    window.scrollTo(0, 0);
+    scroll_to_top();
   }
 
   function reset() {

@@ -19,7 +19,7 @@ function SeasonBar({ series, navigation, episodes, library }: { series: Title; n
     <SeasonPicker seasons={navigation.seasons} value={season} on_change={episodes.select_season} />
     {summary && navigation.season === season && <span className="season-summary">{summary}</span>}
     {navigation.season === season && <SeasonWatchedButton series_id={series.id} navigation={navigation} library={library} />}
-    {navigation.season === season && navigation.items.length > 0 && <DownloadSeasonButton series_id={series.id} season={season} />}
+    {navigation.season === season && navigation.items.length > 0 && <DownloadSeasonButton series_id={series.id} series_title={series.title} season={season} />}
     <div className="season-rating">
       <span>{season_label(season)} rating</span>
       <RatingControl key={season} title={`${series.title} ${season_label(season)}`} value={library.seasons[series.id]?.[season] ?? null}

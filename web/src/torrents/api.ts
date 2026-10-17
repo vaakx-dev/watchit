@@ -1,9 +1,14 @@
 import { request, send } from '../catalog/client';
-import type { TorrentSettings, Transfer, TransferKind, TransferList, TransferPatch } from './types';
+import type { SeasonDownload, TorrentSettings, Transfer, TransferKind, TransferList, TransferPatch } from './types';
 
 const id_path = (id: string) => encodeURIComponent(id);
 
-export const search_url = (title_id: string) => `/api/torrents/search?title=${id_path(title_id)}`;
+export function search_url(title_id: string, { season, unfiltered = false }: { season?: number; unfiltered?: boolean } = {}) {
+  const query = new URLSearchParams({ title: title_id });
+  if (season !== undefined) query.set('season', String(season));
+  if (unfiltered) query.set('unfiltered', 'true');
+  return `/api/torrents/search?${query}`;
+}
 
 export const local_files_url = (title_id: string) => `/api/titles/${id_path(title_id)}/files`;
 
@@ -15,8 +20,8 @@ export function add_transfer(info_hash: string, file_indexes: number[] | null, t
   return send<Transfer>('/api/transfers', 'POST', { info_hash, file_indexes, title_id, kind, download_dir, notify_when_ready });
 }
 
-export function add_season(series_id: string, season: number, download_dir?: string) {
-  return send<Transfer[]>('/api/transfers/season', 'POST', { series_id, season, download_dir });
+export function add_season(series_id: string, season: number, choice: Omit<SeasonDownload, 'series_id' | 'season'>) {
+  return send<Transfer[]>('/api/transfers/season', 'POST', { series_id, season, ...choice });
 }
 
 export function update_transfer(id: string, patch: TransferPatch) {

@@ -30,7 +30,7 @@
 .trailer-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 
 .title-sections { padding-bottom: var(--space-7); }
-.title-episodes { margin-top: var(--space-5); scroll-margin-top: calc(var(--bar-height) + 16px); }
+.title-episodes { margin-top: var(--space-5); }
 .season-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--line); }
 .season-picker { min-width: 0; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
 .season-name { font-size: var(--type-card); font-weight: 700; }

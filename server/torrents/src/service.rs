@@ -4,11 +4,12 @@ use std::sync::Arc;
 
 use axum::http::StatusCode;
 use tokio::sync::watch;
-use watchit_core::{AppError, AppResult, Background, Context, StreamTokens, Viewer};
+use watchit_core::{AppError, AppResult, Background, Context, Db, StreamTokens, Viewer};
 
 use crate::bandwidth::{self, Bandwidth};
 use crate::engine;
 use crate::media::{MediaSource, TorrentFile, raw_url};
+use crate::quality::{self, Quality};
 use crate::queue;
 use crate::search::Search;
 use crate::settings::{self, Settings};
@@ -28,6 +29,7 @@ enum Startup {
 #[derive(Clone)]
 pub struct Torrents {
     search: Search,
+    db: Db,
     tokens: StreamTokens,
     background: Background,
     startup: watch::Receiver<Startup>,
@@ -73,7 +75,8 @@ impl Torrents {
             settings::create_table(conn)?;
             bandwidth::create_table(conn)?;
             transfers::create_tables(conn)?;
-            queue::create_table(conn)
+            queue::create_table(conn)?;
+            quality::create_table(conn)
         })?;
         let folder = std::path::absolute(context.paths.folder("torrents")?)?;
         let default_download_dir = std::path::absolute(context.paths.folder("downloads")?)?;
@@ -84,7 +87,20 @@ impl Torrents {
         let (ready, startup) = watch::channel(Startup::Starting);
         let launching = Launch { context: context.clone(), folder, settings, alternative, search: search.clone(), titles, ready };
         context.background.spawn(launch(launching));
-        Ok(Self { search, tokens: context.tokens.clone(), background: context.background.clone(), startup })
+        Ok(Self { search, db: context.db.clone(), tokens: context.tokens.clone(), background: context.background.clone(), startup })
+    }
+
+    pub async fn quality(&self, profile: i64) -> AppResult<Quality> {
+        self.db.run(move |conn| quality::load(conn, profile)).await
+    }
+
+    pub async fn save_quality(&self, profile: i64, quality: Quality) -> AppResult<Quality> {
+        self.db
+            .run(move |conn| {
+                quality::save(conn, profile, &quality)?;
+                Ok(quality)
+            })
+            .await
     }
 
     pub fn search(&self) -> &Search {

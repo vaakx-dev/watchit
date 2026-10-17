@@ -12,6 +12,7 @@
     "core:window:allow-close",
     "core:window:allow-start-dragging",
     "allow-maximize-button-area",
+    "allow-show-system-menu",
     "allow-mpv-message",
     "allow-check-for-updates",
     "allow-install-update",

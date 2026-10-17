@@ -35,6 +35,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             player::bridge::mpv_message,
             title_bar::snap_button::maximize_button_area,
+            title_bar::system_menu::show_system_menu,
             updates::check_for_updates,
             updates::install_update,
         ])

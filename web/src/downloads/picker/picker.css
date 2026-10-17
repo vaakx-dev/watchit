@@ -1,0 +1,26 @@
+.picker-dialog { display: flex; flex-direction: column; width: min(920px, calc(100vw - 2 * var(--gutter))); height: min(760px, calc(100dvh - 48px)); max-width: none; max-height: none; padding: 0; border: 0; border-radius: var(--radius-panel); background: var(--s1); color: var(--t1); box-shadow: 0 24px 64px rgb(0 0 0 / .6); }
+.picker-dialog:not([open]) { display: none; }
+.picker-dialog::backdrop { background: rgb(0 0 0 / .7); }
+.picker-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); padding: var(--space-4) var(--space-4) var(--space-3); }
+.picker-head h2 { font-size: var(--type-section); font-weight: 700; line-height: 1.35; }
+.picker-filters { display: grid; gap: var(--space-3); padding: 0 var(--space-4) var(--space-3); }
+.picker-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; border-block: 1px solid var(--rule); }
+.picker-body[aria-busy="true"] .picker-rows { opacity: .55; }
+.picker-rows { margin: 0; padding: 0; list-style: none; }
+.picker-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--rule); }
+.picker-row:hover { background: var(--s2); }
+.picker-file { color: var(--t3); font-size: 11px; overflow-wrap: anywhere; }
+.picker-badge { width: fit-content; padding: 1px 6px; border-radius: 4px; background: var(--s3); color: var(--t2); font-size: 10px; font-weight: 700; line-height: 1.4; }
+.picker-badge[data-pack="true"] { background: rgb(34 197 94 / .16); color: var(--watching); }
+.picker-note, .picker-error { padding: var(--space-4); color: var(--t2); font-size: var(--type-card); }
+.picker-error { padding: 0; color: var(--dropped); }
+.picker-foot { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2) var(--space-3); padding: var(--space-3) var(--space-4); }
+.picker-foot .notify-switch-group { flex: 1 1 260px; }
+.picker-actions { display: flex; gap: var(--space-2); margin-left: auto; }
+
+@media (max-width: 640px) {
+  .picker-dialog { width: 100vw; height: 100dvh; margin: 0; border-radius: 0; }
+  .picker-actions { flex: 1; }
+  .picker-actions .button { flex: 1; }
+}
+.picker-hidden { display: flex; align-items: center; gap: var(--space-1); color: var(--t3); font-size: var(--type-meta); font-weight: 500; }

@@ -1,13 +1,7 @@
-.speed-mode { --mode: var(--t2); display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); }
+.speed-mode { --mode: var(--t2); display: inline-flex; align-items: center; gap: var(--space-1); }
 .speed-mode[data-mode="alternative"] { --mode: var(--paused); }
 .speed-mode[data-mode="watching"] { --mode: var(--watching); }
-.speed-mode > p { display: flex; flex: 1; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin: 0; color: var(--t2); font-size: var(--type-card); font-variant-numeric: tabular-nums; }
-.speed-mode > p > .lucide { width: 18px; height: 18px; color: var(--mode); }
-.speed-mode strong { color: var(--t1); font-weight: 600; }
-.speed-mode p span { display: inline-flex; align-items: center; gap: var(--space-3); }
-.speed-mode p span span { gap: 2px; }
-.speed-mode p span .lucide { width: 13px; height: 13px; }
-.speed-mode-error { color: var(--dropped); font-size: var(--type-meta); }
+.speed-mode > .lucide { color: var(--mode); }
+.speed-mode-error { color: var(--dropped); }
 .speed-turtle[aria-pressed="true"] { background: var(--paused); color: #000; }
 .speed-turtle[aria-pressed="true"]:hover:not(:disabled) { background: var(--paused); }
-
