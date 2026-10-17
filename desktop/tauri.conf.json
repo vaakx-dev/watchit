@@ -20,7 +20,7 @@
       "../web/dist/": "web/"
     },
     "windows": {
-      "nsis": { "installMode": "currentUser" }
+      "nsis": { "installMode": "currentUser", "installerHooks": "installer/hooks.nsh" }
     }
   },
   "plugins": {

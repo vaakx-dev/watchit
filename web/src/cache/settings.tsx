@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { use_resource } from '../catalog/api';
 import { CatalogStatus } from '../catalog/components/status';
+import { RemoteSection } from '../remote/remote_section';
 import { Page } from '../ui/page';
 import { CacheForm } from './cache_form';
 import { CacheUsage } from './cache_usage';
@@ -25,6 +26,7 @@ export function Settings() {
       <h2 id="settings-library">Library</h2>
       <p>Ratings, watch status, saved titles and history are stored on this server for each profile. They never expire with the cache.</p>
     </section>
+    <RemoteSection />
     {resource.status === 'ready' ? <Advanced initial={resource.data} /> : <CatalogStatus error={resource.status === 'error' ? resource.error : undefined} retry={retry} />}
   </div></Page>;
 }

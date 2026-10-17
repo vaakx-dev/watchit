@@ -1,6 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ProfileGate } from './profiles/profile_gate';
+import { listen_for_install } from './pwa/install';
+import { register_service_worker } from './pwa/register';
 import '@fontsource-variable/archivo/wdth.css';
 import './styles/tokens.css';
 import './styles/base.css';
@@ -16,7 +18,10 @@ import './styles/my_shows.css';
 import './styles/rankings.css';
 import './styles/settings.css';
 import './styles/downloads.css';
+import './remote/remote.css';
 import './styles/profiles.css';
 import './styles/loading.css';
 
+listen_for_install();
+register_service_worker();
 createRoot(document.getElementById('root')!).render(<StrictMode><ProfileGate /></StrictMode>);
