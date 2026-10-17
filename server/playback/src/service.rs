@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::hash::Hash;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, Weak};
 use std::time::Duration;
 
@@ -38,8 +38,8 @@ pub struct Playback {
 }
 
 impl Playback {
-    pub fn open(context: &Context, sources: Arc<dyn SourceResolver>) -> AppResult<Arc<Self>> {
-        let tools = Tools::from_env();
+    pub fn open(context: &Context, sources: Arc<dyn SourceResolver>, ffmpeg_dir: &Path) -> AppResult<Arc<Self>> {
+        let tools = Tools::in_dir(ffmpeg_dir);
         let work_dir = context.paths.folder("playback")?;
         let sessions_dir = work_dir.join("sessions");
         if sessions_dir.exists() {

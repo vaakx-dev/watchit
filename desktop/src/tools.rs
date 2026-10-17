@@ -1,15 +1,13 @@
 use std::env;
+use std::path::PathBuf;
 
-const FFMPEG_DIR: &str = "WATCHIT_FFMPEG_DIR";
-
-pub fn use_bundled_ffmpeg() {
-    if env::var_os(FFMPEG_DIR).is_some() {
-        return;
+pub fn ffmpeg_dir() -> PathBuf {
+    if let Some(dir) = env::var_os("WATCHIT_FFMPEG_DIR") {
+        return PathBuf::from(dir);
     }
-    let Some(dir) = env::current_exe().ok().and_then(|exe| exe.parent().map(|dir| dir.join("ffmpeg"))) else {
-        return;
-    };
-    if dir.join("ffmpeg.exe").exists() {
-        unsafe { env::set_var(FFMPEG_DIR, dir) };
-    }
+    env::current_exe()
+        .ok()
+        .and_then(|exe| exe.parent().map(|dir| dir.join("ffmpeg")))
+        .filter(|dir| dir.join("ffmpeg.exe").exists())
+        .unwrap_or_else(|| PathBuf::from(watchit_server::SOURCE_FFMPEG_DIR))
 }

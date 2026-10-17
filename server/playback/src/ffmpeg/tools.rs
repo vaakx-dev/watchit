@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use tokio::process::Command;
 
-const BUNDLED_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/resources/ffmpeg");
+pub const SOURCE_FFMPEG_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/resources/ffmpeg");
 
 #[derive(Clone, Debug)]
 pub struct Tools {
@@ -15,10 +15,6 @@ impl Tools {
         Self { ffmpeg: dir.join("ffmpeg.exe"), ffprobe: dir.join("ffprobe.exe") }
     }
 
-    pub fn from_env() -> Self {
-        let dir = std::env::var_os("WATCHIT_FFMPEG_DIR").map(PathBuf::from).unwrap_or_else(|| PathBuf::from(BUNDLED_DIR));
-        Self::in_dir(&dir)
-    }
 
     pub fn ffmpeg(&self) -> Command {
         quiet(&self.ffmpeg)

@@ -15,6 +15,7 @@ use ts_rs::{Config, ExportError, TS};
 
 pub use api::{AudioTrack, ClientProfile, CreateSession, Mode, PlaybackSession, Player, Protocol, SubtitleTrack, VideoInfo};
 pub use routes::router;
+pub use ffmpeg::SOURCE_FFMPEG_DIR;
 pub use service::Playback;
 pub use source::{SourceFuture, SourceInput, SourceRef, SourceResolver};
 

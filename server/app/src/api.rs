@@ -1,4 +1,5 @@
 use std::net::SocketAddr;
+use std::path::Path;
 use std::sync::Arc;
 
 use axum::Router;
@@ -24,7 +25,7 @@ async fn not_found() -> AppError {
     AppError::not_found("API route not found.")
 }
 
-pub fn router(context: &Context, listen: SocketAddr) -> AppResult<Router> {
+pub fn router(context: &Context, listen: SocketAddr, ffmpeg_dir: &Path) -> AppResult<Router> {
     let profiles = Profiles::open(context)?;
     let auth = Auth { profiles: profiles.clone(), tokens: context.tokens.clone() };
     let artwork = Artwork::open(context)?;
@@ -35,7 +36,7 @@ pub fn router(context: &Context, listen: SocketAddr) -> AppResult<Router> {
     let sources = Arc::new(TorrentSources::new(torrents.clone(), listen));
     let signed_in = Router::new()
         .merge(watchit_torrents::router(torrents))
-        .merge(watchit_playback::router(Playback::open(context, sources)?))
+        .merge(watchit_playback::router(Playback::open(context, sources, ffmpeg_dir)?))
         .merge(watchit_artwork::status_router(artwork.clone()))
         .merge(watchit_catalog::router(catalog))
         .merge(watchit_library::router(library))

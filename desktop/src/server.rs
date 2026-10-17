@@ -5,6 +5,8 @@ use std::sync::Mutex;
 use tauri::{AppHandle, Manager, RunEvent};
 use watchit_server::{Config, Server};
 
+use crate::tools;
+
 const DEFAULT_PORT: u16 = 7171;
 
 pub struct EmbeddedServer {
@@ -38,6 +40,7 @@ pub fn start(app: &AppHandle) -> anyhow::Result<u16> {
         data_dir,
         listen,
         web_dir: Some(web_dir),
+        ffmpeg_dir: tools::ffmpeg_dir(),
     }))?;
     let port = server.addr().port();
     app.manage(EmbeddedServer { server: Mutex::new(Some(server)) });

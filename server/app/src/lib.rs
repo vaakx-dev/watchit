@@ -6,6 +6,8 @@ mod torrent_sources;
 mod torrent_titles;
 mod web;
 
+pub use watchit_playback::SOURCE_FFMPEG_DIR;
+
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::time::Duration;
@@ -20,6 +22,7 @@ pub struct Config {
     pub data_dir: PathBuf,
     pub listen: SocketAddr,
     pub web_dir: Option<PathBuf>,
+    pub ffmpeg_dir: PathBuf,
 }
 
 pub struct Server {
@@ -46,7 +49,7 @@ pub async fn start(config: Config) -> anyhow::Result<Server> {
     let context = Context::open(config.data_dir)?;
     let listener = TcpListener::bind(config.listen).await?;
     let addr = listener.local_addr()?;
-    let mut router = api::router(&context, addr)?;
+    let mut router = api::router(&context, addr, &config.ffmpeg_dir)?;
     if let Some(web_dir) = &config.web_dir {
         router = router.merge(web::router(web_dir));
     }

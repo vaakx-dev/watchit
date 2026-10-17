@@ -13,7 +13,6 @@ use tauri_plugin_autostart::MacosLauncher;
 const HIDDEN_ARG: &str = "--hidden";
 
 fn main() {
-    tools::use_bundled_ffmpeg();
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| window::show(app)))
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec![HIDDEN_ARG])))
