@@ -71,7 +71,7 @@
 .settings-header h2 { font-size: 12px; font-weight: 500; }
 .settings-back { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; }
 .settings-back:hover { background: rgb(255 255 255 / .1); }
-.settings-list { padding: 8px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / .3) transparent; }
+.settings-list { padding: 8px; overflow-y: auto; }
 .settings-item, .settings-option { position: relative; display: flex; align-items: center; width: 100%; min-height: 48px; border-radius: 8px; font-size: 14px; text-align: left; white-space: nowrap; }
 .settings-item:is(:hover, :focus-visible), .settings-option:is(:hover, :focus-visible) { outline: none; background: rgb(255 255 255 / .1); }
 .settings-icon { display: flex; padding: 0 24px 0 8px; }

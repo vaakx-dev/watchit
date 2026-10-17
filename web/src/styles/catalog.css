@@ -21,8 +21,7 @@
 .shelf { margin-top: var(--space-6); }
 .shelf-controls { display: flex; gap: 2px; margin-left: var(--space-2); }
 @media (hover: none) { .shelf-controls { display: none; } }
-.shelf-row { display: flex; gap: 14px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity; margin: 0 calc(var(--gutter) * -1); padding: 4px var(--gutter) 8px; scroll-padding-inline: var(--gutter); }
-.shelf-row::-webkit-scrollbar { display: none; }
+.shelf-row { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x proximity; margin: 0 calc(var(--gutter) * -1); padding: 4px var(--gutter) 4px; scroll-padding-inline: var(--gutter); }
 .shelf-row > * { flex: none; scroll-snap-align: start; }
 .shelf-row > .title-card { width: var(--poster-width); }
 

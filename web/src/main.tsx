@@ -6,6 +6,7 @@ import { register_service_worker } from './pwa/register';
 import '@fontsource-variable/archivo/wdth.css';
 import './styles/tokens.css';
 import './styles/base.css';
+import './styles/scrollbar.css';
 import './styles/icons.css';
 import './styles/shell.css';
 import './styles/catalog.css';
