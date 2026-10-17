@@ -6,3 +6,9 @@ members = ["server/*"]
 edition = "2024"
 version = "0.1.0"
 publish = false
+
+[profile.dev.package.scrypt]
+opt-level = 3
+
+[profile.dev.package.salsa20]
+opt-level = 3

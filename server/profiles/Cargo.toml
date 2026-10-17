@@ -1,0 +1,23 @@
+[package]
+name = "watchit-profiles"
+edition.workspace = true
+version.workspace = true
+publish.workspace = true
+
+[dependencies]
+axum = "0.8.9"
+base64 = "0.23.1"
+chrono = "0.4.45"
+hex = "0.4.3"
+http-body-util = "0.1.5"
+image = { version = "0.25.10", default-features = false, features = ["jpeg", "png", "webp", "gif", "tiff", "bmp"] }
+rand = "0.10.3"
+rusqlite = "0.40.2"
+scrypt = "0.12.0"
+serde = { version = "1.0.229", features = ["derive"] }
+sha2 = "0.11.1"
+subtle = "2.6.1"
+tokio = { version = "1.53.3", features = ["rt"] }
+ts-rs = { version = "12.0.1", features = ["no-serde-warnings"] }
+watchit-core = { version = "0.1.0", path = "../core" }
+webp = { version = "0.3.1", default-features = false }

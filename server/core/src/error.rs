@@ -5,6 +5,8 @@ use axum::http::{HeaderValue, StatusCode, header};
 use axum::response::{IntoResponse, Response};
 use serde_json::json;
 
+use crate::SESSION_HEADER;
+
 pub type AppResult<T> = Result<T, AppError>;
 
 #[derive(Debug, thiserror::Error)]
@@ -36,6 +38,10 @@ impl AppError {
         Self::new(StatusCode::UNAUTHORIZED, message)
     }
 
+    pub fn signed_out() -> Self {
+        Self::unauthorized(format!("Sign in first: POST /api/profiles/:id/session, then send its token in the {SESSION_HEADER} header."))
+    }
+
     pub fn internal(cause: impl Display) -> Self {
         Self::new(StatusCode::INTERNAL_SERVER_ERROR, cause.to_string())
     }
@@ -43,6 +49,12 @@ impl AppError {
     pub fn retry_after(mut self, seconds: u64) -> Self {
         self.retry_after = Some(seconds);
         self
+    }
+}
+
+impl From<std::io::Error> for AppError {
+    fn from(error: std::io::Error) -> Self {
+        Self::internal(error)
     }
 }
 
