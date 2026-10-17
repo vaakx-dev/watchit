@@ -13,8 +13,10 @@ export function use_add_download<T extends unknown[]>(start: (...args: T) => Pro
     try {
       const added = await start(...args);
       for (const transfer of Array.isArray(added) ? added : [added]) upsert_transfer(transfer);
+      return true;
     } catch (cause) {
       set_error(cause instanceof Error ? cause.message : 'The server did not respond.');
+      return false;
     } finally {
       set_pending(false);
     }
@@ -23,6 +25,6 @@ export function use_add_download<T extends unknown[]>(start: (...args: T) => Pro
   return { pending, error, run };
 }
 
-export function download_file(info_hash: string, file_index: number | null, title_id: string, download_dir?: string, notify_when_ready = false) {
-  return add_transfer(info_hash, file_index === null ? null : [file_index], title_id, 'download', download_dir, notify_when_ready);
+export function download_file(info_hash: string, file_index: number | null, title_id: string, notify_when_ready = false) {
+  return add_transfer(info_hash, file_index === null ? null : [file_index], title_id, 'download', undefined, notify_when_ready);
 }

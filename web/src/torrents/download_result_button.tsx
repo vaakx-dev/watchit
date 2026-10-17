@@ -1,5 +1,4 @@
 import { ArrowDownToLine, Check } from 'lucide-react';
-import { FolderButton } from '../downloads/locations/folder_button';
 import { percent } from './format';
 import { use_transfers } from './transfer_store';
 import type { TorrentResult } from './types';
@@ -13,14 +12,9 @@ export function DownloadResultButton({ result, title_id }: { result: TorrentResu
   const downloaded = transfer !== undefined && transfer.progress >= 1;
   const label = downloaded ? 'Downloaded' : transfer ? `Downloading, ${percent(transfer.progress)}` : error ? `Download failed: ${error}` : 'Download';
 
-  const locked = pending || Boolean(transfer);
-  return <>
-    <button type="button" className="icon-button small ghost source-download" aria-label={label} title={label}
-      disabled={locked} data-failed={error ? true : undefined}
-      onClick={() => { void run(result.info_hash, result.file_index, title_id, undefined, notify_wanted()); }}>
-      {downloaded ? <Check /> : <ArrowDownToLine />}
-    </button>
-    <FolderButton label="Download to a folder" confirm="Download here" series={title_id.includes(':')} disabled={locked}
-      on_pick={folder => { void run(result.info_hash, result.file_index, title_id, folder, notify_wanted()); }} />
-  </>;
+  return <button type="button" className="icon-button small ghost source-download" aria-label={label} title={label}
+    disabled={pending || Boolean(transfer)} data-failed={error ? true : undefined}
+    onClick={() => { void run(result.info_hash, result.file_index, title_id, notify_wanted()); }}>
+    {downloaded ? <Check /> : <ArrowDownToLine />}
+  </button>;
 }

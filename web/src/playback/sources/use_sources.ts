@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { use_resource } from '../../catalog/api';
 import { send } from '../../catalog/client';
 import { TITLE_ID } from '../../catalog/identity';
@@ -8,6 +8,8 @@ import { local_files_url, search_url } from '../../torrents/api';
 import type { LocalFile, TorrentResult } from '../../torrents/types';
 import { PROVIDERS, pick_provider } from '../providers';
 import { preference, source_key, TORRENT_PREFERENCE, type PlaySource } from './types';
+
+const NO_RESULTS: TorrentResult[] = [];
 
 type Embed = Extract<PlaySource, { kind: 'embed' }>;
 
@@ -32,7 +34,8 @@ export function use_sources(title: Title, remembered: string | null) {
   const [save_error, set_save_error] = useState<string | null>(null);
 
   const local = files.resource.status === 'ready' ? local_sources(files.resource.data.files) : [];
-  const torrents: PlaySource[] = search.resource.status === 'ready' ? search.resource.data.results.map(result => ({ kind: 'torrent', result })) : [];
+  const results = search.resource.status === 'ready' ? search.resource.data.results : NO_RESULTS;
+  const torrents = useMemo(() => results.map((result): PlaySource => ({ kind: 'torrent', result })), [results]);
   const embeds: Embed[] = PROVIDERS.filter(provider => provider.url(title)).map(provider => ({ kind: 'embed', provider }));
   const searching = searchable && [files.resource, search.resource].some(resource => resource.status === 'loading');
   const wanted_embed = remembered === TORRENT_PREFERENCE ? undefined : embeds.find(embed => embed.provider.id === remembered);
@@ -49,6 +52,7 @@ export function use_sources(title: Title, remembered: string | null) {
   return {
     local,
     torrents,
+    results,
     embeds,
     selected,
     searching,

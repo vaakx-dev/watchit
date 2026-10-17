@@ -2,4 +2,4 @@
 import type { Hdr } from "./Hdr";
 import type { Resolution } from "./Resolution";
 
-export type TorrentResult = { info_hash: string, file_index: number | null, name: string, filename: string | null, resolution: Resolution | null, hdr: Array<Hdr>, video_codec: string | null, audio: string | null, size_bytes: number | null, seeders: number | null, site: string | null, languages: Array<string>, };
+export type TorrentResult = { info_hash: string, file_index: number | null, name: string, filename: string | null, resolution: Resolution | null, hdr: Array<Hdr>, video_codec: string | null, audio: string | null, size_bytes: number | null, seeders: number | null, site: string | null, languages: Array<string>, season_pack: boolean, };

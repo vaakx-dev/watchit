@@ -44,6 +44,11 @@ impl Search {
         Ok(Ranked { candidates: found, hidden })
     }
 
+    pub async fn season_start(&self, series: &str, season: u32) -> TitleId {
+        let first = self.titles.season_episodes(series, season).await.first().copied().unwrap_or(1);
+        TitleId::episode(series, season, first)
+    }
+
     pub fn trackers(&self, info_hash: &str) -> Vec<String> {
         self.trackers.lock().expect("trackers lock").get(info_hash).cloned().unwrap_or_default()
     }

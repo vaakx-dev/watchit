@@ -14,7 +14,7 @@ use watchit_core::{AppError, AppResult, JsonBody, Viewer};
 use super::control::Change;
 use super::model::{Kind, Transfer};
 use super::record::{Choice, Pick};
-use super::TransferEvent;
+use super::{SeasonRequest, TransferEvent};
 use crate::bandwidth::SpeedStatus;
 use crate::locations::{Disk, chosen_folder};
 use crate::service::Torrents;
@@ -50,6 +50,12 @@ pub struct NewTransfer {
 pub struct SeasonDownload {
     series_id: String,
     season: u32,
+    #[serde(default)]
+    #[ts(optional)]
+    info_hash: Option<String>,
+    #[serde(default)]
+    #[ts(optional)]
+    notify_when_ready: Option<bool>,
     #[serde(default)]
     #[ts(optional)]
     download_dir: Option<String>,
@@ -110,7 +116,15 @@ pub async fn season(
     let folder = chosen_folder(&viewer, body.download_dir.as_deref())?;
     let quality = torrents.quality(viewer.profile).await?;
     let transfers = torrents.transfers().await?;
-    transfers.add_season(&body.series_id, body.season, folder, &quality).await.map(Json)
+    let request = SeasonRequest {
+        series: body.series_id,
+        season: body.season,
+        info_hash: body.info_hash,
+        folder,
+        quality,
+        notify_when_ready: body.notify_when_ready.unwrap_or(false),
+    };
+    transfers.add_season(request).await.map(Json)
 }
 
 pub async fn update(
