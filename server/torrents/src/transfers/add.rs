@@ -136,7 +136,7 @@ impl Transfers {
         let handle = engine::add_resolved(&self.session, &metadata, request).await.map_err(|error| AppError::internal(format!("{error:#}")))?;
         let attached = match self.entries().get_mut(info_hash) {
             Some(entry) => {
-                entry.handle = Some(handle.clone());
+                entry.attach(handle.clone());
                 entry.resolving = None;
                 entry.record.error = None;
                 true

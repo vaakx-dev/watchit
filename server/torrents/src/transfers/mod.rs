@@ -1,5 +1,6 @@
 pub mod add;
 mod control;
+mod engine_view;
 mod entry;
 mod events;
 pub mod model;

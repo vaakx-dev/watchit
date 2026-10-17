@@ -8,7 +8,7 @@ use std::time::Duration;
 
 use librqbit::dht::DhtPersistenceConfig;
 use librqbit::limits::LimitsConfig;
-use librqbit::{DhtSessionConfig, ListenerMode, ListenerOptions, Session, SessionOptions, SessionPersistenceConfig};
+use librqbit::{DhtSessionConfig, ListenerMode, ListenerOptions, ManagedTorrentState, Session, SessionOptions, SessionPersistenceConfig};
 
 pub use metadata::{AddRequest, Metadata, MetadataFile, add_resolved, files_of, resolve};
 
@@ -59,4 +59,12 @@ pub async fn start(folder: &Path, listen_port: u16, download_dir: &Path, limits:
 pub fn set_limits(session: &Session, limits: LimitsConfig) {
     session.ratelimits.set_download_bps(limits.download_bps);
     session.ratelimits.set_upload_bps(limits.upload_bps);
+}
+
+pub fn is_live(handle: &Handle) -> bool {
+    handle.with_state(|state| matches!(state, ManagedTorrentState::Live(_)))
+}
+
+pub fn is_paused(handle: &Handle) -> bool {
+    handle.with_state(|state| matches!(state, ManagedTorrentState::Paused(_)))
 }

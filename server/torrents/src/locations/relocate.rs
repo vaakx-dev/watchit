@@ -87,7 +87,7 @@ impl Transfers {
 
     fn begin_move(&self, entry: &mut Entry, target: &Path) {
         let before = snapshot(entry);
-        entry.handle = None;
+        entry.detach();
         entry.file_error = None;
         entry.relocation = Some(Moving { target: target.to_path_buf(), before });
     }
@@ -132,7 +132,7 @@ impl Transfers {
                 match reattached {
                     Ok(handle) => {
                         entry.record.download_dir = location;
-                        entry.handle = Some(handle);
+                        entry.attach(handle);
                         entry.record.error = None;
                         if !entry.record.picks.is_empty() {
                             let available = engine::files_of(entry.handle.as_ref().expect("handle just set")).unwrap_or_default();

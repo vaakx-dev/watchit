@@ -34,7 +34,7 @@ impl Transfers {
                         entry.files = pick::resolve(&entry.record.picks, &available, &entry.record.name, &entry.files);
                         entry.record.picks.clear();
                     }
-                    entry.handle = Some(handle);
+                    entry.attach(handle);
                 }
                 None => {
                     if !entry.files.is_empty() {
@@ -52,6 +52,7 @@ impl Transfers {
         for hash in unresolved {
             self.fetch_metadata(&hash);
         }
+        self.refresh_engine().await;
         self.reconcile().await;
         Ok(())
     }

@@ -1,6 +1,7 @@
+use std::sync::Arc;
 use std::time::Duration;
 
-use librqbit::TorrentStatsState;
+use librqbit::{Session, TorrentStatsState};
 
 use super::contiguous::{contiguous_from, geometry};
 use super::estimate::{Inputs, estimate};
@@ -29,16 +30,31 @@ struct Sampled {
     readiness: Readiness,
 }
 
+fn have_ahead(session: &Arc<Session>, job: &Job) -> u64 {
+    let remaining = job.target.size_bytes.saturating_sub(job.target.position);
+    if job.target.complete {
+        return remaining;
+    }
+    let Some(handle) = &job.handle else { return 0 };
+    let Some(geometry) = geometry(handle, job.target.index) else { return 0 };
+    contiguous_from(session, handle, &geometry, job.target.position)
+}
+
 impl Transfers {
     pub async fn sample_readiness(&self, elapsed: Duration) {
         let jobs = self.readiness_jobs(elapsed.as_secs_f64().min(LONGEST_SAMPLE));
-        let mut results = Vec::with_capacity(jobs.len());
-        for job in jobs {
+        let session = Arc::clone(&self.session);
+        let measured = tokio::task::spawn_blocking(move || {
+            jobs.into_iter().map(|job| (have_ahead(&session, &job), job)).collect::<Vec<_>>()
+        })
+        .await;
+        let Ok(measured) = measured else { return };
+        let mut results = Vec::with_capacity(measured.len());
+        for (have_ahead, job) in measured {
             let runtime = match job.cached_runtime {
                 Some(minutes) => Some(minutes),
                 None => self.titles.runtime_minutes(&job.target.title_id).await,
             };
-            let have_ahead = self.have_ahead(&job);
             let title_id = job.target.title_id.clone();
             let readiness = estimate(&Inputs {
                 size_bytes: job.target.size_bytes,
@@ -60,16 +76,6 @@ impl Transfers {
             entry.readiness.target = Some(sampled.file);
             entry.readiness.current = sampled.readiness;
         }
-    }
-
-    fn have_ahead(&self, job: &Job) -> u64 {
-        let remaining = job.target.size_bytes.saturating_sub(job.target.position);
-        if job.target.complete {
-            return remaining;
-        }
-        let Some(handle) = &job.handle else { return 0 };
-        let Some(geometry) = geometry(handle, job.target.index) else { return 0 };
-        contiguous_from(&self.session, handle, &geometry, job.target.position)
     }
 
     fn readiness_jobs(&self, seconds: f64) -> Vec<Job> {

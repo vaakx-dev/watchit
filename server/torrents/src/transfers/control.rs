@@ -35,7 +35,7 @@ impl Transfers {
             let restart = entry
                 .handle
                 .clone()
-                .filter(|handle| resume && matches!(handle.stats().state, TorrentStatsState::Error));
+                .filter(|_| resume && matches!(entry.progress().engine_state(), Some(TorrentStatsState::Error)));
             (refetch, restart)
         };
         self.persist(&info_hash).await?;

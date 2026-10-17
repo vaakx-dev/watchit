@@ -1,8 +1,10 @@
 use std::collections::BTreeSet;
+use std::sync::Arc;
 
 use librqbit::{TorrentStats, TorrentStatsState};
 use tokio::task::AbortHandle;
 
+use super::engine_view::EngineView;
 use super::model::Transfer;
 use super::record::{FileRecord, Record};
 use crate::engine::Handle;
@@ -14,6 +16,7 @@ pub struct Entry {
     pub record: Record,
     pub files: Vec<FileRecord>,
     pub handle: Option<Handle>,
+    pub engine: Option<EngineView>,
     pub resolving: Option<AbortHandle>,
     pub readers: usize,
     pub live_uploaded: u64,
@@ -34,7 +37,7 @@ pub struct Progress {
     pub size_bytes: u64,
     pub downloaded_bytes: u64,
     pub per_file: Vec<(usize, u64)>,
-    pub stats: Option<TorrentStats>,
+    pub stats: Option<Arc<TorrentStats>>,
 }
 
 impl Entry {
@@ -43,6 +46,7 @@ impl Entry {
             record,
             files,
             handle: None,
+            engine: None,
             resolving: None,
             readers: 0,
             live_uploaded: 0,
@@ -64,8 +68,18 @@ impl Entry {
         self.files.iter().map(|file| file.index).collect()
     }
 
+    pub fn attach(&mut self, handle: Handle) {
+        self.handle = Some(handle);
+        self.engine = None;
+    }
+
+    pub fn detach(&mut self) {
+        self.handle = None;
+        self.engine = None;
+    }
+
     pub fn progress(&self) -> Progress {
-        let stats = self.handle.as_ref().map(|handle| handle.stats());
+        let stats = self.engine.as_ref().map(|engine| Arc::clone(&engine.stats));
         let have = stats.as_ref().map(|stats| stats.file_progress.as_slice()).unwrap_or_default();
         let per_file: Vec<(usize, u64)> =
             self.files.iter().map(|file| (file.index, have.get(file.index).copied().unwrap_or(0).min(file.size_bytes))).collect();
@@ -79,9 +93,9 @@ impl Entry {
 
     pub fn file_complete(&self, index: usize) -> bool {
         let Some(file) = self.files.iter().find(|file| file.index == index) else { return false };
-        self.handle
+        self.engine
             .as_ref()
-            .and_then(|handle| handle.stats().file_progress.get(index).copied())
+            .and_then(|engine| engine.stats.file_progress.get(index).copied())
             .is_some_and(|have| have >= file.size_bytes)
     }
 }

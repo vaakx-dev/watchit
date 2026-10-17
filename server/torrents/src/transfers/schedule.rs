@@ -5,11 +5,12 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use librqbit::TorrentStatsState;
+use librqbit::limits::LimitsConfig;
 
 use super::Transfers;
 use super::entry::Entry;
 use super::model::Kind;
-use crate::engine::Handle;
+use crate::engine::{self, Handle};
 use crate::locations::root_of;
 use crate::bandwidth;
 use crate::queue;
@@ -21,6 +22,7 @@ enum Action {
     Pause(Handle),
     Resume(Handle),
     SelectFiles(Handle, HashSet<usize>),
+    Limit(Handle, LimitsConfig),
     Evict(String),
 }
 
@@ -37,6 +39,7 @@ impl Transfers {
             }
             let elapsed = last.elapsed();
             last = Instant::now();
+            self.refresh_engine().await;
             self.account(elapsed);
             self.sample_readiness(elapsed).await;
             self.reconcile().await;
@@ -52,7 +55,7 @@ impl Transfers {
     fn account(&self, elapsed: Duration) {
         for entry in self.entries().values_mut() {
             let progress = entry.progress();
-            let uploaded = progress.stats.as_ref().map_or(0, |stats| stats.uploaded_bytes);
+            let Some(uploaded) = progress.stats.as_ref().map(|stats| stats.uploaded_bytes) else { continue };
             let delta = if uploaded >= entry.live_uploaded { uploaded - entry.live_uploaded } else { uploaded };
             entry.live_uploaded = uploaded;
             entry.record.uploaded_bytes += delta;
@@ -78,16 +81,15 @@ impl Transfers {
         let mut entries = self.entries();
         let used = queue::used_by_drive(&entries);
         queue::assign_slots(&mut entries, &settings, used.clone());
-        bandwidth::steer_background(&mut entries, self.bandwidth.background());
-        let mut actions = Vec::new();
+        let limits = bandwidth::steer_background(&mut entries, self.bandwidth.background());
+        let mut actions: Vec<Action> = limits.into_iter().map(|(handle, limits)| Action::Limit(handle, limits)).collect();
 
         for entry in entries.values() {
-            let Some(handle) = entry.handle.clone() else { continue };
+            let (Some(handle), Some(view)) = (entry.handle.clone(), entry.engine.as_ref()) else { continue };
             let progress = entry.progress();
             let engine = progress.engine_state();
             let wanted: BTreeSet<usize> = queue::wanted_files(entry, &progress);
-            let engine_selected: Option<BTreeSet<usize>> = handle.only_files().map(|files| files.into_iter().collect());
-            if !matches!(engine, Some(TorrentStatsState::Initializing { .. })) && engine_selected.as_ref() != Some(&wanted) {
+            if !matches!(engine, Some(TorrentStatsState::Initializing { .. })) && view.only_files.as_ref() != Some(&wanted) {
                 actions.push(Action::SelectFiles(handle.clone(), wanted.into_iter().collect()));
             }
             match (engine, entry.slot.runs()) {
@@ -116,16 +118,26 @@ impl Transfers {
 
     pub async fn reconcile(&self) {
         self.steer_bandwidth().await;
-        for action in self.plan() {
+        let actions = self.plan();
+        let acted = !actions.is_empty();
+        for action in actions {
             let outcome = match action {
-                Action::Pause(handle) => self.session.pause(&handle).await,
-                Action::Resume(handle) => self.session.unpause(&handle).await,
+                Action::Pause(handle) if engine::is_live(&handle) => self.session.pause(&handle).await,
+                Action::Resume(handle) if engine::is_paused(&handle) => self.session.unpause(&handle).await,
+                Action::Pause(_) | Action::Resume(_) => Ok(()),
                 Action::SelectFiles(handle, files) => self.session.update_only_files(&handle, &files).await,
+                Action::Limit(handle, limits) => {
+                    handle.set_ratelimits(limits);
+                    Ok(())
+                }
                 Action::Evict(hash) => self.remove(&hash, true).await.map_err(|error| anyhow::anyhow!(error.message)),
             };
             if let Err(error) = outcome {
                 tracing::warn!(error = format!("{error:#}"), "transfer scheduling step failed");
             }
+        }
+        if acted {
+            self.refresh_engine().await;
         }
         self.emit_changes();
     }

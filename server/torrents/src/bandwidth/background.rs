@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 use std::num::NonZeroU32;
+use std::sync::Arc;
 
 use librqbit::limits::LimitsConfig;
 
+use crate::engine::Handle;
 use crate::queue::Slot;
 use crate::transfers::Entry;
 
@@ -22,17 +24,19 @@ fn share(background: Background, active: u32) -> Option<NonZeroU32> {
     }
 }
 
-pub fn steer_background(entries: &mut HashMap<String, Entry>, background: Background) {
+pub fn steer_background(entries: &mut HashMap<String, Entry>, background: Background) -> Vec<(Handle, LimitsConfig)> {
     let active = entries.values().filter(|entry| entry.slot == Slot::Active).count() as u32;
+    let mut changes = Vec::new();
     for entry in entries.values_mut() {
         let is_background = entry.slot == Slot::Active;
         if is_background && background == Background::Paused {
             entry.slot = Slot::Queued(Some(PAUSED_WHILE_WATCHING));
         }
-        let Some(handle) = &entry.handle else { continue };
+        let (Some(handle), Some(view)) = (&entry.handle, &entry.engine) else { continue };
         let wanted = LimitsConfig { download_bps: share(background, active).filter(|_| is_background), upload_bps: None };
-        if handle.ratelimits() != wanted {
-            handle.set_ratelimits(wanted);
+        if view.limits != wanted {
+            changes.push((Arc::clone(handle), wanted));
         }
     }
+    changes
 }
