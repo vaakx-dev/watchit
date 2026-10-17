@@ -9,7 +9,6 @@ use std::sync::{Arc, Mutex};
 
 use watchit_core::AppResult;
 
-pub use ranking::same_tier;
 pub use result::{Candidate, TorrentResult};
 
 use crate::title_id::TitleId;

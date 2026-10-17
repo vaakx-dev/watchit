@@ -1,5 +1,6 @@
 mod api;
 mod decide;
+mod external;
 mod ffmpeg;
 mod hls;
 mod keyframes;
@@ -17,7 +18,7 @@ pub use api::{AudioTrack, ClientProfile, CreateSession, Mode, PlaybackSession, P
 pub use routes::router;
 pub use ffmpeg::SOURCE_FFMPEG_DIR;
 pub use service::Playback;
-pub use source::{SourceFuture, SourceInput, SourceRef, SourceResolver};
+pub use source::{FilesFuture, SourceFile, SourceFuture, SourceInput, SourceRef, SourceResolver};
 
 pub fn export_types(config: &Config) -> Result<(), ExportError> {
     CreateSession::export_all(config)?;

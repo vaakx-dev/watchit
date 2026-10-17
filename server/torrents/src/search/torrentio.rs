@@ -104,11 +104,13 @@ fn candidate(stream: Stream) -> Option<Candidate> {
 }
 
 fn label_resolution(label: &str) -> Option<Resolution> {
-    match label.split(' ').next()? {
-        "4k" => Some(Resolution::Uhd),
+    match label.split(' ').next()?.to_ascii_lowercase().as_str() {
+        "4k" | "2160p" => Some(Resolution::Uhd),
+        "2k" | "1440p" => Some(Resolution::Qhd),
         "1080p" => Some(Resolution::FullHd),
         "720p" => Some(Resolution::Hd),
-        "480p" => Some(Resolution::Sd),
+        "576p" | "480p" => Some(Resolution::Sd),
+        "360p" | "240p" | "144p" => Some(Resolution::Low),
         _ => None,
     }
 }

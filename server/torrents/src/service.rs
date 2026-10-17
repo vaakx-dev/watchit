@@ -7,7 +7,7 @@ use tokio::sync::watch;
 use watchit_core::{AppError, AppResult, Background, Context, StreamTokens, Viewer};
 
 use crate::engine;
-use crate::media::{MediaSource, raw_url};
+use crate::media::{MediaSource, TorrentFile, raw_url};
 use crate::search::Search;
 use crate::settings::{self, Settings};
 use crate::titles::Titles;
@@ -113,5 +113,12 @@ impl Torrents {
             return Ok(MediaSource::File(transfers.disk_path(&handle, file_index)?));
         }
         Ok(MediaSource::Url(format!("{origin}{}", raw_url(&self.tokens, viewer.profile, &info_hash, file_index))))
+    }
+
+    pub async fn files(&self, info_hash: &str) -> AppResult<Vec<TorrentFile>> {
+        let transfers = self.transfers().await?;
+        let handle = transfers.ready_handle(&info_hash.to_ascii_lowercase()).await?;
+        let files = engine::files_of(&handle).map_err(AppError::internal)?;
+        Ok(files.into_iter().map(|file| TorrentFile { index: file.index, path: file.path }).collect())
     }
 }

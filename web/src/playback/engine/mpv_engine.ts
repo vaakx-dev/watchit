@@ -1,6 +1,6 @@
 import { mpv_listen, mpv_send, type MpvValue } from './mpv_bridge';
 import { create_state_store } from './state_store';
-import type { Engine, EngineTrack, TimeRange } from './types';
+import type { Engine, EngineTrack, SubtitleFile, TimeRange } from './types';
 import { remember_volume, saved_volume } from './volume_memory';
 
 const OBSERVED = ['pause', 'time-pos', 'duration', 'volume', 'mute', 'track-list', 'aid', 'sid', 'paused-for-cache', 'seeking', 'eof-reached', 'demuxer-cache-state'];
@@ -31,6 +31,7 @@ export function create_mpv_engine(): Engine {
   const store = create_state_store();
   const flags = { cache: false, seeking: false };
   const waiting = () => flags.cache || flags.seeking;
+  let pending: SubtitleFile[] = [];
 
   function change(name: string, data: unknown) {
     if (name === 'pause') store.update({ paused: data === true });
@@ -38,6 +39,7 @@ export function create_mpv_engine(): Engine {
     if (name === 'duration') store.update({ duration: number(data) });
     if (name === 'volume') store.update({ volume: number(data) ?? 100 });
     if (name === 'mute') store.update({ muted: data === true });
+    if (name === 'track-list') add_subtitles();
     if (name === 'track-list') store.update({ audio_tracks: tracks(data, 'audio'), subtitle_tracks: tracks(data, 'sub') });
     if (name === 'aid') store.update({ audio: number(data) });
     if (name === 'sid') store.update({ subtitle: number(data) });
@@ -46,6 +48,12 @@ export function create_mpv_engine(): Engine {
     if (name === 'paused-for-cache') flags.cache = data === true;
     if (name === 'seeking') flags.seeking = data === true;
     if (name === 'paused-for-cache' || name === 'seeking') store.update({ waiting: waiting() });
+  }
+
+  function add_subtitles() {
+    const files = pending;
+    pending = [];
+    for (const file of files) mpv_send(['mpv-command', ['sub-add', file.url, 'auto', file.title ?? '', file.language ?? '']]);
   }
 
   const unlisten = mpv_listen(([kind, payload]) => {
@@ -61,6 +69,7 @@ export function create_mpv_engine(): Engine {
       store.reset('volume', 'muted', 'paused');
       set('start', media.start > 0 ? String(media.start) : 'none');
       set('pause', false);
+      pending = media.subtitles;
       mpv_send(['mpv-command', ['loadfile', new URL(media.url, window.location.href).href]]);
     },
     play: () => set('pause', false),

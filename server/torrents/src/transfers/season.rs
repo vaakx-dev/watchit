@@ -6,12 +6,14 @@ use super::Transfers;
 use super::model::{Kind, Transfer};
 use super::record::{Choice, Pick};
 use crate::release::episode;
-use crate::search::{Candidate, same_tier};
+use crate::search::Candidate;
 use crate::title_id::TitleId;
 
 fn best_pack(found: &[Candidate], season: u32) -> Option<&Candidate> {
-    let best = found.first()?;
-    found.iter().filter(|candidate| same_tier(candidate, best)).find(|candidate| episode::coverage(&candidate.result.name).is_pack_for(season))
+    found
+        .iter()
+        .filter(|candidate| candidate.result.seeders.is_none_or(|seeders| seeders > 0))
+        .find(|candidate| episode::coverage(&candidate.result.name).is_pack_for(season))
 }
 
 impl Transfers {

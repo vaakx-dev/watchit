@@ -9,21 +9,27 @@ use ts_rs::TS;
 pub enum Resolution {
     #[serde(rename = "2160p")]
     Uhd,
+    #[serde(rename = "1440p")]
+    Qhd,
     #[serde(rename = "1080p")]
     FullHd,
     #[serde(rename = "720p")]
     Hd,
     #[serde(rename = "480p")]
     Sd,
+    #[serde(rename = "360p")]
+    Low,
 }
 
 impl Resolution {
     pub fn label(self) -> &'static str {
         match self {
             Self::Uhd => "2160p",
+            Self::Qhd => "1440p",
             Self::FullHd => "1080p",
             Self::Hd => "720p",
             Self::Sd => "480p",
+            Self::Low => "360p",
         }
     }
 }
@@ -57,9 +63,11 @@ fn regex(pattern: &str) -> Regex {
 }
 
 static UHD: LazyLock<Regex> = LazyLock::new(|| regex(r"(?i)\b4k\b|21600?[pi]|\b3840x\d{4}\b|\buhd\b"));
+static QHD: LazyLock<Regex> = LazyLock::new(|| regex(r"(?i)\b2k\b|\b14400?[pi]\b|\b2560x\d{3,4}\b|\bqhd\b"));
 static FULL_HD: LazyLock<Regex> = LazyLock::new(|| regex(r"(?i)10800?[pi]|\b1920x\d{3,4}\b|\bfhd\b"));
 static HD: LazyLock<Regex> = LazyLock::new(|| regex(r"(?i)\b7200?[pi]\b|\b1280x\d{3}\b"));
-static SD: LazyLock<Regex> = LazyLock::new(|| regex(r"(?i)\b480[pi]\b"));
+static SD: LazyLock<Regex> = LazyLock::new(|| regex(r"(?i)\b(480|576)[pi]\b"));
+static LOW: LazyLock<Regex> = LazyLock::new(|| regex(r"(?i)\b(360|240|144)[pi]\b"));
 
 static DOLBY_VISION: LazyLock<Regex> = LazyLock::new(|| regex(r"(?i)\b(dv|dovi|dolby[ .]?v(ision)?)\b"));
 static HDR10_PLUS: LazyLock<Regex> = LazyLock::new(|| regex(r"(?i)\bhdr10(\+|p(lus)?\b)"));
@@ -85,7 +93,7 @@ static CAM: LazyLock<Regex> = LazyLock::new(|| {
 static THREE_D: LazyLock<Regex> = LazyLock::new(|| regex(r"(?i)\b3d\b"));
 
 pub fn resolution(text: &str) -> Option<Resolution> {
-    [(&UHD, Resolution::Uhd), (&FULL_HD, Resolution::FullHd), (&HD, Resolution::Hd), (&SD, Resolution::Sd)]
+    [(&UHD, Resolution::Uhd), (&QHD, Resolution::Qhd), (&FULL_HD, Resolution::FullHd), (&HD, Resolution::Hd), (&SD, Resolution::Sd), (&LOW, Resolution::Low)]
         .into_iter()
         .find(|(pattern, _)| pattern.is_match(text))
         .map(|(_, resolution)| resolution)

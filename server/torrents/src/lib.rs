@@ -13,7 +13,7 @@ use axum::Router;
 use axum::routing::{get, patch, post};
 use ts_rs::{Config, ExportError, TS};
 
-pub use media::{MediaSource, raw_path};
+pub use media::{MediaSource, TorrentFile, raw_path};
 pub use service::Torrents;
 pub use titles::{NoTitles, Titles};
 

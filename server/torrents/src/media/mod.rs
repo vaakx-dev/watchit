@@ -12,6 +12,12 @@ pub enum MediaSource {
     Url(String),
 }
 
+#[derive(Clone, Debug)]
+pub struct TorrentFile {
+    pub index: usize,
+    pub path: String,
+}
+
 pub fn raw_path(info_hash: &str, file_index: usize) -> String {
     format!("/api/torrents/{info_hash}/{file_index}/raw")
 }

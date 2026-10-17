@@ -14,12 +14,14 @@ const THREE_D_PENALTY: f64 = 4.0;
 fn tier(candidate: &Candidate) -> u8 {
     let alive = candidate.result.seeders.is_none_or(|seeders| seeders > 0);
     let quality = match (candidate.traits.cam, candidate.result.resolution) {
-        (true, _) => 5,
+        (true, _) => 7,
         (false, Some(Resolution::Uhd)) => 0,
-        (false, Some(Resolution::FullHd)) => 1,
-        (false, Some(Resolution::Hd)) => 2,
-        (false, Some(Resolution::Sd)) => 3,
-        (false, None) => 4,
+        (false, Some(Resolution::Qhd)) => 1,
+        (false, Some(Resolution::FullHd)) => 2,
+        (false, Some(Resolution::Hd)) => 3,
+        (false, Some(Resolution::Sd)) => 4,
+        (false, Some(Resolution::Low)) => 5,
+        (false, None) => 6,
     };
     if alive { quality } else { 10 + quality }
 }
@@ -66,8 +68,4 @@ pub fn rank(candidates: &mut [Candidate], runtime_minutes: Option<u32>) {
             .then_with(|| score(b, runtime_minutes).partial_cmp(&score(a, runtime_minutes)).unwrap_or(Ordering::Equal))
             .then_with(|| b.result.seeders.cmp(&a.result.seeders))
     });
-}
-
-pub fn same_tier(a: &Candidate, b: &Candidate) -> bool {
-    tier(a) == tier(b)
 }

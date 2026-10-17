@@ -8,6 +8,7 @@ use tokio::sync::OnceCell;
 use watchit_core::{AppError, AppResult, Background, Context, StreamTokens, Viewer};
 
 use crate::api::{CreateSession, Mode, PlaybackSession, Player};
+use crate::external::{self, ExternalSubtitle};
 use crate::decide::{VideoPlan, decide};
 use crate::ffmpeg::{Encoders, Tools, detect};
 use crate::hls::{Job, Recipe, segment_at, vod_playlist};
@@ -84,10 +85,11 @@ impl Playback {
                 Some(Job::start(recipe, self.tools.clone(), self.background.clone(), self.sessions_dir.join(&id), first)?)
             }
         };
+        let external = self.external_subtitles(viewer, &source).await;
         let token = self.tokens.mint(viewer.profile, &session_prefix(&id));
         let direct_url = self.tokens.url(viewer.profile, &raw_path(&source));
         let converts_subtitles = request.client.player == Player::Browser;
-        let parts = SessionParts { id: id.clone(), owner: viewer.profile, source, input, media, mode: decision.mode, job, token, direct_url, converts_subtitles };
+        let parts = SessionParts { id: id.clone(), owner: viewer.profile, source, input, media, mode: decision.mode, job, token, direct_url, converts_subtitles, external };
         let session = Session::new(parts);
         let response = session.response.clone();
         self.lock_sessions().insert(id, Arc::new(session));
@@ -123,8 +125,29 @@ impl Playback {
         path
     }
 
+    async fn external_subtitles(&self, viewer: &Viewer, source: &SourceRef) -> Vec<ExternalSubtitle> {
+        let Ok(files) = self.sources.files(&source.info_hash).await else { return Vec::new() };
+        let mut found = Vec::new();
+        for (offset, candidate) in external::matching(&files, source.file_index).into_iter().enumerate() {
+            let subtitle_source = SourceRef { info_hash: source.info_hash.clone(), file_index: candidate.file_index };
+            let Ok(input) = self.sources.resolve(viewer, &subtitle_source).await else { continue };
+            found.push(ExternalSubtitle {
+                index: external::FIRST_INDEX + offset as u32,
+                source: subtitle_source,
+                input,
+                language: candidate.language,
+                title: candidate.title,
+                codec: candidate.codec,
+            });
+        }
+        found
+    }
+
     pub async fn subtitle(&self, id: &str, stream: u32) -> AppResult<PathBuf> {
         let session = self.session(id)?;
+        if let Some(subtitle) = session.external.iter().find(|subtitle| subtitle.index == stream) {
+            return self.subtitles.webvtt(&subtitle.source, &subtitle.input, 0).await;
+        }
         let listed = session.response.subtitle_tracks.iter().any(|track| track.index == stream && track.url.is_some());
         if !listed {
             return Err(not_found());

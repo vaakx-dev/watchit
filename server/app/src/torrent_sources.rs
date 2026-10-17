@@ -1,7 +1,7 @@
 use std::net::SocketAddr;
 
 use watchit_core::Viewer;
-use watchit_playback::{SourceFuture, SourceInput, SourceRef, SourceResolver};
+use watchit_playback::{FilesFuture, SourceFile, SourceFuture, SourceInput, SourceRef, SourceResolver};
 use watchit_torrents::{MediaSource, Torrents};
 
 pub struct TorrentSources {
@@ -23,6 +23,13 @@ impl SourceResolver for TorrentSources {
                 MediaSource::File(path) => SourceInput::File(path),
                 MediaSource::Url(url) => SourceInput::Url(url),
             })
+        })
+    }
+
+    fn files<'a>(&'a self, info_hash: &'a str) -> FilesFuture<'a> {
+        Box::pin(async move {
+            let files = self.torrents.files(info_hash).await?;
+            Ok(files.into_iter().map(|file| SourceFile { index: file.index as u32, path: file.path }).collect())
         })
     }
 }

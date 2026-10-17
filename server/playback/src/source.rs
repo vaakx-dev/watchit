@@ -28,8 +28,17 @@ impl SourceInput {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct SourceFile {
+    pub index: u32,
+    pub path: String,
+}
+
+pub type FilesFuture<'a> = Pin<Box<dyn Future<Output = AppResult<Vec<SourceFile>>> + Send + 'a>>;
+
 pub type SourceFuture<'a> = Pin<Box<dyn Future<Output = AppResult<SourceInput>> + Send + 'a>>;
 
 pub trait SourceResolver: Send + Sync + 'static {
     fn resolve<'a>(&'a self, viewer: &'a Viewer, source: &'a SourceRef) -> SourceFuture<'a>;
+    fn files<'a>(&'a self, info_hash: &'a str) -> FilesFuture<'a>;
 }

@@ -99,4 +99,5 @@ pub struct SubtitleTrack {
     pub codec: String,
     pub default: bool,
     pub url: Option<String>,
+    pub external: bool,
 }
