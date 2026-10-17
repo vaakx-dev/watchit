@@ -17,7 +17,7 @@ tokio-util = "0.7.20"
 tower = { version = "0.5.3", default-features = false }
 tower-http = { version = "0.7.1", features = ["compression-br", "compression-gzip", "fs", "set-header"] }
 tracing = "0.1.44"
-tracing-subscriber = "0.3.23"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 ts-rs = "12.0.1"
 watchit-artwork = { version = "0.1.0", path = "../artwork" }
 watchit-catalog = { version = "0.1.0", path = "../catalog" }
