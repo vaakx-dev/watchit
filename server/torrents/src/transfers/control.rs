@@ -18,12 +18,10 @@ pub struct Change {
 impl Transfers {
     pub async fn change(self: &Arc<Self>, id: &str, change: Change) -> AppResult<Transfer> {
         let info_hash = valid_info_hash(id)?;
-        let mut kept = false;
         let (refetch, restart) = {
             let mut entries = self.entries();
             let entry = entries.get_mut(&info_hash).ok_or_else(|| AppError::not_found("Transfer not found."))?;
             if let Some(kind) = change.kind {
-                kept = entry.record.kind == Kind::Stream && kind == Kind::Download;
                 entry.record.kind = entry.record.kind.max(kind);
             }
             if let Some(notify) = change.notify_when_ready {
@@ -50,9 +48,6 @@ impl Transfers {
         if let Some(handle) = restart {
             self.session.unpause(&handle).await.map_err(|error| AppError::internal(format!("{error:#}")))?;
         }
-        if kept {
-            self.move_to_default(&info_hash).await;
-        }
         self.wake();
         self.transfer(&info_hash).ok_or_else(|| AppError::not_found("Transfer not found."))
     }
@@ -73,6 +68,9 @@ impl Transfers {
         self.db.run(move |conn| super::store::delete(conn, &hash)).await?;
         if let Some(handle) = &entry.handle {
             self.session.delete(handle.id().into(), delete_files).await.map_err(|error| AppError::internal(format!("{error:#}")))?;
+        }
+        if delete_files {
+            Transfers::unlink_library(entry.library, self.settings().download_dir()).await;
         }
         self.emit_removed(&info_hash);
         self.wake();

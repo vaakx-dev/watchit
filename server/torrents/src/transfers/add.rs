@@ -8,7 +8,6 @@ use super::model::{Kind, Transfer};
 use super::pick;
 use super::record::{Pick, Record};
 use super::{Transfers, now};
-use crate::locations::is_series_pick;
 use crate::engine::{self, AddRequest, Metadata};
 use crate::queue;
 
@@ -32,17 +31,13 @@ fn output_folder(download_dir: PathBuf, metadata: &Metadata) -> PathBuf {
 }
 
 impl Transfers {
-    pub async fn add(self: &Arc<Self>, info_hash: &str, pick: Pick, kind: Kind, folder: Option<PathBuf>, notify_when_ready: bool) -> AppResult<Transfer> {
+    pub async fn add(self: &Arc<Self>, info_hash: &str, pick: Pick, kind: Kind, notify_when_ready: bool) -> AppResult<Transfer> {
         let info_hash = valid_info_hash(info_hash)?;
         let trackers = self.search.trackers(&info_hash);
-        let mut moved_to = None;
-        let mut kept = false;
         let existing = {
             let mut entries = self.entries();
             match entries.get_mut(&info_hash) {
                 Some(entry) => {
-                    kept = entry.record.kind == Kind::Stream && kind == Kind::Download;
-                    moved_to = folder;
                     entry.record.kind = entry.record.kind.max(kind);
                     entry.record.notify_when_ready |= notify_when_ready;
                     entry.record.last_used_at = now();
@@ -71,7 +66,7 @@ impl Transfers {
                         seeded_seconds: 0,
                         trackers,
                         error: None,
-                        download_dir: folder.unwrap_or_else(|| self.settings().folder_for(kind, is_series_pick(&pick))),
+                        download_dir: self.settings().torrents_folder(),
                         picks: vec![pick],
                         notify_when_ready,
                     };
@@ -83,13 +78,6 @@ impl Transfers {
             }
         };
         self.persist(&info_hash).await?;
-        match moved_to {
-            Some(target) => {
-                self.relocate(&info_hash, target).await?;
-            }
-            None if kept => self.move_to_default(&info_hash).await,
-            None => {}
-        }
         if !existing {
             self.fetch_metadata(&info_hash);
         }

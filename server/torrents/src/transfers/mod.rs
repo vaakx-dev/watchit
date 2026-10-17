@@ -15,6 +15,7 @@ mod store;
 
 use std::collections::HashMap;
 use std::path::PathBuf;
+use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Mutex, MutexGuard, RwLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -47,6 +48,7 @@ pub struct Transfers {
     entries: Mutex<HashMap<String, Entry>>,
     events: broadcast::Sender<TransferEvent>,
     pub resolved: Notify,
+    pub importing: AtomicBool,
     wake: Notify,
 }
 
@@ -75,6 +77,7 @@ impl Transfers {
             entries: Mutex::default(),
             events: broadcast::channel(EVENT_BUFFER).0,
             resolved: Notify::new(),
+            importing: AtomicBool::new(false),
             wake: Notify::new(),
         })
     }
@@ -106,12 +109,17 @@ impl Transfers {
             .await
     }
 
-    pub async fn update_settings(&self, settings: Settings) -> AppResult<Settings> {
+    pub async fn update_settings(self: &Arc<Self>, settings: Settings) -> AppResult<Settings> {
         let settings = settings.validated()?;
+        let moved = settings.download_dir != self.settings().download_dir;
         let saved = settings.clone();
         self.db.run(move |conn| crate::settings::save(conn, &saved)).await?;
         *self.settings.write().expect("settings lock") = settings.clone();
         self.bandwidth.reschedule();
+        if moved {
+            let transfers = Arc::clone(self);
+            tokio::spawn(async move { transfers.relocate_all().await });
+        }
         self.wake();
         Ok(settings)
     }

@@ -1,4 +1,3 @@
-use std::path::PathBuf;
 use std::sync::Arc;
 
 use watchit_core::{AppError, AppResult};
@@ -14,7 +13,6 @@ pub struct SeasonRequest {
     pub series: String,
     pub season: u32,
     pub info_hash: Option<String>,
-    pub folder: Option<PathBuf>,
     pub notify_when_ready: bool,
 }
 
@@ -30,11 +28,10 @@ impl Transfers {
         let TitleId::Title(series) = TitleId::parse(&request.series)? else {
             return Err(AppError::bad_request("A season download needs a series id."));
         };
-        let SeasonRequest { season, folder, notify_when_ready, .. } = request;
+        let SeasonRequest { season, notify_when_ready, .. } = request;
         let pack = |info_hash: String| {
             let pick = Pick { title_id: series.clone(), choice: Choice::Season { season } };
-            let folder = folder.clone();
-            async move { self.add(&info_hash, pick, Kind::Download, folder, notify_when_ready).await.map(|transfer| vec![transfer]) }
+            async move { self.add(&info_hash, pick, Kind::Download, notify_when_ready).await.map(|transfer| vec![transfer]) }
         };
         if let Some(info_hash) = request.info_hash {
             return pack(info_hash).await;
@@ -54,7 +51,7 @@ impl Transfers {
             let results = if number == first { found.clone() } else { self.search.ranked(&title, quality).await?.candidates };
             let Some(best) = results.first() else { continue };
             let pick = Pick::files_or(&title.to_string(), best.result.file_index.map(|index| vec![index]), Choice::Main);
-            added.push(self.add(&best.result.info_hash, pick, Kind::Download, folder.clone(), notify_when_ready).await?);
+            added.push(self.add(&best.result.info_hash, pick, Kind::Download, notify_when_ready).await?);
         }
         if added.is_empty() {
             return Err(AppError::not_found("No torrents were found for this season."));

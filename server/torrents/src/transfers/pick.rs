@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 
 use super::record::{Choice, FileRecord, Pick};
 use crate::engine::MetadataFile;
+use crate::locations::subtitles::{self, Video};
 use crate::release::{episode, files};
 use crate::title_id::TitleId;
 
@@ -41,6 +42,22 @@ fn record(file: &MetadataFile, title_id: Option<String>) -> FileRecord {
     FileRecord { index: file.index, name: file.path.clone(), size_bytes: file.size_bytes, title_id }
 }
 
+fn with_subtitles(mut chosen: Vec<FileRecord>, available: &[MetadataFile], torrent_name: &str) -> Vec<FileRecord> {
+    let videos: Vec<Video> = chosen
+        .iter()
+        .filter(|file| files::is_video(&file.name))
+        .filter_map(|file| file.title_id.as_deref().map(|title_id| Video { path: &file.name, title_id }))
+        .collect();
+    let companions: Vec<FileRecord> = available
+        .iter()
+        .filter(|file| subtitles::is_subtitle(&file.path) && !chosen.iter().any(|known| known.index == file.index))
+        .filter(|file| subtitles::owner(&file.path, &videos, torrent_name).is_some())
+        .map(|file| record(file, None))
+        .collect();
+    chosen.extend(companions);
+    chosen
+}
+
 fn pick_files(pick: &Pick, available: &[MetadataFile], torrent_name: &str) -> Vec<FileRecord> {
     let Ok(title) = TitleId::parse(&pick.title_id) else { return Vec::new() };
     let series = match &pick.choice {
@@ -48,7 +65,7 @@ fn pick_files(pick: &Pick, available: &[MetadataFile], torrent_name: &str) -> Ve
         _ => title.series().map(str::to_owned),
     };
     let context = Context { title, series, torrent_name };
-    match &pick.choice {
+    let chosen = match &pick.choice {
         Choice::Files { indexes } => available
             .iter()
             .filter(|file| indexes.contains(&file.index))
@@ -74,7 +91,8 @@ fn pick_files(pick: &Pick, available: &[MetadataFile], torrent_name: &str) -> Ve
             .filter(|file| episode::file_episode(&file.path, torrent_name).is_some_and(|found| found.season == *season))
             .map(|file| record(file, context.episode_of(file)))
             .collect(),
-    }
+    };
+    with_subtitles(chosen, available, torrent_name)
 }
 
 pub fn resolve(picks: &[Pick], available: &[MetadataFile], torrent_name: &str, existing: &[FileRecord]) -> Vec<FileRecord> {

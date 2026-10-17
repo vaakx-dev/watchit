@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use watchit_catalog::Catalog;
 use watchit_core::Db;
-use watchit_torrents::Titles;
+use watchit_torrents::{TitleName, Titles};
 
 pub struct CatalogTitles {
     catalog: Catalog,
@@ -31,5 +31,12 @@ impl Titles for CatalogTitles {
         let series = series_id.to_owned();
         let ids = self.db.run(move |conn| catalog.season_episodes(conn, &series, i64::from(season))).await;
         ids.unwrap_or_default().iter().filter_map(|id| episode_number(id)).collect()
+    }
+
+    async fn name(&self, title_id: &str) -> Option<TitleName> {
+        let catalog = self.catalog.clone();
+        let ids = vec![title_id.to_owned()];
+        let (entries, _) = self.db.run(move |conn| catalog.entries(conn, &ids)).await.ok()?;
+        entries.into_iter().next().map(|entry| TitleName { title: entry.title, year: entry.year })
     }
 }

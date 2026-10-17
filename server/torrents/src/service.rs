@@ -75,6 +75,7 @@ impl Torrents {
             settings::create_table(conn)?;
             bandwidth::create_table(conn)?;
             transfers::create_tables(conn)?;
+            crate::locations::create_library_table(conn)?;
             queue::create_table(conn)?;
             quality::create_table(conn)
         })?;
@@ -133,7 +134,7 @@ impl Torrents {
         transfers.select_file(&info_hash, file_index, &handle)?;
         transfers.resume_for_playback(&info_hash).await?;
         if transfers.complete_file(&info_hash, file_index) {
-            return Ok(MediaSource::File(transfers.disk_path(&handle, file_index)?));
+            return Ok(MediaSource::File(transfers.finished_path(&info_hash, &handle, file_index)?));
         }
         Ok(MediaSource::Url(format!("{origin}{}", raw_url(&self.tokens, viewer.profile, &info_hash, file_index))))
     }

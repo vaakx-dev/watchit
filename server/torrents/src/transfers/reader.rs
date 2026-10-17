@@ -105,7 +105,7 @@ impl Transfers {
         let handle = self.ready_handle(info_hash).await?;
         let (name, len, guard) = self.start_reading(info_hash, index, &handle)?;
         if self.complete_file(info_hash, index) {
-            let file = tokio::fs::File::open(self.disk_path(&handle, index)?).await.map_err(AppError::internal)?;
+            let file = tokio::fs::File::open(self.finished_path(info_hash, &handle, index)?).await.map_err(AppError::internal)?;
             return Ok(OpenedFile { name, len, reader: Box::new(file), guard });
         }
         handle.wait_until_initialized().await.map_err(engine_error)?;

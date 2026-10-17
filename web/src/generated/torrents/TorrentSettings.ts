@@ -2,4 +2,4 @@
 import type { SpeedSchedule } from "./SpeedSchedule";
 import type { WhileWatching } from "./WhileWatching";
 
-export type TorrentSettings = { download_dir: string, movie_dir: string | null, series_dir: string | null, disk_budget_bytes: number | null, max_download_bps: number | null, max_upload_bps: number | null, seed_ratio: number | null, seed_minutes: number | null, max_active: number, alt_download_bps: number | null, alt_upload_bps: number | null, schedule: SpeedSchedule, while_watching: WhileWatching, while_watching_bps: number | null, };
+export type TorrentSettings = { download_dir: string, disk_budget_bytes: number | null, max_download_bps: number | null, max_upload_bps: number | null, seed_ratio: number | null, seed_minutes: number | null, max_active: number, alt_download_bps: number | null, alt_upload_bps: number | null, schedule: SpeedSchedule, while_watching: WhileWatching, while_watching_bps: number | null, };

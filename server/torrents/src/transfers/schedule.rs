@@ -1,6 +1,7 @@
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::path::PathBuf;
 use std::future::Future;
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use librqbit::TorrentStatsState;
@@ -24,7 +25,7 @@ enum Action {
 }
 
 impl Transfers {
-    pub async fn run_scheduler(&self, stopping: impl Future<Output = ()>) {
+    pub async fn run_scheduler(self: &Arc<Self>, stopping: impl Future<Output = ()>) {
         tokio::pin!(stopping);
         let mut last = Instant::now();
         let mut ticks = 0u32;
@@ -39,6 +40,7 @@ impl Transfers {
             self.account(elapsed);
             self.sample_readiness(elapsed).await;
             self.reconcile().await;
+            self.import_finished();
             ticks += 1;
             if ticks.is_multiple_of(PERSIST_EVERY) {
                 self.persist_all().await;

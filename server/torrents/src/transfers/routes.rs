@@ -16,7 +16,7 @@ use super::model::{Kind, Transfer};
 use super::record::{Choice, Pick};
 use super::{SeasonRequest, TransferEvent};
 use crate::bandwidth::SpeedStatus;
-use crate::locations::{Disk, chosen_folder};
+use crate::locations::Disk;
 use crate::service::Torrents;
 use crate::title_id::TitleId;
 
@@ -39,9 +39,6 @@ pub struct NewTransfer {
     #[serde(default)]
     #[ts(optional)]
     notify_when_ready: Option<bool>,
-    #[serde(default)]
-    #[ts(optional)]
-    download_dir: Option<String>,
 }
 
 #[derive(Deserialize, TS)]
@@ -56,9 +53,6 @@ pub struct SeasonDownload {
     #[serde(default)]
     #[ts(optional)]
     notify_when_ready: Option<bool>,
-    #[serde(default)]
-    #[ts(optional)]
-    download_dir: Option<String>,
 }
 
 #[derive(Deserialize, TS)]
@@ -77,9 +71,6 @@ pub struct TransferPatch {
     #[serde(default)]
     #[ts(optional)]
     queue_position: Option<u32>,
-    #[serde(default)]
-    #[ts(optional)]
-    download_dir: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -93,8 +84,7 @@ pub async fn list(State(torrents): State<Torrents>) -> AppResult<Json<TransferLi
     Ok(Json(TransferList { transfers: transfers.all(), disks: transfers.disks(), speed: transfers.bandwidth.status() }))
 }
 
-pub async fn create(State(torrents): State<Torrents>, viewer: Viewer, JsonBody(body): JsonBody<NewTransfer>) -> AppResult<Json<Transfer>> {
-    let folder = chosen_folder(&viewer, body.download_dir.as_deref())?;
+pub async fn create(State(torrents): State<Torrents>, JsonBody(body): JsonBody<NewTransfer>) -> AppResult<Json<Transfer>> {
     let title = TitleId::parse(&body.title_id)?.to_string();
     if body.file_indexes.as_ref().is_some_and(Vec::is_empty) {
         return Err(AppError::bad_request("Pick at least one file, or send null for the whole torrent."));
@@ -105,41 +95,26 @@ pub async fn create(State(torrents): State<Torrents>, viewer: Viewer, JsonBody(b
     };
     let pick = Pick::files_or(&title, body.file_indexes, fallback);
     let transfers = torrents.transfers().await?;
-    transfers.add(&body.info_hash, pick, body.kind, folder, body.notify_when_ready.unwrap_or(false)).await.map(Json)
+    transfers.add(&body.info_hash, pick, body.kind, body.notify_when_ready.unwrap_or(false)).await.map(Json)
 }
 
-pub async fn season(
-    State(torrents): State<Torrents>,
-    viewer: Viewer,
-    JsonBody(body): JsonBody<SeasonDownload>,
-) -> AppResult<Json<Vec<Transfer>>> {
-    let folder = chosen_folder(&viewer, body.download_dir.as_deref())?;
+pub async fn season(State(torrents): State<Torrents>, viewer: Viewer, JsonBody(body): JsonBody<SeasonDownload>) -> AppResult<Json<Vec<Transfer>>> {
     let quality = torrents.quality(viewer.profile).await?;
     let transfers = torrents.transfers().await?;
     let request = SeasonRequest {
         series: body.series_id,
         season: body.season,
         info_hash: body.info_hash,
-        folder,
         notify_when_ready: body.notify_when_ready.unwrap_or(false),
     };
     transfers.add_season(request, &quality).await.map(Json)
 }
 
-pub async fn update(
-    State(torrents): State<Torrents>,
-    viewer: Viewer,
-    Path(id): Path<String>,
-    JsonBody(body): JsonBody<TransferPatch>,
-) -> AppResult<Json<Transfer>> {
+pub async fn update(State(torrents): State<Torrents>, Path(id): Path<String>, JsonBody(body): JsonBody<TransferPatch>) -> AppResult<Json<Transfer>> {
     if body.kind == Some(Kind::Stream) {
         return Err(AppError::bad_request("A transfer can only be changed into a download."));
     }
-    let folder = chosen_folder(&viewer, body.download_dir.as_deref())?;
     let transfers = torrents.transfers().await?;
-    if let Some(folder) = folder {
-        transfers.relocate(&id, folder).await?;
-    }
     transfers.change(&id, Change { paused: body.paused, kind: body.kind, queue_position: body.queue_position, notify_when_ready: body.notify_when_ready }).await.map(Json)
 }
 

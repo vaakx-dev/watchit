@@ -72,7 +72,10 @@ impl Transfers {
             }
         };
         match job {
-            None => self.persist(&info_hash).await?,
+            None => {
+                self.persist(&info_hash).await?;
+                self.drop_library_links(&info_hash, None).await;
+            }
             Some(job) => {
                 self.emit_changes();
                 let transfers = Arc::clone(self);
@@ -85,32 +88,47 @@ impl Transfers {
     fn begin_move(&self, entry: &mut Entry, target: &Path) {
         let before = snapshot(entry);
         entry.handle = None;
-        entry.move_error = None;
+        entry.file_error = None;
         entry.relocation = Some(Moving { target: target.to_path_buf(), before });
     }
 
-    pub async fn move_to_default(self: &Arc<Self>, info_hash: &str) {
-        let target = {
-            let entries = self.entries();
-            let Some(entry) = entries.get(info_hash) else { return };
-            let series = super::defaults::is_series_title(&entry.record.title_id);
-            self.settings().folder_for(Kind::Download, series)
-        };
-        if let Err(error) = self.relocate(info_hash, target).await {
-            tracing::warn!(%error, "could not move a kept download to its folder");
+    pub async fn relocate_all(self: &Arc<Self>) {
+        let target = self.settings().torrents_folder();
+        let hashes: Vec<String> = self.entries().keys().cloned().collect();
+        for hash in hashes {
+            if let Err(error) = self.relocate(&hash, target.clone()).await {
+                tracing::warn!(%hash, %error, "could not move a download to the new download folder");
+            }
         }
+    }
+
+    async fn drop_library_links(&self, info_hash: &str, old_download_dir: Option<&Path>) {
+        let links = match self.entries().get_mut(info_hash) {
+            Some(entry) => {
+                entry.import_failed.clear();
+                std::mem::take(&mut entry.library)
+            }
+            None => return,
+        };
+        if let Some(old) = old_download_dir {
+            Transfers::unlink_library(links, old).await;
+        }
+        self.save_library(info_hash, Vec::new()).await;
     }
 
     async fn run_move(self: Arc<Self>, job: Job) {
         let outcome = self.move_files_of(&job).await;
         let moved = outcome.is_ok();
+        if moved {
+            self.drop_library_links(&job.info_hash, job.from_dir.parent()).await;
+        }
         let location = if moved { job.to_dir.clone() } else { job.from_dir.clone() };
         let reattached = self.reattach(&job, &location).await;
         {
             let mut entries = self.entries();
             if let Some(entry) = entries.get_mut(&job.info_hash) {
                 entry.relocation = None;
-                entry.move_error = outcome.err();
+                entry.file_error = outcome.err();
                 match reattached {
                     Ok(handle) => {
                         entry.record.download_dir = location;
