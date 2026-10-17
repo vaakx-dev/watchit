@@ -2,6 +2,8 @@ import { App } from '../app';
 import { use_resource } from '../catalog/api';
 import { CatalogStatus } from '../catalog/components/status';
 import { Brand } from '../shell/brand';
+import { framed } from '../title_bar/frame';
+import { WindowStrip } from '../title_bar/window_strip';
 import { ProfilePicker } from './profile_picker';
 import type { Profile, SessionState } from './types';
 
@@ -19,6 +21,7 @@ export function ProfileGate() {
     return <App profile={session.resource.data.profile} profiles={profiles.resource.data} on_profiles_changed={refresh} />;
   }
   return <main className="profile-gate page-gutter">
+    {framed && <WindowStrip />}
     <Brand />
     {profiles.resource.status === 'ready' && session.resource.status === 'ready'
       ? <ProfilePicker profiles={profiles.resource.data} current={null} on_changed={refresh} />

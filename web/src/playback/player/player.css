@@ -2,7 +2,9 @@
 
 .player-overlay { position: absolute; inset: 0; color: #eee; text-shadow: 0 0 2px rgb(0 0 0 / .5); pointer-events: none; opacity: 0; transition: opacity .1s cubic-bezier(.4, 0, 1, 1); }
 .player-overlay[data-shown] { opacity: 1; transition: opacity .25s cubic-bezier(0, 0, .2, 1); }
-.player-overlay[data-shown] :is(.player-top-bar, .player-bottom) { pointer-events: auto; }
+.player-overlay[data-shown] :is(.player-top-bar, .player-bottom, .window-controls) { pointer-events: auto; }
+.player-overlay > .window-controls { position: absolute; top: 0; right: 0; }
+.player-overlay:has(> .window-controls) .player-top-bar { right: 150px; }
 .player-gradient { position: absolute; left: 0; right: 0; height: 98px; }
 .player-gradient.top { top: 0; background: linear-gradient(var(--player-fade)); }
 .player-gradient.bottom { bottom: 0; background: linear-gradient(to top, var(--player-fade)); }

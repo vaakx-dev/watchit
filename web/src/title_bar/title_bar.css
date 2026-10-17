@@ -1,0 +1,20 @@
+html.framed { --bar-height: 48px; }
+
+.window-controls { display: flex; flex: none; align-self: flex-start; height: var(--bar-height); color: #fff; }
+.window-controls button { display: grid; place-items: center; width: 46px; height: 100%; border-radius: 0; color: inherit; }
+.window-controls button:focus-visible { outline-offset: -2px; }
+.window-controls button:is(:hover, [data-pointer="hover"]) { background: rgb(255 255 255 / .0605); }
+.window-controls button:is(:active, [data-pointer="press"]) { background: rgb(255 255 255 / .0419); color: rgb(255 255 255 / .786); }
+.window-controls .close:hover { background: #c42b1c; color: #fff; }
+.window-controls .close:active { background: rgb(196 43 28 / .9); color: rgb(255 255 255 / .7); }
+.window-controls[data-inactive] button:not(:hover, [data-pointer="hover"]) { color: rgb(255 255 255 / .3628); }
+.window-controls .minimize .lucide { width: 17px; height: 17px; }
+.window-controls .maximize .lucide { width: 13px; height: 13px; }
+.window-controls .restore .lucide { width: 12px; height: 12px; transform: scaleX(-1); }
+.window-controls .close .lucide { width: 20px; height: 20px; }
+
+:is(.top-bar, .embed-bar) > .window-controls { height: calc(var(--bar-height) - 1px); }
+.top-bar[data-tauri-drag-region] { padding-right: 0; }
+html.framed .top-bar { min-height: var(--bar-height); }
+
+.window-strip { position: fixed; inset: 0 0 auto; z-index: 40; display: flex; justify-content: flex-end; height: var(--bar-height); }
