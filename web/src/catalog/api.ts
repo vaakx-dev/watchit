@@ -13,7 +13,7 @@ type Resource<T> =
   | { status: 'ready'; data: T }
   | { status: 'error'; error: string };
 
-export function awaiting_items(resource: Resource<Pick<CatalogPage, 'items' | 'imports'>>) {
+export function awaiting_items(resource: Resource<Pick<CatalogPage, 'items'> & Partial<Pick<CatalogPage, 'imports'>>>) {
   return resource.status === 'loading' || (resource.status === 'ready' && resource.data.items.length === 0
     && resource.data.imports?.pending === true && !resource.data.imports.error);
 }
