@@ -16,7 +16,7 @@ mod sync;
 pub use genres::GenreOption;
 pub use ids::{is_imdb_id, is_title_id};
 pub use model::*;
-pub use personal::{HIDE_STATUSES, Personal, SeriesProgress, TitleExtras};
+pub use personal::{HIDE_STATUSES, Personal, SavedPosition, SeriesProgress, TitleExtras};
 pub use routes::router;
 pub use service::Catalog;
 pub use store::browse::{BrowseQuery, IdFilter};

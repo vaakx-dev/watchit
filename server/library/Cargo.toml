@@ -1,0 +1,24 @@
+[package]
+name = "watchit-library"
+edition.workspace = true
+version.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "import-profiles"
+path = "src/bin/import-profiles.rs"
+
+[dependencies]
+axum = "0.8.9"
+chrono = { version = "0.4.45", default-features = false, features = ["std", "clock"] }
+form_urlencoded = "1.2.2"
+hex = "0.4.3"
+rusqlite = "0.40.2"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+tokio = { version = "1.53.3", features = ["rt-multi-thread", "macros"] }
+ts-rs = { version = "12.0.1", features = ["no-serde-warnings"] }
+watchit-artwork = { version = "0.1.0", path = "../artwork" }
+watchit-catalog = { version = "0.1.0", path = "../catalog" }
+watchit-core = { version = "0.1.0", path = "../core" }
+watchit-profiles = { version = "0.1.0", path = "../profiles" }

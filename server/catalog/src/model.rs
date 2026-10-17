@@ -3,7 +3,7 @@ use ts_rs::TS;
 use watchit_artwork::ArtworkStatus;
 
 use crate::genres::GenreOption;
-use crate::personal::SeriesProgress;
+use crate::personal::{SavedPosition, SeriesProgress};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[ts(export_to = "catalog/")]
@@ -303,6 +303,7 @@ pub struct TitleResult {
     pub freshness: Freshness,
     pub playback_source: Option<String>,
     pub progress: Option<SeriesProgress>,
+    pub resume: Option<SavedPosition>,
     pub imports: ImportStatus,
     pub artwork_status: ArtworkStatus,
 }

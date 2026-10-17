@@ -1,10 +1,8 @@
 import type { CatalogResponse } from '../generated/catalog/CatalogResponse';
 import type { EpisodesResponse } from '../generated/catalog/EpisodesResponse';
 import type { NavigationResponse } from '../generated/catalog/NavigationResponse';
-import type { TitleResult as TitleResponse } from '../generated/catalog/TitleResult';
 import type { TrendingResponse } from '../generated/catalog/TrendingResponse';
 import type { Status } from '../library/types.ts';
-import type { SavedPosition } from '../playback/progress/api.ts';
 
 export type { ArtworkStatus } from '../generated/artwork/ArtworkStatus';
 export type { CatalogEntry } from '../generated/catalog/CatalogEntry';
@@ -18,6 +16,7 @@ export type { ImportStatus } from '../generated/catalog/ImportStatus';
 export type { MediaKind } from '../generated/catalog/MediaKind';
 export type { RelatedTitles } from '../generated/catalog/RelatedTitles';
 export type { Title } from '../generated/catalog/Title';
+export type { TitleResult } from '../generated/catalog/TitleResult';
 export type { Trailer } from '../generated/catalog/Trailer';
 export type { TrendingEntry } from '../generated/catalog/TrendingEntry';
 
@@ -30,7 +29,6 @@ export type CatalogPage = CatalogResponse;
 export type TrendingPage = TrendingResponse;
 export type EpisodePage = EpisodesResponse;
 export type EpisodeNavigation = NavigationResponse;
-export type TitleResult = TitleResponse & { position?: SavedPosition | null };
 
 export type CatalogQuery = {
   page: number;

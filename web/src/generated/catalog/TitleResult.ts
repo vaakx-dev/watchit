@@ -2,7 +2,8 @@
 import type { ArtworkStatus } from "../artwork/ArtworkStatus";
 import type { Freshness } from "./Freshness";
 import type { ImportStatus } from "./ImportStatus";
+import type { SavedPosition } from "./SavedPosition";
 import type { SeriesProgress } from "./SeriesProgress";
 import type { Title } from "./Title";
 
-export type TitleResult = { title: Title, freshness: Freshness, playback_source: string | null, progress: SeriesProgress | null, imports: ImportStatus, artwork_status: ArtworkStatus, };
+export type TitleResult = { title: Title, freshness: Freshness, playback_source: string | null, progress: SeriesProgress | null, resume: SavedPosition | null, imports: ImportStatus, artwork_status: ArtworkStatus, };
