@@ -17,7 +17,7 @@ import { use_sources } from './sources/use_sources';
 export function WatchPage({ result, library }: { result: TitleResult; library: Library }) {
   const { title } = result;
   const root = useRef<HTMLDivElement>(null);
-  const position = useRef(resume_at(result.position));
+  const position = useRef(resume_at(result.resume));
   const sources = use_sources(title, result.playback_source);
   const seasons = use_season_navigation(title.series ? title.id : null);
   const fullscreen = use_fullscreen(root);

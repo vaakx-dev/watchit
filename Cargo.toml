@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["server/*"]
+members = ["server/*", "desktop"]
 
 [workspace.package]
 edition = "2024"
@@ -11,4 +11,31 @@ publish = false
 opt-level = 3
 
 [profile.dev.package.salsa20]
+opt-level = 3
+
+[profile.dev.package.libwebp-sys]
+opt-level = 3
+
+[profile.dev.package.image]
+opt-level = 3
+
+[profile.dev.package.zune-jpeg]
+opt-level = 3
+
+[profile.dev.package.png]
+opt-level = 3
+
+[profile.dev.package.fast_image_resize]
+opt-level = 3
+
+[profile.dev.package.image-webp]
+opt-level = 3
+
+[profile.dev.package.fdeflate]
+opt-level = 3
+
+[profile.dev.package.gif]
+opt-level = 3
+
+[profile.dev.package.weezl]
 opt-level = 3
