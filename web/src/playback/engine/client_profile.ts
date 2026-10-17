@@ -1,13 +1,7 @@
+import type { ClientProfile } from '../../generated/playback/ClientProfile';
 import { desktop } from './mpv_bridge';
 
-export type ClientProfile = {
-  player: 'mpv' | 'browser';
-  containers: string[];
-  video_codecs: string[];
-  audio_codecs: string[];
-  hdr: boolean;
-  max_height: number;
-};
+export type { ClientProfile };
 
 const MPV_PROFILE: ClientProfile = {
   player: 'mpv',

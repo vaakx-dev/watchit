@@ -12,6 +12,7 @@ function item(status: Status, next: EpisodeEntry | null, title = series): Librar
     title,
     entry: { id: title.id, rating: null, status, favorite: false, recommended: false, saved: false, last_opened_at: null },
     opened_at: new Date(2026, 8, 25, 20).toISOString(),
+    resume: null,
     progress: title.kind === 'series' ? { last: null, next, opened_at: null } : null,
   };
 }

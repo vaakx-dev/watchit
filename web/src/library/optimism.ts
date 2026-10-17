@@ -30,7 +30,7 @@ export type State = {
 };
 
 export function empty(): LibrarySnapshot {
-  return { entries: {}, seasons: {}, saved: [], recent: [] };
+  return { entries: {}, seasons: {}, saved: [], recent: [], artwork_status: { pending: false, running: false, error: null } };
 }
 
 export function create(snapshot: LibrarySnapshot = empty()): State {
