@@ -24,7 +24,7 @@ pub struct SavedPosition {
 
 #[derive(Clone, Debug, Default)]
 pub struct TitleExtras {
-    pub position: Option<SavedPosition>,
+    pub resume: Option<SavedPosition>,
     pub playback_source: Option<String>,
     pub progress: Option<SeriesProgress>,
 }

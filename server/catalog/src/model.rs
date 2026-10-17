@@ -303,7 +303,7 @@ pub struct TitleResult {
     pub freshness: Freshness,
     pub playback_source: Option<String>,
     pub progress: Option<SeriesProgress>,
-    pub position: Option<SavedPosition>,
+    pub resume: Option<SavedPosition>,
     pub imports: ImportStatus,
     pub artwork_status: ArtworkStatus,
 }

@@ -37,7 +37,7 @@ pub struct LibraryRow {
     pub saved: bool,
     pub last_opened_at: Option<String>,
     pub opened_at: Option<String>,
-    pub position: Option<SavedPosition>,
+    pub resume: Option<SavedPosition>,
 }
 
 impl LibraryRow {
@@ -55,7 +55,7 @@ impl LibraryRow {
             saved: row.get(9)?,
             last_opened_at: row.get(10)?,
             opened_at: row.get(11)?,
-            position: position.zip(duration).map(|(position_seconds, duration_seconds)| SavedPosition { position_seconds, duration_seconds }),
+            resume: position.zip(duration).map(|(position_seconds, duration_seconds)| SavedPosition { position_seconds, duration_seconds }),
         })
     }
 

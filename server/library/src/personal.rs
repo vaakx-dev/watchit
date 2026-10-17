@@ -28,7 +28,7 @@ impl Personal for Library {
         Ok(TitleExtras {
             playback_source: playback_source::get(conn, profile, id)?,
             progress: series.map(|series| series_progress(conn, &self.catalog, profile, series)).transpose()?,
-            position: get(conn, profile, id)?,
+            resume: get(conn, profile, id)?,
         })
     }
 }

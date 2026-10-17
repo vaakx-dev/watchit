@@ -12,7 +12,7 @@ pub struct LibraryItem {
     pub entry: PersonalEntry,
     pub opened_at: Option<String>,
     pub progress: Option<SeriesProgress>,
-    pub position: Option<SavedPosition>,
+    pub resume: Option<SavedPosition>,
 }
 
 #[derive(Debug, Default, Serialize, TS)]

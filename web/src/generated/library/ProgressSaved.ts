@@ -2,4 +2,4 @@
 import type { SavedPosition } from "../catalog/SavedPosition";
 import type { PersonalEntry } from "./PersonalEntry";
 
-export type ProgressSaved = { position: SavedPosition | null, entry: PersonalEntry, };
+export type ProgressSaved = { resume: SavedPosition | null, entry: PersonalEntry, };

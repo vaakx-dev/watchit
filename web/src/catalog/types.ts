@@ -89,7 +89,7 @@ export type TitleResult = {
   freshness: Freshness;
   playback_source: string | null;
   progress: SeriesProgress | null;
-  position?: SavedPosition | null;
+  resume?: SavedPosition | null;
   imports?: ImportStatus;
   artwork_status?: ArtworkStatus;
 };

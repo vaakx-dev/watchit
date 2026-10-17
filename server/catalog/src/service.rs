@@ -107,6 +107,6 @@ impl Catalog {
             Some(series_id) => Some(SeriesProgress { last: None, next: self.next_episode(conn, series_id, None)?, opened_at: None }),
             None => None,
         };
-        Ok(TitleExtras { playback_source: None, progress, position: None })
+        Ok(TitleExtras { playback_source: None, progress, resume: None })
     }
 }

@@ -57,7 +57,7 @@ impl Catalog {
             freshness,
             playback_source: extras.playback_source,
             progress: extras.progress,
-            position: extras.position,
+            resume: extras.resume,
             imports,
             artwork_status: images.status,
         })

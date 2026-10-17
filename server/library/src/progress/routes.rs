@@ -25,7 +25,7 @@ pub struct Reading {
 #[derive(Serialize, TS)]
 #[ts(export_to = "library/")]
 pub struct ProgressSaved {
-    pub position: Option<SavedPosition>,
+    pub resume: Option<SavedPosition>,
     pub entry: PersonalEntry,
 }
 
@@ -61,7 +61,7 @@ pub async fn save(
                 Outcome::Clear => store::forget(conn, viewer.profile, &id)?,
             }
             entries::apply(conn, viewer.profile, &id, &title, &patch)?;
-            Ok(ProgressSaved { position: store::get(conn, viewer.profile, &id)?, entry: entries::entry(conn, viewer.profile, &id)? })
+            Ok(ProgressSaved { resume: store::get(conn, viewer.profile, &id)?, entry: entries::entry(conn, viewer.profile, &id)? })
         })
         .await?;
     Ok(Json(saved))
@@ -72,7 +72,7 @@ pub async fn clear(State(library): State<Library>, viewer: Viewer, TitleId(id): 
         .db
         .run(move |conn| {
             store::forget(conn, viewer.profile, &id)?;
-            Ok(ProgressSaved { position: None, entry: entries::entry(conn, viewer.profile, &id)? })
+            Ok(ProgressSaved { resume: None, entry: entries::entry(conn, viewer.profile, &id)? })
         })
         .await?;
     Ok(Json(saved))

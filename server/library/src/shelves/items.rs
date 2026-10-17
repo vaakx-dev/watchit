@@ -17,7 +17,7 @@ pub fn build_items(conn: &Connection, catalog: &Catalog, profile: i64, rows: &[L
     for row in rows {
         let Some(title) = by_id.remove(&row.id) else { continue };
         let progress = (row.kind == MediaKind::Series).then(|| series_progress(conn, catalog, profile, &row.id)).transpose()?;
-        items.push(LibraryItem { title, entry: row.entry(), opened_at: row.opened_at.clone(), progress, position: row.position });
+        items.push(LibraryItem { title, entry: row.entry(), opened_at: row.opened_at.clone(), progress, resume: row.resume });
     }
     Ok((items, artwork_status))
 }

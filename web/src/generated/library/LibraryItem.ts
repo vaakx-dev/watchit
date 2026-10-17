@@ -4,4 +4,4 @@ import type { SavedPosition } from "../catalog/SavedPosition";
 import type { SeriesProgress } from "../catalog/SeriesProgress";
 import type { PersonalEntry } from "./PersonalEntry";
 
-export type LibraryItem = { title: CatalogEntry, entry: PersonalEntry, opened_at: string | null, progress: SeriesProgress | null, position: SavedPosition | null, };
+export type LibraryItem = { title: CatalogEntry, entry: PersonalEntry, opened_at: string | null, progress: SeriesProgress | null, resume: SavedPosition | null, };
