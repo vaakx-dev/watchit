@@ -1,13 +1,21 @@
-use std::collections::VecDeque;
+use std::collections::{HashSet, VecDeque};
 
 use serde::{Deserialize, Serialize};
 
 use crate::cinemeta::source::SourceQuery;
 use crate::clock::{DAY_MS, iso, now_ms};
-use crate::model::{CatalogKind, ImportStatus};
+use crate::model::{CatalogKind, ImportStatus, MediaKind};
 
 const DISCOVERY_REFRESH_MS: i64 = 7 * DAY_MS;
 pub(crate) const TRENDING_REFRESH_MS: i64 = DAY_MS;
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) enum Priority {
+    #[default]
+    Crawl,
+    Backfill,
+    Visible,
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
@@ -29,6 +37,8 @@ pub(crate) enum Work {
     },
     Title {
         id: String,
+        #[serde(default)]
+        kind: Option<MediaKind>,
     },
     Episodes {
         id: String,
@@ -45,21 +55,21 @@ pub(crate) struct Job {
     pub retry_at: i64,
     pub error: Option<String>,
     #[serde(skip)]
-    pub priority: u8,
+    pub priority: Priority,
 }
 
 impl Job {
     pub fn new(key: String, work: Work) -> Self {
-        let mut job = Self { key, work, page: 1, complete: false, updated_at: 0, retry_at: 0, error: None, priority: 0 };
+        let mut job = Self { key, work, page: 1, complete: false, updated_at: 0, retry_at: 0, error: None, priority: Priority::Crawl };
         job.priority = job.default_priority();
         job
     }
 
-    pub fn default_priority(&self) -> u8 {
+    pub fn default_priority(&self) -> Priority {
         match self.work {
-            Work::Catalog { discovery: true, .. } | Work::Trending { .. } => 0,
-            Work::Catalog { .. } => 1,
-            Work::Title { .. } | Work::Episodes { .. } => 2,
+            Work::Catalog { discovery: true, .. } => Priority::Crawl,
+            Work::Title { .. } | Work::Episodes { .. } => Priority::Backfill,
+            Work::Catalog { .. } | Work::Trending { .. } => Priority::Visible,
         }
     }
 
@@ -94,7 +104,7 @@ pub(crate) struct Queue {
     pub jobs: Vec<Job>,
     pub error: Option<String>,
     pub next_retry_at: Option<i64>,
-    pub active: Option<String>,
+    pub active: HashSet<String>,
 }
 
 impl Queue {
@@ -104,9 +114,9 @@ impl Queue {
 
     fn ready(&self, job: &Job, now: i64, metadata_ms: i64) -> bool {
         job.pending(now, metadata_ms)
-            && self.active.as_deref() != Some(job.key.as_str())
+            && !self.active.contains(&job.key)
             && job.retry_at <= now
-            && (job.priority > 0 || !self.paused(now))
+            && (job.priority > Priority::Crawl || !self.paused(now))
     }
 
     pub fn next(&self, now: i64, metadata_ms: i64) -> Option<&Job> {
@@ -135,7 +145,11 @@ impl Queue {
         Some(self.jobs.remove(index))
     }
 
-    pub fn ensure(&mut self, job: Job, priority: u8, metadata_ms: i64) -> Option<Job> {
+    pub fn crawling(&self) -> bool {
+        self.jobs.iter().any(|job| job.priority == Priority::Crawl && self.active.contains(&job.key))
+    }
+
+    pub fn ensure(&mut self, job: Job, priority: Priority, metadata_ms: i64) -> Option<Job> {
         let Some(index) = self.jobs.iter().position(|item| item.key == job.key) else {
             let mut job = job;
             job.priority = priority.max(job.priority);
@@ -165,7 +179,7 @@ impl Queue {
     pub fn status(&self, key: Option<&str>, enabled: bool, imported: i64, metadata_ms: i64) -> ImportStatus {
         let now = now_ms();
         let jobs: Vec<&Job> = self.jobs.iter().filter(|job| key.is_none_or(|key| job.key == key)).collect();
-        let blocked = self.paused(now) && (key.is_none() || jobs.iter().any(|job| job.priority == 0));
+        let blocked = self.paused(now) && (key.is_none() || jobs.iter().any(|job| job.priority == Priority::Crawl));
         let error = jobs
             .iter()
             .find_map(|job| job.error.clone())
@@ -173,8 +187,8 @@ impl Queue {
         let retry_at = jobs.iter().map(|job| job.retry_at).filter(|retry_at| *retry_at > now).min().unwrap_or(0);
         let next_retry_at = retry_at.max(if blocked { self.next_retry_at.unwrap_or(0) } else { 0 });
         let running = match key {
-            Some(key) => self.active.as_deref() == Some(key),
-            None => self.active.is_some(),
+            Some(key) => self.active.contains(key),
+            None => !self.active.is_empty(),
         };
         ImportStatus {
             enabled,
@@ -191,7 +205,7 @@ impl Queue {
         let jobs: Vec<&Job> = self.jobs.iter().filter(|job| keys.contains(&job.key)).collect();
         ImportStatus {
             pending: enabled && jobs.iter().any(|job| job.pending(now, metadata_ms)),
-            running: enabled && jobs.iter().any(|job| self.active.as_deref() == Some(job.key.as_str())),
+            running: enabled && jobs.iter().any(|job| self.active.contains(&job.key)),
             ..self.status(None, enabled, imported, metadata_ms)
         }
     }

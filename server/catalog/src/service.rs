@@ -102,6 +102,11 @@ impl Catalog {
         Ok(self.inner.sync.title(conn, id)?.pending)
     }
 
+    pub fn backfill_title(&self, conn: &Connection, id: &str, kind: Option<MediaKind>) -> AppResult<()> {
+        self.inner.sync.backfill(conn, id, kind)?;
+        Ok(())
+    }
+
     pub fn episodes_pending(&self, conn: &Connection, series_id: &str) -> AppResult<bool> {
         Ok(self.inner.sync.episodes(conn, series_id)?.pending)
     }

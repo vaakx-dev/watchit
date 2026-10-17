@@ -44,8 +44,8 @@ impl Inner {
         match job.work.clone() {
             Work::Catalog { .. } => self.catalog_step(job).await,
             Work::Trending { kind, .. } => self.trending_step(job, kind).await,
-            Work::Title { id } => self.detail_step(job, id, false).await,
-            Work::Episodes { id } => self.detail_step(job, id, true).await,
+            Work::Title { id, kind } => self.detail_step(job, id, kind, false).await,
+            Work::Episodes { id } => self.detail_step(job, id, Some(MediaKind::Series), true).await,
         }
     }
 
@@ -55,7 +55,7 @@ impl Inner {
         if let Some(id) = details.pop_front() {
             let mut published = Vec::new();
             if !self.fresh(&id, false).await? {
-                match self.source.title(&id, None).await {
+                match self.source.title(&id, self.known_kind(&id).await?).await {
                     Ok(meta) => published = self.publish_detail(meta, id).await?,
                     Err(error) if error.status == 404 => {}
                     Err(error) => {
@@ -110,15 +110,19 @@ impl Inner {
         Ok(Step { ended: true, published: Vec::new() })
     }
 
-    async fn detail_step(&self, job: &mut Job, id: String, episodes: bool) -> Result<Step, StepError> {
+    async fn detail_step(&self, job: &mut Job, id: String, kind: Option<MediaKind>, episodes: bool) -> Result<Step, StepError> {
         let mut published = Vec::new();
         if !self.fresh(&id, episodes).await? {
-            let kind = episodes.then_some(MediaKind::Series);
             let meta = self.source.title(&id, kind).await?;
             published = self.publish_detail(meta, id).await?;
         }
         job.complete = true;
         Ok(Step { ended: true, published })
+    }
+
+    async fn known_kind(&self, id: &str) -> Result<Option<MediaKind>, StepError> {
+        let id = id.to_owned();
+        Ok(self.db.run(move |conn| record::kind_of(conn, &id)).await?)
     }
 
     pub(crate) async fn fresh(&self, id: &str, series_only: bool) -> Result<bool, StepError> {

@@ -2,8 +2,9 @@ use std::time::Duration;
 
 use reqwest::StatusCode;
 use reqwest::header::{ACCEPT, RETRY_AFTER, USER_AGENT};
+use std::sync::Mutex;
+
 use serde::de::DeserializeOwned;
-use tokio::sync::Mutex;
 use tokio::time::Instant;
 
 use crate::cinemeta::error::SourceError;
@@ -12,7 +13,6 @@ const ATTEMPTS: u32 = 3;
 const TIMEOUT: Duration = Duration::from_secs(15);
 const BUDGET: Duration = Duration::from_secs(45);
 const BACKOFF: Duration = Duration::from_secs(5);
-const INTERVAL: Duration = Duration::from_secs(1);
 const RETRYABLE: [u16; 4] = [429, 502, 503, 504];
 
 struct Cooldown {
@@ -20,14 +20,9 @@ struct Cooldown {
     error: SourceError,
 }
 
-struct Pace {
-    next_request: Instant,
-    cooldown: Option<Cooldown>,
-}
-
 pub(crate) struct Client {
     http: reqwest::Client,
-    pace: Mutex<Pace>,
+    cooldown: Mutex<Option<Cooldown>>,
 }
 
 fn retry_delay(header: Option<&str>, minimum: Duration) -> Duration {
@@ -45,35 +40,53 @@ fn retry_delay(header: Option<&str>, minimum: Duration) -> Duration {
 impl Client {
     pub fn new() -> Self {
         let http = reqwest::Client::builder().connect_timeout(TIMEOUT).build().expect("cinemeta http client");
-        Self { http, pace: Mutex::new(Pace { next_request: Instant::now(), cooldown: None }) }
+        Self { http, cooldown: Mutex::new(None) }
+    }
+
+    fn ready_at(&self) -> Instant {
+        self.cooldown.lock().unwrap().as_ref().map_or_else(Instant::now, |cooldown| cooldown.until)
+    }
+
+    fn cool_down(&self, until: Instant, error: SourceError) {
+        let mut cooldown = self.cooldown.lock().unwrap();
+        if cooldown.as_ref().is_none_or(|current| current.until < until) {
+            *cooldown = Some(Cooldown { until, error });
+        }
     }
 
     pub async fn get<T: DeserializeOwned>(&self, url: &str) -> Result<T, SourceError> {
-        let mut pace = self.pace.lock().await;
         let deadline = Instant::now() + BUDGET;
         for attempt in 0..ATTEMPTS {
-            let ready = pace.cooldown.as_ref().map_or(pace.next_request, |cooldown| cooldown.until.max(pace.next_request));
+            let ready = self.ready_at();
             if ready >= deadline {
-                return Err(unavailable(&pace));
+                return Err(self.unavailable());
             }
             tokio::time::sleep_until(ready).await;
             let remaining = deadline.saturating_duration_since(Instant::now());
             if remaining.is_zero() {
-                return Err(unavailable(&pace));
+                return Err(self.unavailable());
             }
-            pace.cooldown = None;
-            let backoff = BACKOFF * 2u32.pow(attempt);
-            let result = self.attempt::<T>(url, remaining.min(TIMEOUT)).await;
-            pace.next_request = Instant::now() + INTERVAL;
-            match result {
+            match self.attempt::<T>(url, remaining.min(TIMEOUT)).await {
                 Ok(value) => return Ok(value),
                 Err(Failure::Final(error)) => return Err(error),
                 Err(Failure::Retry { error, retry_after }) => {
-                    pace.cooldown = Some(Cooldown { until: Instant::now() + retry_delay(retry_after.as_deref(), backoff), error });
+                    let backoff = BACKOFF * 2u32.pow(attempt);
+                    self.cool_down(Instant::now() + retry_delay(retry_after.as_deref(), backoff), error);
                 }
             }
         }
-        Err(unavailable(&pace))
+        Err(self.unavailable())
+    }
+
+    fn unavailable(&self) -> SourceError {
+        let cooldown = self.cooldown.lock().unwrap();
+        match cooldown.as_ref().filter(|cooldown| cooldown.until > Instant::now()) {
+            None => SourceError::new(503, "Cinemeta request timed out."),
+            Some(cooldown) => {
+                let wait = cooldown.until.saturating_duration_since(Instant::now());
+                SourceError { status: 503, message: cooldown.error.message.clone(), retry_after: Some(wait.as_millis().div_ceil(1000) as u64) }
+            }
+        }
     }
 
     async fn attempt<T: DeserializeOwned>(&self, url: &str, timeout: Duration) -> Result<T, Failure> {
@@ -110,16 +123,6 @@ impl Failure {
         Self::Retry {
             error: SourceError::new(StatusCode::SERVICE_UNAVAILABLE.as_u16(), format!("Cinemeta request failed: {cause}.")),
             retry_after: None,
-        }
-    }
-}
-
-fn unavailable(pace: &Pace) -> SourceError {
-    match &pace.cooldown {
-        None => SourceError::new(503, "Cinemeta request timed out while queued."),
-        Some(cooldown) => {
-            let wait = cooldown.until.saturating_duration_since(Instant::now());
-            SourceError { status: 503, message: cooldown.error.message.clone(), retry_after: Some(wait.as_millis().div_ceil(1000) as u64) }
         }
     }
 }

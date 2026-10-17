@@ -2,17 +2,20 @@ use std::future::Future;
 use std::sync::Arc;
 use std::time::Duration;
 
+use tokio::task::JoinSet;
 use watchit_core::Background;
 
 use crate::clock::now_ms;
 use crate::model::CatalogKind;
-use crate::sync::jobs::Job;
+use crate::sync::jobs::{Job, Priority};
 use crate::sync::publish::StepError;
 use crate::sync::steps::Step;
 use crate::sync::{Inner, Sync, delete_job, save_job};
 
 const RETRY_MS: i64 = 60_000;
-const BACKGROUND_INTERVAL_MS: i64 = 30_000;
+const CRAWL_INTERVAL_MS: i64 = 30_000;
+const CONCURRENT_JOBS: usize = 8;
+const IDLE_MS: i64 = 60_000;
 
 impl Sync {
     pub fn start(&self, background: &Background) {
@@ -24,7 +27,7 @@ impl Sync {
             .flat_map(|kind| [Self::discovery_job(kind), Self::trending_job(kind)]);
         let saved: Vec<Job> = {
             let mut queue = self.inner.queue.lock().unwrap();
-            jobs.filter_map(|job| queue.ensure(job, 0, self.inner.metadata.ms())).collect()
+            jobs.filter_map(|job| queue.ensure(job, Priority::Crawl, self.inner.metadata.ms())).collect()
         };
         let db = self.inner.db.clone();
         let inner = self.inner.clone();
@@ -39,42 +42,46 @@ impl Sync {
 }
 
 impl Inner {
+    fn pick(&self, crawl_after: i64) -> Result<Job, i64> {
+        let now = now_ms();
+        let mut queue = self.queue.lock().unwrap();
+        if queue.next_retry_at.is_some_and(|retry_at| retry_at <= now) {
+            queue.next_retry_at = None;
+        }
+        if queue.active.len() >= CONCURRENT_JOBS {
+            return Err(IDLE_MS);
+        }
+        let metadata_ms = self.metadata.ms();
+        let crawling = queue.crawling();
+        let job = match queue.next(now, metadata_ms) {
+            Some(job) if job.priority > Priority::Crawl || (!crawling && now >= crawl_after) => job.clone(),
+            Some(_) if !crawling => return Err(crawl_after - now),
+            _ => return Err(queue.wait(now, metadata_ms)),
+        };
+        queue.active.insert(job.key.clone());
+        Ok(job)
+    }
+
     async fn run(self: Arc<Self>, stopping: impl Future<Output = ()>) {
         let mut stopping = std::pin::pin!(stopping);
-        let mut background_after = 0;
+        let mut running = JoinSet::new();
+        let mut crawl_after = 0;
         loop {
-            let now = now_ms();
-            let picked = {
-                let mut queue = self.queue.lock().unwrap();
-                if queue.next_retry_at.is_some_and(|retry_at| retry_at <= now) {
-                    queue.next_retry_at = None;
-                }
-                let metadata_ms = self.metadata.ms();
-                match queue.next(now, metadata_ms) {
-                    Some(job) if job.priority > 0 || now >= background_after => {
-                        let job = job.clone();
-                        queue.active = Some(job.key.clone());
-                        Ok(job)
+            let delay = loop {
+                match self.pick(crawl_after) {
+                    Ok(job) => {
+                        let inner = self.clone();
+                        running.spawn(async move { inner.process(job).await });
                     }
-                    Some(_) => Err(background_after - now),
-                    None => Err(queue.wait(now, metadata_ms)),
+                    Err(delay) => break delay,
                 }
-            };
-            let delay = match picked {
-                Ok(job) => {
-                    let background = job.priority == 0;
-                    let ended = tokio::select! {
-                        ended = self.process(job) => ended,
-                        () = &mut stopping => return,
-                    };
-                    if background && ended {
-                        background_after = now_ms() + BACKGROUND_INTERVAL_MS;
-                    }
-                    continue;
-                }
-                Err(delay) => delay,
             };
             tokio::select! {
+                Some(Ok(crawled)) = running.join_next() => {
+                    if crawled {
+                        crawl_after = now_ms() + CRAWL_INTERVAL_MS;
+                    }
+                }
                 () = tokio::time::sleep(Duration::from_millis(delay.max(0) as u64)) => {}
                 () = self.wake.notified() => {}
                 () = &mut stopping => return,
@@ -83,6 +90,7 @@ impl Inner {
     }
 
     async fn process(&self, mut job: Job) -> bool {
+        let crawl = job.priority == Priority::Crawl;
         let result = self.step(&mut job).await;
         let ended = matches!(result, Ok(Step { ended: true, .. }));
         let (saved, removed) = self.settle(job, result);
@@ -96,15 +104,15 @@ impl Inner {
         if let Err(error) = stored {
             tracing::warn!(%error, "import jobs not saved");
         }
-        ended
+        crawl && ended
     }
 
     fn settle(&self, mut job: Job, result: Result<Step, StepError>) -> (Vec<Job>, Vec<String>) {
         let now = now_ms();
         let mut queue = self.queue.lock().unwrap();
-        queue.active = None;
+        queue.active.remove(&job.key);
         let current = queue.take(&job.key);
-        job.priority = job.priority.max(current.map_or(0, |current| current.priority));
+        job.priority = job.priority.max(current.map_or(Priority::Crawl, |current| current.priority));
         let mut demote = true;
         match result {
             Ok(step) => {
