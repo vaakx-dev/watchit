@@ -40,6 +40,7 @@ pub struct Record {
     pub trackers: Vec<String>,
     pub error: Option<String>,
     pub picks: Vec<Pick>,
+    pub notify_when_ready: bool,
     pub download_dir: PathBuf,
 }
 

@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import { list_transfers } from './api';
 import { read_events } from './event_stream';
-import type { Disk, Transfer } from './types';
+import type { Disk, ReadyEvent, Transfer } from './types';
 
 export type TransferSnapshot = { transfers: Transfer[]; disks: Disk[]; live: boolean; error: string | null };
 
@@ -10,6 +10,7 @@ const DISK_REFRESH_MS = 10000;
 
 let snapshot: TransferSnapshot = { transfers: [], disks: [], live: false, error: null };
 const listeners = new Set<() => void>();
+const ready_listeners = new Set<(event: ReadyEvent) => void>();
 let stop: (() => void) | null = null;
 
 function publish(next: Partial<TransferSnapshot>) {
@@ -36,8 +37,14 @@ function refresh(signal: AbortSignal) {
   });
 }
 
+export function on_ready_event(listener: (event: ReadyEvent) => void) {
+  ready_listeners.add(listener);
+  return () => { ready_listeners.delete(listener); };
+}
+
 function on_event(name: string, data: string) {
   if (name === 'transfer') upsert_transfer(JSON.parse(data) as Transfer);
+  if (name === 'ready') for (const listener of ready_listeners) listener(JSON.parse(data) as ReadyEvent);
   if (name === 'removed') remove_transfer((JSON.parse(data) as { id: string }).id);
 }
 

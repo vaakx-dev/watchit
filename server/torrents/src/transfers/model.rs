@@ -67,6 +67,7 @@ pub struct Transfer {
     pub peers: u32,
     pub eta_seconds: Option<u64>,
     pub added_at: i64,
+    pub notify_when_ready: bool,
     pub readiness: Readiness,
     pub queue_position: Option<u32>,
     pub download_dir: String,

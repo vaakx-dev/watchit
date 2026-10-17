@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ArrowDownToLine, Pause, Trash2 } from 'lucide-react';
 import { update_transfer } from '../torrents/api';
 import type { Transfer } from '../torrents/types';
+import { NotifyButton } from './notify/notify_button';
 import { FolderButton } from './locations/folder_button';
 import { finished } from './states';
 
@@ -23,6 +24,7 @@ export function TransferActions({ transfer, on_remove }: { transfer: Transfer; o
     {transfer.kind === 'stream' && <button type="button" className="button ghost small" disabled={pending} onClick={() => patch({ kind: 'download' })}>
       <ArrowDownToLine />Keep
     </button>}
+    {!finished(transfer) && transfer.state !== 'error' && transfer.readiness.state !== 'ready' && <NotifyButton transfer={transfer} />}
     {!finished(transfer) && transfer.state !== 'error' && <button type="button" className="button ghost small" disabled={pending}
       aria-label={`${paused ? 'Resume' : 'Pause'} ${transfer.name}`} onClick={() => patch({ paused: !paused })}>
       {paused ? <ArrowDownToLine /> : <Pause />}{paused ? 'Resume' : 'Pause'}

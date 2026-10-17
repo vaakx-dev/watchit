@@ -8,7 +8,7 @@ mod target;
 
 use std::collections::HashMap;
 
-pub use model::Readiness;
+pub use model::{Readiness, Verdict};
 pub use playhead::Slot;
 
 #[derive(Default)]

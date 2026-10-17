@@ -36,6 +36,9 @@ pub struct NewTransfer {
     kind: Kind,
     #[serde(default)]
     #[ts(optional)]
+    notify_when_ready: Option<bool>,
+    #[serde(default)]
+    #[ts(optional)]
     download_dir: Option<String>,
 }
 
@@ -60,6 +63,9 @@ pub struct TransferPatch {
     #[serde(default)]
     #[ts(optional, type = "'download'")]
     kind: Option<Kind>,
+    #[serde(default)]
+    #[ts(optional)]
+    notify_when_ready: Option<bool>,
     #[serde(default)]
     #[ts(optional)]
     queue_position: Option<u32>,
@@ -91,7 +97,7 @@ pub async fn create(State(torrents): State<Torrents>, viewer: Viewer, JsonBody(b
     };
     let pick = Pick::files_or(&title, body.file_indexes, fallback);
     let transfers = torrents.transfers().await?;
-    transfers.add(&body.info_hash, pick, body.kind, folder).await.map(Json)
+    transfers.add(&body.info_hash, pick, body.kind, folder, body.notify_when_ready.unwrap_or(false)).await.map(Json)
 }
 
 pub async fn season(
@@ -118,7 +124,7 @@ pub async fn update(
     if let Some(folder) = folder {
         transfers.relocate(&id, folder).await?;
     }
-    transfers.change(&id, Change { paused: body.paused, kind: body.kind, queue_position: body.queue_position }).await.map(Json)
+    transfers.change(&id, Change { paused: body.paused, kind: body.kind, queue_position: body.queue_position, notify_when_ready: body.notify_when_ready }).await.map(Json)
 }
 
 pub async fn remove(State(torrents): State<Torrents>, Path(id): Path<String>, Query(query): Query<DeleteQuery>) -> AppResult<StatusCode> {
@@ -131,6 +137,7 @@ fn sse_event(event: TransferEvent) -> Option<Event> {
     match event {
         TransferEvent::Changed(transfer) => Event::default().event("transfer").json_data(transfer).ok(),
         TransferEvent::Removed { id } => Event::default().event("removed").json_data(json!({ "id": id })).ok(),
+        TransferEvent::Ready(notice) => Event::default().event("ready").json_data(notice).ok(),
     }
 }
 

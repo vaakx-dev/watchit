@@ -5,6 +5,7 @@ import { Home } from './catalog/pages/home';
 import { CatalogStatus } from './catalog/components/status';
 import { use_title } from './catalog/api';
 import { Settings } from './cache/settings';
+import { ReadyNotifications } from './downloads/notify/ready_notifications';
 import { DownloadsPage } from './downloads/downloads_page';
 import { MyShows } from './library/pages/my_shows';
 import { Rankings } from './library/pages/rankings';
@@ -62,5 +63,6 @@ export function App({ profile, profiles, on_profiles_changed }: Props) {
       {route.view === 'missing' && <div className="not-found"><EmptyState title="That page is not in the catalog."><a className="button primary" href="#/">Back to Tonight</a></EmptyState></div>}
     </main>
     {!watching && <TabBar route={route} />}
+    <ReadyNotifications />
   </>;
 }

@@ -32,7 +32,7 @@ fn output_folder(download_dir: PathBuf, metadata: &Metadata) -> PathBuf {
 }
 
 impl Transfers {
-    pub async fn add(self: &Arc<Self>, info_hash: &str, pick: Pick, kind: Kind, folder: Option<PathBuf>) -> AppResult<Transfer> {
+    pub async fn add(self: &Arc<Self>, info_hash: &str, pick: Pick, kind: Kind, folder: Option<PathBuf>, notify_when_ready: bool) -> AppResult<Transfer> {
         let info_hash = valid_info_hash(info_hash)?;
         let trackers = self.search.trackers(&info_hash);
         let mut moved_to = None;
@@ -44,6 +44,7 @@ impl Transfers {
                     kept = entry.record.kind == Kind::Stream && kind == Kind::Download;
                     moved_to = folder;
                     entry.record.kind = entry.record.kind.max(kind);
+                    entry.record.notify_when_ready |= notify_when_ready;
                     entry.record.last_used_at = now();
                     if entry.record.trackers.is_empty() {
                         entry.record.trackers = trackers;
@@ -72,6 +73,7 @@ impl Transfers {
                         error: None,
                         download_dir: folder.unwrap_or_else(|| self.settings().folder_for(kind, is_series_pick(&pick))),
                         picks: vec![pick],
+                        notify_when_ready,
                     };
                     let mut entry = Entry::new(record, Vec::new());
                     entry.queue_rank = queue::next_rank(&entries);

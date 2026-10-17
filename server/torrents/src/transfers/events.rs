@@ -1,22 +1,29 @@
 use super::Transfers;
 use super::model::Transfer;
 use super::snapshot::snapshot;
+use crate::notify::{ReadyNotice, take_due};
 use crate::queue;
 
 #[derive(Clone, Debug)]
 pub enum TransferEvent {
     Changed(Transfer),
     Removed { id: String },
+    Ready(ReadyNotice),
 }
 
 impl Transfers {
     pub fn emit_changes(&self) {
+        let mut ready = Vec::new();
         let mut entries = self.entries();
         queue::number(&mut entries);
         let changed: Vec<Transfer> = entries
             .values_mut()
             .filter_map(|entry| {
-                let current = snapshot(entry);
+                let mut current = snapshot(entry);
+                if let Some(notice) = take_due(entry, &current) {
+                    ready.push(notice);
+                    current = snapshot(entry);
+                }
                 if entry.sent.as_ref() == Some(&current) {
                     return None;
                 }
@@ -27,6 +34,9 @@ impl Transfers {
         drop(entries);
         for transfer in changed {
             let _ = self.events.send(TransferEvent::Changed(transfer));
+        }
+        for notice in ready {
+            let _ = self.events.send(TransferEvent::Ready(notice));
         }
     }
 

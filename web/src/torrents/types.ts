@@ -4,6 +4,7 @@ export type { FolderListing } from '../generated/torrents/FolderListing';
 export type { LocalFile } from '../generated/torrents/LocalFile';
 export type { Readiness } from '../generated/torrents/Readiness';
 export type { Resolution } from '../generated/torrents/Resolution';
+export type { ReadyEvent } from '../generated/torrents/ReadyEvent';
 export type { TorrentResult } from '../generated/torrents/TorrentResult';
 export type { TorrentSettings } from '../generated/torrents/TorrentSettings';
 export type { Transfer } from '../generated/torrents/Transfer';

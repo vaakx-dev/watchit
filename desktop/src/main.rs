@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 mod autostart;
+mod notifications;
 mod player;
 mod server;
 mod tools;
@@ -16,6 +17,7 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| window::show(app)))
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec![HIDDEN_ARG])))
+        .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             let handle = app.handle();
@@ -24,6 +26,7 @@ fn main() {
             window::create(handle, port, hidden)?;
             autostart::enable_on_first_run(handle)?;
             tray::create(handle)?;
+            notifications::open_window_on_click(handle)?;
             updates::spawn_checks(handle);
             Ok(())
         })

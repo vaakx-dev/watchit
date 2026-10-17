@@ -27,7 +27,7 @@ impl Transfers {
         let found = self.search.ranked(&TitleId::episode(&series, season, first)).await?;
         if let Some(pack) = best_pack(&found, season) {
             let pick = Pick { title_id: series.clone(), choice: Choice::Season { season } };
-            return Ok(vec![self.add(&pack.result.info_hash, pick, Kind::Download, folder).await?]);
+            return Ok(vec![self.add(&pack.result.info_hash, pick, Kind::Download, folder, false).await?]);
         }
         if episodes.is_empty() {
             return Err(AppError::not_found("No season pack was found and the season's episode list is unavailable."));
@@ -38,7 +38,7 @@ impl Transfers {
             let results = if number == first { found.clone() } else { self.search.ranked(&title).await? };
             let Some(best) = results.first() else { continue };
             let pick = Pick::files_or(&title.to_string(), best.result.file_index.map(|index| vec![index]), Choice::Main);
-            added.push(self.add(&best.result.info_hash, pick, Kind::Download, folder.clone()).await?);
+            added.push(self.add(&best.result.info_hash, pick, Kind::Download, folder.clone(), false).await?);
         }
         if added.is_empty() {
             return Err(AppError::not_found("No torrents were found for this season."));

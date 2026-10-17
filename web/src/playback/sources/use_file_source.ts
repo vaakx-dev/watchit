@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { notify_wanted } from '../../downloads/notify/notify_choice';
 import { add_transfer } from '../../torrents/api';
 import { upsert_transfer, use_transfers } from '../../torrents/transfer_store';
 import type { Transfer } from '../../torrents/types';
@@ -21,7 +22,7 @@ export function use_file_source(title_id: string, source: PlaySource) {
   useEffect(() => {
     if (!result) return;
     let current = true;
-    add_transfer(result.info_hash, result.file_index === null ? null : [result.file_index], title_id, 'stream')
+    add_transfer(result.info_hash, result.file_index === null ? null : [result.file_index], title_id, 'stream', undefined, notify_wanted())
       .then(transfer => {
         upsert_transfer(transfer);
         if (current) set_started({ key, transfer_id: transfer.id, error: null });

@@ -11,8 +11,8 @@ export function list_transfers(signal?: AbortSignal) {
   return request<TransferList>('/api/transfers', { signal });
 }
 
-export function add_transfer(info_hash: string, file_indexes: number[] | null, title_id: string, kind: TransferKind, download_dir?: string) {
-  return send<Transfer>('/api/transfers', 'POST', { info_hash, file_indexes, title_id, kind, download_dir });
+export function add_transfer(info_hash: string, file_indexes: number[] | null, title_id: string, kind: TransferKind, download_dir?: string, notify_when_ready = false) {
+  return send<Transfer>('/api/transfers', 'POST', { info_hash, file_indexes, title_id, kind, download_dir, notify_when_ready });
 }
 
 export function add_season(series_id: string, season: number, download_dir?: string) {
