@@ -10,9 +10,10 @@ type Props = {
   current: boolean;
   on_play: () => void;
   action?: ReactNode;
+  note?: ReactNode;
 };
 
-export function SourceRow({ resolution, hdr, name, details, current, on_play, action }: Props) {
+export function SourceRow({ resolution, hdr, name, details, current, on_play, action, note }: Props) {
   const quality = resolution_label(resolution);
   const meta = details.filter(Boolean);
   return <li className="source-row">
@@ -23,6 +24,7 @@ export function SourceRow({ resolution, hdr, name, details, current, on_play, ac
       </span>
       <span className="source-copy">
         <span className="source-name">{name}</span>
+        {note}
         {meta.length > 0 && <span className="meta">{meta.map(item => <span key={String(item)}>{item}</span>)}</span>}
       </span>
       <Play className="source-state" fill="currentColor" />

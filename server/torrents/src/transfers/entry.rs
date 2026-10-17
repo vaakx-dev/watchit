@@ -6,6 +6,9 @@ use tokio::task::AbortHandle;
 use super::model::Transfer;
 use super::record::{FileRecord, Record};
 use crate::engine::Handle;
+use crate::queue::Slot;
+use crate::readiness::Tracker;
+use crate::locations::Moving;
 
 pub struct Entry {
     pub record: Record,
@@ -15,8 +18,14 @@ pub struct Entry {
     pub readers: usize,
     pub live_uploaded: u64,
     pub seeding_millis: u64,
-    pub waiting: Option<&'static str>,
+    pub slot: Slot,
+    pub queue_rank: i64,
+    pub queue_position: Option<u32>,
+    pub focus: Option<usize>,
     pub sent: Option<Transfer>,
+    pub readiness: Tracker,
+    pub relocation: Option<Moving>,
+    pub move_error: Option<String>,
 }
 
 pub struct Progress {
@@ -28,7 +37,23 @@ pub struct Progress {
 
 impl Entry {
     pub fn new(record: Record, files: Vec<FileRecord>) -> Self {
-        Self { record, files, handle: None, resolving: None, readers: 0, live_uploaded: 0, seeding_millis: 0, waiting: None, sent: None }
+        Self {
+            record,
+            files,
+            handle: None,
+            resolving: None,
+            readers: 0,
+            live_uploaded: 0,
+            seeding_millis: 0,
+            slot: Slot::default(),
+            queue_rank: 0,
+            queue_position: None,
+            focus: None,
+            sent: None,
+            readiness: Tracker::default(),
+            relocation: None,
+            move_error: None,
+        }
     }
 
     pub fn selected(&self) -> BTreeSet<usize> {

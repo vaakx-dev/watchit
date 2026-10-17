@@ -1,5 +1,5 @@
 import { request, send } from '../catalog/client';
-import type { TorrentSettings, Transfer, TransferKind, TransferList } from './types';
+import type { TorrentSettings, Transfer, TransferKind, TransferList, TransferPatch } from './types';
 
 const id_path = (id: string) => encodeURIComponent(id);
 
@@ -11,15 +11,15 @@ export function list_transfers(signal?: AbortSignal) {
   return request<TransferList>('/api/transfers', { signal });
 }
 
-export function add_transfer(info_hash: string, file_indexes: number[] | null, title_id: string, kind: TransferKind) {
-  return send<Transfer>('/api/transfers', 'POST', { info_hash, file_indexes, title_id, kind });
+export function add_transfer(info_hash: string, file_indexes: number[] | null, title_id: string, kind: TransferKind, download_dir?: string) {
+  return send<Transfer>('/api/transfers', 'POST', { info_hash, file_indexes, title_id, kind, download_dir });
 }
 
-export function add_season(series_id: string, season: number) {
-  return send<Transfer[]>('/api/transfers/season', 'POST', { series_id, season });
+export function add_season(series_id: string, season: number, download_dir?: string) {
+  return send<Transfer[]>('/api/transfers/season', 'POST', { series_id, season, download_dir });
 }
 
-export function update_transfer(id: string, patch: { paused?: boolean; kind?: 'download' }) {
+export function update_transfer(id: string, patch: TransferPatch) {
   return send<unknown>(`/api/transfers/${id_path(id)}`, 'PATCH', patch);
 }
 

@@ -11,7 +11,7 @@ axum = "0.8.9"
 bytes = "1.12.1"
 fs4 = "1.1.0"
 futures = "0.3.34"
-librqbit = "9.0.1"
+librqbit = { git = "https://github.com/vaakx-dev/rqbit", rev = "7d5f2c758b93362189c37b5b01342932201d0089" }
 regex = "1.13.1"
 reqwest = { version = "0.13.5", features = ["json"] }
 rusqlite = "0.40.2"
@@ -23,3 +23,6 @@ tokio-util = { version = "0.7.20", features = ["io"] }
 tracing = "0.1.44"
 ts-rs = { version = "12.0.1", features = ["no-serde-warnings"] }
 watchit-core = { version = "0.1.0", path = "../core" }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61.2", features = ["Win32_Foundation", "Win32_Storage_FileSystem"] }

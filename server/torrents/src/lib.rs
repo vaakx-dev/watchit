@@ -1,6 +1,9 @@
 mod engine;
 mod library;
+mod locations;
 mod media;
+mod queue;
+mod readiness;
 mod release;
 mod search;
 mod service;
@@ -26,6 +29,7 @@ pub fn router(torrents: Torrents) -> Router {
         .route("/api/transfers/events", get(transfers::routes::events))
         .route("/api/transfers/season", post(transfers::routes::season))
         .route("/api/transfers/{id}", patch(transfers::routes::update).delete(transfers::routes::remove))
+        .route("/api/folders", get(locations::routes::folders))
         .route("/api/titles/{title_id}/files", get(library::routes::files))
         .with_state(torrents)
 }
@@ -37,5 +41,6 @@ pub fn export_types(config: &Config) -> Result<(), ExportError> {
     transfers::routes::SeasonDownload::export_all(config)?;
     transfers::routes::TransferPatch::export_all(config)?;
     settings::Settings::export_all(config)?;
+    locations::FolderListing::export_all(config)?;
     library::routes::LocalFiles::export_all(config)
 }

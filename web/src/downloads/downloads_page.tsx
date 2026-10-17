@@ -5,6 +5,7 @@ import type { Transfer } from '../torrents/types';
 import { Choices } from '../ui/choices';
 import { EmptyState } from '../ui/empty_state';
 import { Page } from '../ui/page';
+import { QueueSection } from './queue/queue_section';
 import { RemoveDialog } from './remove_dialog';
 import { SettingsSection } from './settings/settings_section';
 import { FILTER_LABELS, FILTERS, matches, type Filter } from './states';
@@ -23,7 +24,7 @@ function Notice({ live, error }: { live: boolean; error: string | null }) {
 }
 
 export function DownloadsPage() {
-  const { transfers, disk, live, error } = use_transfers();
+  const { transfers, disks, live, error } = use_transfers();
   const [filter, set_filter] = useState<Filter>('all');
   const [removing, set_removing] = useState<Transfer | null>(null);
   const shown = transfers.filter(transfer => matches(transfer, filter));
@@ -31,8 +32,9 @@ export function DownloadsPage() {
 
   return <Page title="Downloads">
     <div className="downloads">
-      <Summary transfers={transfers} disk={disk} />
+      <Summary transfers={transfers} disks={disks} />
       <Notice live={live} error={error} />
+      <QueueSection transfers={transfers} />
       <Choices label="Show downloads" options={options} value={filter} on_change={set_filter} />
       {shown.length ? groups(shown).map(([id, list]) => <TransferGroup key={id} id={id} transfers={list} on_remove={set_removing} />)
         : <EmptyState icon={Download} title={filter === 'all' ? 'Nothing downloaded yet.' : `No ${FILTER_LABELS[filter].toLowerCase()} downloads.`}>

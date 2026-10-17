@@ -17,6 +17,7 @@ export const STATE_LABELS: Record<TransferState, string> = {
   queued: 'Queued',
   downloading: 'Downloading',
   paused: 'Paused',
+  moving: 'Moving files',
   seeding: 'Seeding',
   completed: 'Completed',
   error: 'Error',

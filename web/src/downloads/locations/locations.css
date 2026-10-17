@@ -1,0 +1,27 @@
+.folder-dialog { display: flex; flex-direction: column; width: min(560px, calc(100vw - 2 * var(--gutter))); height: min(620px, calc(100dvh - 48px)); max-height: none; padding: 0; border: 0; border-radius: var(--radius-panel); background: var(--s1); color: var(--t1); box-shadow: 0 24px 64px rgb(0 0 0 / .6); }
+.folder-dialog:not([open]) { display: none; }
+.folder-dialog::backdrop { background: rgb(0 0 0 / .7); }
+.folder-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-4) var(--space-4) var(--space-3); }
+.folder-head h2 { font-size: var(--type-section); font-weight: 700; line-height: 1.35; overflow-wrap: anywhere; }
+.folder-path { display: flex; gap: var(--space-2); padding: 0 var(--space-4) var(--space-3); }
+.folder-path input { flex: 1; min-width: 0; height: 44px; padding: 0 12px; border: 1px solid transparent; border-radius: var(--radius-button); background: var(--s2); font-size: 16px; }
+.folder-path .icon-button { width: 44px; height: 44px; }
+.folder-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; border-block: 1px solid var(--rule); }
+.folder-body[aria-busy="true"] .folder-rows { opacity: .55; }
+.folder-rows { margin: 0; padding: 0; list-style: none; }
+.folder-row { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 48px; padding: 0 var(--space-4); border-bottom: 1px solid var(--rule); color: var(--t1); font-size: var(--type-body); text-align: left; }
+.folder-row:hover, .folder-row:focus-visible { background: var(--s2); }
+.folder-row .lucide { flex: none; width: 20px; height: 20px; color: var(--t2); }
+.folder-row .folder-open { margin-left: auto; width: 16px; height: 16px; color: var(--t3); }
+.folder-name { min-width: 0; overflow-wrap: anywhere; }
+.folder-empty, .folder-error { padding: var(--space-4); color: var(--t2); font-size: var(--type-card); }
+.folder-error { color: var(--dropped); }
+.folder-foot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3); padding: var(--space-3) var(--space-4); }
+.folder-actions { display: flex; gap: var(--space-2); margin-left: auto; }
+.folder-field .cache-input .icon-button { flex: none; }
+
+@media (max-width: 640px) {
+  .folder-dialog { width: 100vw; max-width: none; height: 100dvh; margin: 0; border-radius: 0; }
+  .folder-actions { flex: 1; }
+  .folder-actions .button { flex: 1; }
+}

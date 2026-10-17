@@ -2,4 +2,4 @@
 import type { DiskUsage } from "./DiskUsage";
 import type { Transfer } from "./Transfer";
 
-export type TransferList = { transfers: Array<Transfer>, disk: DiskUsage, };
+export type TransferList = { transfers: Array<Transfer>, disks: Array<DiskUsage>, };

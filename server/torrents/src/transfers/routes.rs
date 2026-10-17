@@ -9,12 +9,13 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tokio_stream::wrappers::BroadcastStream;
 use ts_rs::TS;
-use watchit_core::{AppError, AppResult, JsonBody};
+use watchit_core::{AppError, AppResult, JsonBody, Viewer};
 
 use super::control::Change;
 use super::model::{Kind, Transfer};
 use super::record::{Choice, Pick};
-use super::{Disk, TransferEvent};
+use super::TransferEvent;
+use crate::locations::{Disk, chosen_folder};
 use crate::service::Torrents;
 use crate::title_id::TitleId;
 
@@ -22,7 +23,7 @@ use crate::title_id::TitleId;
 #[ts(export_to = "torrents/")]
 pub struct TransferList {
     transfers: Vec<Transfer>,
-    disk: Disk,
+    disks: Vec<Disk>,
 }
 
 #[derive(Deserialize, TS)]
@@ -33,6 +34,9 @@ pub struct NewTransfer {
     file_indexes: Option<Vec<usize>>,
     title_id: String,
     kind: Kind,
+    #[serde(default)]
+    #[ts(optional)]
+    download_dir: Option<String>,
 }
 
 #[derive(Deserialize, TS)]
@@ -41,6 +45,9 @@ pub struct NewTransfer {
 pub struct SeasonDownload {
     series_id: String,
     season: u32,
+    #[serde(default)]
+    #[ts(optional)]
+    download_dir: Option<String>,
 }
 
 #[derive(Deserialize, TS)]
@@ -53,6 +60,12 @@ pub struct TransferPatch {
     #[serde(default)]
     #[ts(optional, type = "'download'")]
     kind: Option<Kind>,
+    #[serde(default)]
+    #[ts(optional)]
+    queue_position: Option<u32>,
+    #[serde(default)]
+    #[ts(optional)]
+    download_dir: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -63,10 +76,11 @@ pub struct DeleteQuery {
 
 pub async fn list(State(torrents): State<Torrents>) -> AppResult<Json<TransferList>> {
     let transfers = torrents.transfers().await?;
-    Ok(Json(TransferList { transfers: transfers.all(), disk: transfers.disk() }))
+    Ok(Json(TransferList { transfers: transfers.all(), disks: transfers.disks() }))
 }
 
-pub async fn create(State(torrents): State<Torrents>, JsonBody(body): JsonBody<NewTransfer>) -> AppResult<Json<Transfer>> {
+pub async fn create(State(torrents): State<Torrents>, viewer: Viewer, JsonBody(body): JsonBody<NewTransfer>) -> AppResult<Json<Transfer>> {
+    let folder = chosen_folder(&viewer, body.download_dir.as_deref())?;
     let title = TitleId::parse(&body.title_id)?.to_string();
     if body.file_indexes.as_ref().is_some_and(Vec::is_empty) {
         return Err(AppError::bad_request("Pick at least one file, or send null for the whole torrent."));
@@ -77,24 +91,34 @@ pub async fn create(State(torrents): State<Torrents>, JsonBody(body): JsonBody<N
     };
     let pick = Pick::files_or(&title, body.file_indexes, fallback);
     let transfers = torrents.transfers().await?;
-    transfers.add(&body.info_hash, pick, body.kind).await.map(Json)
+    transfers.add(&body.info_hash, pick, body.kind, folder).await.map(Json)
 }
 
-pub async fn season(State(torrents): State<Torrents>, JsonBody(body): JsonBody<SeasonDownload>) -> AppResult<Json<Vec<Transfer>>> {
+pub async fn season(
+    State(torrents): State<Torrents>,
+    viewer: Viewer,
+    JsonBody(body): JsonBody<SeasonDownload>,
+) -> AppResult<Json<Vec<Transfer>>> {
+    let folder = chosen_folder(&viewer, body.download_dir.as_deref())?;
     let transfers = torrents.transfers().await?;
-    transfers.add_season(&body.series_id, body.season).await.map(Json)
+    transfers.add_season(&body.series_id, body.season, folder).await.map(Json)
 }
 
 pub async fn update(
     State(torrents): State<Torrents>,
+    viewer: Viewer,
     Path(id): Path<String>,
     JsonBody(body): JsonBody<TransferPatch>,
 ) -> AppResult<Json<Transfer>> {
     if body.kind == Some(Kind::Stream) {
         return Err(AppError::bad_request("A transfer can only be changed into a download."));
     }
+    let folder = chosen_folder(&viewer, body.download_dir.as_deref())?;
     let transfers = torrents.transfers().await?;
-    transfers.change(&id, Change { paused: body.paused, kind: body.kind }).await.map(Json)
+    if let Some(folder) = folder {
+        transfers.relocate(&id, folder).await?;
+    }
+    transfers.change(&id, Change { paused: body.paused, kind: body.kind, queue_position: body.queue_position }).await.map(Json)
 }
 
 pub async fn remove(State(torrents): State<Torrents>, Path(id): Path<String>, Query(query): Query<DeleteQuery>) -> AppResult<StatusCode> {
