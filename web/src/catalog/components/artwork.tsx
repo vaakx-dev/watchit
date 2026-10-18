@@ -1,10 +1,5 @@
 import { useState } from 'react';
-
-function hue(text: string) {
-  let value = 0;
-  for (const char of text) value = (value * 31 + char.charCodeAt(0)) % 360;
-  return value;
-}
+import { hue } from '../../ui/hue';
 
 function Fallback({ label }: { label?: string }) {
   if (!label) return <div className="artwork artwork-fallback" />;

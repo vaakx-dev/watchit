@@ -63,25 +63,43 @@ pub(crate) fn trending_column(kind: CatalogKind) -> &'static str {
     if kind == CatalogKind::Anime { "anime_rank" } else { "trending_rank" }
 }
 
-fn order(query: &BrowseQuery) -> String {
+const RELEVANCE_ORDER: &str = "CASE WHEN titles.search = ? THEN 0 WHEN titles.search LIKE ? ESCAPE '\\' THEN 1
+    WHEN titles.search LIKE ? ESCAPE '\\' THEN 2 ELSE 3 END, popularity DESC NULLS LAST, imdb_rating DESC NULLS LAST, year DESC, title COLLATE NOCASE, id";
+
+fn trending_order(kind: CatalogKind) -> String {
+    format!("{} NULLS LAST, year DESC, title COLLATE NOCASE, id", trending_column(kind))
+}
+
+fn order(query: &BrowseQuery, parameters: &mut Vec<Value>) -> String {
     match query.sort {
+        CatalogSort::Relevance if query.query.is_empty() => trending_order(query.kind),
+        CatalogSort::Relevance => {
+            let text = query.query.to_lowercase();
+            parameters.push(Value::Text(text.clone()));
+            parameters.push(Value::Text(format!("{}%", escape(&text))));
+            parameters.push(Value::Text(format!("% {}%", escape(&text))));
+            RELEVANCE_ORDER.into()
+        }
         CatalogSort::Title => "title COLLATE NOCASE, id".into(),
         CatalogSort::TopRated => TOP_RATED_ORDER.into(),
-        CatalogSort::Trending => format!("{} NULLS LAST, year DESC, title COLLATE NOCASE, id", trending_column(query.kind)),
+        CatalogSort::Trending => trending_order(query.kind),
         CatalogSort::Newest => "year DESC, title COLLATE NOCASE, id".into(),
     }
 }
 
-fn search_pattern(query: &str) -> String {
-    let mut pattern = String::from("%");
-    for char in query.to_lowercase().chars() {
+fn escape(text: &str) -> String {
+    let mut escaped = String::new();
+    for char in text.chars() {
         if matches!(char, '\\' | '%' | '_') {
-            pattern.push('\\');
+            escaped.push('\\');
         }
-        pattern.push(char);
+        escaped.push(char);
     }
-    pattern.push('%');
-    pattern
+    escaped
+}
+
+fn search_pattern(query: &str) -> String {
+    format!("%{}%", escape(&query.to_lowercase()))
 }
 
 fn genre_options(conn: &Connection, facets: &Facets, query: &BrowseQuery, conditions: &[&str], parameters: &[Value]) -> AppResult<Vec<GenreOption>> {
@@ -127,15 +145,21 @@ pub(crate) fn browse(
     if let Some(filter) = filter {
         conditions.push(filter.condition(&mut parameters));
     }
+    let filters = conditions.join(" AND ");
+    let total = conn
+        .prepare_cached(&format!("SELECT COUNT(*) FROM titles WHERE {filters}"))?
+        .query_row(rusqlite::params_from_iter(&parameters), |row| row.get(0))?;
+    let order = order(query, &mut parameters);
     parameters.push(Value::Integer(PAGE_SIZE as i64 + 1));
     parameters.push(Value::Integer(offset(query.page)));
-    let sql = format!("SELECT {ENTRY_COLUMNS} FROM titles WHERE {} ORDER BY {} LIMIT ? OFFSET ?", conditions.join(" AND "), order(query));
+    let sql = format!("SELECT {ENTRY_COLUMNS} FROM titles WHERE {filters} ORDER BY {order} LIMIT ? OFFSET ?");
     let (rows, has_next) = page_rows(&mut *conn.prepare_cached(&sql)?, rusqlite::params_from_iter(parameters))?;
     let images = images(conn, artwork, &rows)?;
     Ok(CatalogPage {
         items: rows.iter().map(|row| row.entry(&images)).collect(),
         page: query.page,
         has_next,
+        total,
         genres,
         freshness: freshness(&rows, metadata_ms),
         artwork_status: images.status,

@@ -68,6 +68,7 @@ impl CatalogKind {
 #[ts(export_to = "catalog/")]
 #[serde(rename_all = "snake_case")]
 pub enum CatalogSort {
+    Relevance,
     Newest,
     Title,
     Trending,
@@ -77,6 +78,7 @@ pub enum CatalogSort {
 impl CatalogSort {
     pub fn parse(value: &str) -> Option<Self> {
         match value {
+            "relevance" => Some(Self::Relevance),
             "newest" => Some(Self::Newest),
             "title" => Some(Self::Title),
             "trending" => Some(Self::Trending),
@@ -195,6 +197,7 @@ pub struct CatalogPage {
     pub items: Vec<CatalogEntry>,
     pub page: u32,
     pub has_next: bool,
+    pub total: i64,
     pub genres: Vec<GenreOption>,
     pub freshness: Freshness,
     pub artwork_status: ArtworkStatus,

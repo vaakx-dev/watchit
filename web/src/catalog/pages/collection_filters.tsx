@@ -3,20 +3,11 @@ import { Choices, type Choice } from '../../ui/choices';
 import { useRowScroll } from '../../ui/use_row_scroll';
 import { Check } from 'lucide-react';
 import { HIDDEN_STATUSES, type DiscoverQuery, type HiddenStatus } from '../../navigation/discover';
-import type { CatalogKind, CatalogSort, GenreOption } from '../types';
-
-const KINDS: readonly Choice<CatalogKind>[] = [
-  { value: 'all', label: 'All' },
-  { value: 'movie', label: 'Movies' },
-  { value: 'series', label: 'Series' },
-  { value: 'anime', label: 'Anime' },
-];
-
-export const SORT_LABELS: Record<CatalogSort, string> = { trending: 'Trending', top_rated: 'Top rated', newest: 'Newest', title: 'A–Z' };
+import type { CatalogSort, GenreOption } from '../types';
+import { KINDS } from '../../library/pages/kinds';
+import { HIDDEN_LABELS, SORT_LABELS } from '../../search/filters/title_filters';
 
 const SORTS: readonly Choice<CatalogSort>[] = (['trending', 'top_rated', 'newest', 'title'] as const).map(value => ({ value, label: SORT_LABELS[value] }));
-
-const HIDDEN_LABELS: Record<HiddenStatus, string> = { watched: 'Watched', dropped: 'Dropped' };
 
 type Change = (next: Partial<DiscoverQuery>) => void;
 

@@ -10,8 +10,11 @@ function kind_label({ kind, anime }: CatalogEntry) {
   return kind === 'movie' ? 'Movie' : 'Series';
 }
 
-export const Card = memo(function Card({ entry, library }: { entry: CatalogEntry; library: Library }) {
-  const details = [kind_label(entry), entry.year, entry.genres[0]].filter(Boolean).join(' · ');
+export const Card = memo(function Card({ entry, library, details = [kind_label(entry), entry.year, entry.genres[0]].filter(Boolean).join(' · ') }: {
+  entry: CatalogEntry;
+  library: Library;
+  details?: string;
+}) {
 
   return <article className="title-card">
     <a className="card-link" href={`#/title/${entry.id}`} aria-label={`${entry.title}${entry.year ? `, ${entry.year}` : ''}`} title={entry.title}>
