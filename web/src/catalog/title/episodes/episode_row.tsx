@@ -33,10 +33,10 @@ export function EpisodeRow({ episode, minutes, up_next, resume, library }: Props
       </span>
     </a>
     <span className="episode-action">
-      {watched
-        ? <button type="button" className="icon-button small ghost" disabled={!library.ready} aria-pressed="true" aria-label={`Watched episode ${name}. Mark unwatched`}
-          title="Watched" onClick={() => { void library.update(episode.id, { status: null }); }}><StatusEye status="watched" /></button>
-        : <DownloadEpisodeButton episode={episode} />}
+      {!watched && <DownloadEpisodeButton episode={episode} />}
+      <button type="button" className="icon-button small ghost" disabled={!library.ready} aria-pressed={watched}
+        aria-label={watched ? `Watched episode ${name}. Mark unwatched` : `Mark episode ${name} watched`} title={watched ? 'Watched' : 'Mark watched'}
+        onClick={() => { void library.update(episode.id, { status: watched ? null : 'watched' }); }}><StatusEye status={watched ? 'watched' : null} /></button>
     </span>
   </li>;
 }

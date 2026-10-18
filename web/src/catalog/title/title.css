@@ -76,7 +76,7 @@
 .episode-row[data-watched] .episode-name { color: var(--t2); }
 .episode-detail { margin-top: 2px; color: var(--t3); font-size: var(--type-meta); }
 .episode-synopsis { margin-top: 3px; color: var(--t2); font-size: 12.5px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.episode-action { margin-top: -4px; color: var(--t3); }
+.episode-action { margin-top: -4px; color: var(--t3); display: flex; gap: 2px; }
 .episode-action .eye { width: 20px; height: 20px; }
 .episode-action .eye .eye-mark { width: 100%; height: 100%; }
 .episode-action .icon-button[aria-pressed="true"] { background: transparent; color: inherit; }
