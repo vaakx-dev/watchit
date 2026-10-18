@@ -7,6 +7,7 @@ use crate::status::Status;
 
 pub const RANKING_ORDER: &str = "rating DESC, position IS NULL, position, opened_at DESC, title COLLATE NOCASE, id";
 pub const RECENT_ORDER: &str = "opened_at DESC, title COLLATE NOCASE, id";
+pub const ADDED_ORDER: &str = "status_changed_at IS NULL, status_changed_at DESC, title COLLATE NOCASE, id";
 
 pub const LIBRARY_TITLES: &str = "
   WITH opened AS (
@@ -19,12 +20,13 @@ pub const LIBRARY_TITLES: &str = "
     SELECT titles.id, titles.title, titles.year, titles.kind, titles.anime,
       e.rating, e.status, COALESCE(e.favorite, 0) AS favorite, COALESCE(e.recommended, 0) AS recommended,
       COALESCE(e.saved, 0) AS saved, e.opened_at AS last_opened_at, opened.opened_at, e.position,
-      w.position_seconds, w.duration_seconds
+      w.position_seconds, w.duration_seconds, st.changed_at AS status_changed_at
     FROM members
     JOIN titles ON titles.id = members.id AND titles.kind <> 'episode'
     LEFT JOIN library_entries e ON e.profile_id = ?1 AND e.id = members.id
     LEFT JOIN opened ON opened.id = members.id
     LEFT JOIN watch_progress w ON w.profile_id = ?1 AND w.id = members.id
+    LEFT JOIN library_status_times st ON st.profile_id = ?1 AND st.id = members.id
   )";
 
 pub struct LibraryRow {
@@ -38,6 +40,7 @@ pub struct LibraryRow {
     pub last_opened_at: Option<String>,
     pub opened_at: Option<String>,
     pub resume: Option<SavedPosition>,
+    pub status_changed_at: Option<String>,
 }
 
 impl LibraryRow {
@@ -56,6 +59,7 @@ impl LibraryRow {
             last_opened_at: row.get(10)?,
             opened_at: row.get(11)?,
             resume: position.zip(duration).map(|(position_seconds, duration_seconds)| SavedPosition { position_seconds, duration_seconds }),
+            status_changed_at: row.get(15)?,
         })
     }
 

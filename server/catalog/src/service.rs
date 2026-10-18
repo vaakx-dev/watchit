@@ -98,6 +98,10 @@ impl Catalog {
         episodes::season_ids(conn, series_id, season)
     }
 
+    pub fn season_count(&self, conn: &Connection, series_id: &str) -> AppResult<i64> {
+        episodes::season_count(conn, series_id)
+    }
+
     pub fn import_title(&self, conn: &Connection, id: &str) -> AppResult<bool> {
         Ok(self.inner.sync.title(conn, id)?.pending)
     }

@@ -17,7 +17,6 @@ import './styles/title.css';
 import './styles/playback.css';
 import './playback/player/player.css';
 import './styles/personal.css';
-import './styles/my_shows.css';
 import './styles/rankings.css';
 import './downloads/locations/locations.css';
 import './downloads/picker/picker.css';

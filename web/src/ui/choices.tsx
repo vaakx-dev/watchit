@@ -7,7 +7,7 @@ export function Choices<T extends string>({ label, options, value, on_change, lo
   options: readonly Choice<T>[];
   value: T;
   on_change: (value: T) => void;
-  look?: 'chips' | 'segmented' | 'tabs';
+  look?: 'chips' | 'segmented' | 'pills' | 'quiet';
   children?: ReactNode;
 }) {
   return <div className={`choices ${look}`} role="group" aria-label={label}>

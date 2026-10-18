@@ -7,6 +7,7 @@ function item(id: string, rank: number, position: number): RankedItem {
     title: { id, title: id, year: 2024, artwork: '', genres: [], kind: 'movie', anime: false, imdb_rating: null },
     entry: { id, rating: null, status: null, favorite: false, recommended: false, saved: false, last_opened_at: null },
     opened_at: null, progress: null, resume: null, rank, position,
+    status_changed_at: null, minutes: null, seasons: null, season_episodes: null,
   };
 }
 

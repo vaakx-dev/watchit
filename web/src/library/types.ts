@@ -23,7 +23,7 @@ export const STATUSES = ['want', 'watching', 'paused', 'watched', 'dropped'] as 
 export const SHELVES = [...STATUSES, 'favorite', 'recommended', 'saved', 'recent'] as const;
 export type Shelf = typeof SHELVES[number];
 
-export const LIBRARY_SORTS = ['recent', 'title', 'newest', 'rating'] as const;
+export const LIBRARY_SORTS = ['recent', 'added', 'title', 'newest', 'rating'] as const;
 export type LibrarySort = typeof LIBRARY_SORTS[number];
 
 export type LibraryQuery = { shelf: Shelf; kind: CatalogKind; sort: LibrarySort; page: number };

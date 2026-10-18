@@ -9,7 +9,7 @@ import { CatalogStatus } from './catalog/components/status';
 import { use_title } from './catalog/api';
 import { ReadyNotifications } from './downloads/notify/ready_notifications';
 import { DownloadsPage } from './downloads/downloads_page';
-import { MyShows } from './library/pages/my_shows';
+import { MyShows } from './library/my_shows/my_shows';
 import { Rankings } from './library/pages/rankings';
 import { use_library } from './library/use_library';
 import { use_library_refresh } from './library/use_library_refresh';
