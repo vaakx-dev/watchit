@@ -1,12 +1,12 @@
 import { parse_kind } from '../catalog/kinds';
 import type { CatalogKind } from '../catalog/types';
 
-const RANKING_LAYOUTS = ['ranked', 'tiers'] as const;
+const RANKING_LAYOUTS = ['ranked', 'tiers', 'duel'] as const;
 export type RankingLayout = typeof RANKING_LAYOUTS[number];
 
-export type RankingsQuery = { kind: CatalogKind; layout: RankingLayout };
+export type RankingsQuery = { kind: CatalogKind; layout: RankingLayout | null };
 
-export const RANKINGS_DEFAULTS: RankingsQuery = { kind: 'all', layout: 'ranked' };
+export const RANKINGS_DEFAULTS: RankingsQuery = { kind: 'all', layout: null };
 
 export function parse_rankings(params: URLSearchParams): RankingsQuery {
   return {
@@ -18,7 +18,7 @@ export function parse_rankings(params: URLSearchParams): RankingsQuery {
 function href(path: string, { kind, layout }: RankingsQuery) {
   const params = new URLSearchParams();
   if (kind !== RANKINGS_DEFAULTS.kind) params.set('type', kind);
-  if (layout !== RANKINGS_DEFAULTS.layout) params.set('layout', layout);
+  if (layout) params.set('layout', layout);
   const search = params.toString();
   return search ? `${path}?${search}` : path;
 }

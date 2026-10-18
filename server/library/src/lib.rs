@@ -16,7 +16,7 @@ mod status;
 mod titles;
 
 use axum::Router;
-use axum::routing::{delete, get, patch, put};
+use axum::routing::{delete, get, patch, post, put};
 use ts_rs::{Config, ExportError, TS};
 use watchit_catalog::Catalog;
 use watchit_core::{AppError, AppResult, Context, Db};
@@ -54,7 +54,16 @@ impl Library {
 }
 
 fn tables() -> String {
-    [entries::TABLE, seasons::TABLE, progress::TABLE, playback_source::TABLE, searches::TABLE].concat()
+    [
+        entries::TABLE,
+        seasons::TABLE,
+        progress::TABLE,
+        playback_source::TABLE,
+        searches::TABLE,
+        rankings::duels::TABLE,
+        rankings::system::TABLE,
+    ]
+    .concat()
 }
 
 pub fn router(library: Library) -> Router {
@@ -67,6 +76,11 @@ pub fn router(library: Library) -> Router {
         .route("/api/library/{id}/playback", patch(playback_source::update))
         .route("/api/rankings", get(rankings::show))
         .route("/api/rankings/unrated", get(rankings::unrated))
+        .route("/api/rankings/system", get(rankings::system::show).put(rankings::system::choose))
+        .route("/api/rankings/duels", get(rankings::duels::next).post(rankings::duels::result))
+        .route("/api/rankings/duels/skip", post(rankings::duels::skip))
+        .route("/api/rankings/duels/undo", post(rankings::duels::undo))
+        .route("/api/rankings/duels/ranked", get(rankings::duels::ranked))
         .route("/api/rankings/{id}", patch(rankings::place))
         .route("/api/progress/{id}", put(progress::save).delete(progress::clear))
         .route("/api/searches", get(searches::list).post(searches::remember).delete(searches::clear))
@@ -84,6 +98,11 @@ pub fn export_types(config: &Config) -> Result<(), ExportError> {
     rankings::Rankings::export_all(config)?;
     rankings::RankingMove::export_all(config)?;
     rankings::UnratedTitles::export_all(config)?;
+    rankings::system::RankingChoice::export_all(config)?;
+    rankings::duels::DuelBoard::export_all(config)?;
+    rankings::duels::DuelRanking::export_all(config)?;
+    rankings::duels::DuelResult::export_all(config)?;
+    rankings::duels::DuelPair::export_all(config)?;
     playback_source::PlaybackPreference::export_all(config)?;
     playback_source::SourcePatch::export_all(config)?;
     progress::ProgressSaved::export_all(config)?;
