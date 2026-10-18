@@ -82,6 +82,12 @@ a.watch-episode:focus-visible { outline-offset: -2px; }
 .watch-episode-note .eye { width: 14px; height: 14px; }
 .watch-episode-note.now-playing { color: var(--watching); font-weight: 600; }
 .watch-episodes .pagination { justify-content: space-between; gap: var(--space-3); margin-top: var(--space-3); }
+.watch-episodes .season-picker { min-width: 0; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.watch-episodes .season-name { font-size: var(--type-card); font-weight: 700; }
+.watch-episodes .season-select { height: 32px; padding: 0 8px 0 12px; border: 0; border-radius: var(--radius-full); background: var(--s2); color: var(--t1); font-size: var(--type-card); }
+.watch-episodes .season-summary { color: var(--t2); font-size: var(--type-meta); }
+.season-watched .eye { width: 18px; height: 18px; }
+.season-watched .eye .eye-mark { width: 100%; height: 100%; }
 
 @media (max-width: 760px) {
   .ending-next { grid-template-columns: 96px minmax(0, 1fr); }

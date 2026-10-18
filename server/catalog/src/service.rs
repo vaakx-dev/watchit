@@ -117,7 +117,7 @@ impl Catalog {
 
     pub(crate) fn default_extras(&self, conn: &Connection, series_id: Option<&str>) -> AppResult<TitleExtras> {
         let progress = match series_id {
-            Some(series_id) => Some(SeriesProgress { last: None, next: self.next_episode(conn, series_id, None)?, opened_at: None }),
+            Some(series_id) => Some(SeriesProgress { last: None, next: self.next_episode(conn, series_id, None)?, resume: None, opened_at: None }),
             None => None,
         };
         Ok(TitleExtras { playback_source: None, progress, resume: None })

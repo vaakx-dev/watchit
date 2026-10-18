@@ -1,7 +1,7 @@
-import { awaiting_items, use_first_episodes } from '../api';
-import { navigation_anchor } from '../episodes';
-import { use_season_navigation, type SeasonNavigation } from '../use_season_navigation';
-import type { SeriesProgress } from '../../library/types';
+import { awaiting_items, use_first_episodes } from '../../api';
+import { navigation_anchor } from '../../episodes';
+import { use_season_navigation, type SeasonNavigation } from '../../use_season_navigation';
+import type { SeriesProgress } from '../../../library/types';
 
 export function use_series_episodes(series_id: string | null, progress: SeriesProgress | null): SeasonNavigation {
   const known = navigation_anchor(progress, []);

@@ -12,6 +12,7 @@ pub const HIDE_STATUSES: [&str; 5] = ["want", "watching", "paused", "watched", "
 pub struct SeriesProgress {
     pub last: Option<EpisodeEntry>,
     pub next: Option<EpisodeEntry>,
+    pub resume: Option<SavedPosition>,
     pub opened_at: Option<String>,
 }
 

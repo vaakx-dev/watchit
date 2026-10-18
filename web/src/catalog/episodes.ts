@@ -12,8 +12,8 @@ export function episode_code({ season, episode }: Numbered, current_season?: num
   return parts.filter(Boolean).join(' ');
 }
 
-export function play_label(next: EpisodeEntry, last: EpisodeEntry | null) {
-  return `${last ? 'Continue' : 'Play'} ${episode_code(next)}`;
+export function play_label(next: Numbered) {
+  return `Play ${episode_code(next)}`;
 }
 
 export function navigation_anchor(progress: SeriesProgress | null, episodes: readonly EpisodeEntry[]) {

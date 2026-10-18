@@ -108,6 +108,7 @@ pub struct EpisodeEntry {
     pub entry: CatalogEntry,
     pub season: Option<i64>,
     pub episode: Option<i64>,
+    pub synopsis: String,
 }
 
 #[derive(Clone, Debug, Serialize, TS)]

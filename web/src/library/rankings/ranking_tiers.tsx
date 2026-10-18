@@ -2,7 +2,7 @@ import { ChevronRight } from 'lucide-react';
 import { Artwork } from '../../catalog/components/artwork';
 import type { CatalogEntry } from '../../catalog/types';
 import type { Rankings } from '../types';
-import { Stars } from './stars';
+import { Stars } from '../components/stars';
 
 const UNRATED_PREVIEW = 8;
 

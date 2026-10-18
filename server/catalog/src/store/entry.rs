@@ -6,8 +6,9 @@ use crate::clock::{iso, now_ms};
 use crate::model::{CatalogEntry, EpisodeEntry, Freshness, MediaKind};
 
 pub(crate) const ENTRY_COLUMNS: &str = "titles.id, titles.title, titles.year, titles.poster, titles.genres, titles.kind, titles.anime,
-    titles.imdb_rating, titles.updated_at, titles.season, titles.episode";
-pub(crate) const ENTRY_WIDTH: usize = 11;
+    titles.imdb_rating, titles.updated_at, titles.season, titles.episode,
+    CASE WHEN titles.kind = 'episode' THEN json_extract(titles.detail, '$.synopsis') END";
+pub(crate) const ENTRY_WIDTH: usize = 12;
 
 pub(crate) struct EntryRow {
     pub id: String,
@@ -21,6 +22,7 @@ pub(crate) struct EntryRow {
     pub updated_at: i64,
     pub season: Option<i64>,
     pub episode: Option<i64>,
+    pub synopsis: Option<String>,
 }
 
 impl EntryRow {
@@ -40,6 +42,7 @@ impl EntryRow {
             updated_at: row.get(8)?,
             season: row.get(9)?,
             episode: row.get(10)?,
+            synopsis: row.get(11)?,
         })
     }
 
@@ -57,7 +60,12 @@ impl EntryRow {
     }
 
     pub fn episode(&self, images: &ImageSet) -> EpisodeEntry {
-        EpisodeEntry { entry: self.entry(images), season: self.season, episode: self.episode }
+        EpisodeEntry {
+            entry: self.entry(images),
+            season: self.season,
+            episode: self.episode,
+            synopsis: self.synopsis.clone().unwrap_or_default(),
+        }
     }
 }
 

@@ -4,7 +4,7 @@ import { Artwork } from '../../catalog/components/artwork';
 import type { RankedItem, Rankings } from '../types';
 import { PODIUM_SIZE } from './podium';
 import { before_of, move, step, type Move } from './ranking_moves';
-import { Stars } from './stars';
+import { Stars } from '../components/stars';
 
 type Drag = Move & { origin: string | null };
 

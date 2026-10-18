@@ -40,8 +40,10 @@ export function GridSkeleton() {
 export function EpisodeSkeleton() {
   return <div role="status" aria-label="Loading episodes">
     <ol className="episode-rows" aria-hidden="true">{Array.from({ length: 4 }, (_, index) => <li className="episode-row" key={index}>
-      <div className="episode-still skeleton-block" />
-      <div className="episode-copy"><span className="skeleton-line skeleton-episode" /></div>
+      <div className="episode-link">
+        <div className="episode-still skeleton-block" />
+        <div className="episode-copy"><span className="skeleton-line skeleton-episode" /></div>
+      </div>
     </li>)}</ol>
   </div>;
 }

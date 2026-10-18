@@ -6,7 +6,7 @@ import type { EpisodeEntry, EpisodeNavigation, ImportStatus } from './types';
 const imports: ImportStatus = { enabled: true, pending: false, running: false, imported: 0, error: null, next_retry_at: null };
 
 function episode(season: number | null, number: number | null): EpisodeEntry {
-  return { id: `tt1:${season}:${number}`, title: `Episode ${number}`, year: 2026, artwork: '', genres: [], kind: 'episode', anime: false, imdb_rating: null, season, episode: number };
+  return { id: `tt1:${season}:${number}`, title: `Episode ${number}`, year: 2026, artwork: '', genres: [], kind: 'episode', anime: false, imdb_rating: null, season, episode: number, synopsis: '' };
 }
 
 function navigation(items: EpisodeEntry[], page = 1, has_next = false): EpisodeNavigation {
@@ -30,15 +30,14 @@ describe('episode labels', () => {
 });
 
 describe('series progress', () => {
-  it('continues after the last opened episode or starts at the next one', () => {
-    expect(play_label(episode(1, 4), episode(1, 3))).toBe('Continue S1 E4');
-    expect(play_label(episode(1, 1), null)).toBe('Play S1 E1');
+  it('plays the next episode by its code', () => {
+    expect(play_label(episode(1, 4))).toBe('Play S1 E4');
   });
 
   it('anchors the season list on progress, then on the first numbered regular episode', () => {
     const specials = [episode(0, 1), episode(null, null), episode(1, 1)];
-    expect(navigation_anchor({ last: episode(1, 3), next: episode(1, 4), opened_at: null }, specials)?.id).toBe('tt1:1:4');
-    expect(navigation_anchor({ last: episode(2, 8), next: null, opened_at: null }, specials)?.id).toBe('tt1:2:8');
+    expect(navigation_anchor({ last: episode(1, 3), next: episode(1, 4), resume: null, opened_at: null }, specials)?.id).toBe('tt1:1:4');
+    expect(navigation_anchor({ last: episode(2, 8), next: null, resume: null, opened_at: null }, specials)?.id).toBe('tt1:2:8');
     expect(navigation_anchor(null, specials)?.id).toBe('tt1:1:1');
     expect(navigation_anchor(null, [episode(null, null), episode(0, 2)])?.id).toBe('tt1:0:2');
     expect(navigation_anchor(null, [])).toBeNull();

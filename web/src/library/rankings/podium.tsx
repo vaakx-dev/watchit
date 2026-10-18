@@ -1,6 +1,6 @@
 import { Artwork } from '../../catalog/components/artwork';
 import type { Rankings } from '../types';
-import { Stars } from './stars';
+import { Stars } from '../components/stars';
 
 export const PODIUM_SIZE = 3;
 
