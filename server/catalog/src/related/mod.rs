@@ -39,11 +39,17 @@ impl Catalog {
             .enumerate()
             .filter_map(|(offset, id)| {
                 let row = members.iter().find(|row| &row.id == id)?;
-                Some(FranchiseEntry { entry: row.entry(&images), position: start + offset + 1, current: *id == title.id })
+                Some(FranchiseEntry {
+                    entry: row.entry(&images),
+                    position: start + offset + 1,
+                    current: *id == title.id,
+                })
             })
             .collect();
         Ok(RelatedTitles {
-            franchise: franchise.filter(|_| items.len() > 1).map(|franchise| Franchise { name: franchise.name, items }),
+            franchise: franchise
+                .filter(|_| items.len() > 1)
+                .map(|franchise| Franchise { name: franchise.name, items }),
             similar: similar.iter().map(|row| row.entry(&images)).collect(),
             pending: pending || (!missing.is_empty() && inner.sync.titles(&missing).pending),
             artwork_status: images.status,

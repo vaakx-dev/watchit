@@ -24,7 +24,11 @@ pub fn movie(movies: &Path, movie: &TitleName) -> PathBuf {
 }
 
 fn season_folder(season: u32) -> String {
-    if season == 0 { "Specials".to_owned() } else { format!("Season {season:02}") }
+    if season == 0 {
+        "Specials".to_owned()
+    } else {
+        format!("Season {season:02}")
+    }
 }
 
 pub struct EpisodeName<'a> {

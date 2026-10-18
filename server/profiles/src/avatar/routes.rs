@@ -52,7 +52,12 @@ async fn edit(
     Ok(Json(profile))
 }
 
-pub async fn show(State(profiles): State<Profiles>, ProfileId(id): ProfileId, Query(version): Query<Version>, headers: HeaderMap) -> AppResult<Response> {
+pub async fn show(
+    State(profiles): State<Profiles>,
+    ProfileId(id): ProfileId,
+    Query(version): Query<Version>,
+    headers: HeaderMap,
+) -> AppResult<Response> {
     let avatar = profiles
         .db
         .run(move |conn| {
@@ -63,8 +68,14 @@ pub async fn show(State(profiles): State<Profiles>, ProfileId(id): ProfileId, Qu
         .ok_or_else(|| AppError::not_found("This profile has no photo."))?;
     let etag = format!("\"{}\"", avatar.updated_at);
     let versioned = version.v == Some(avatar.updated_at.to_string());
-    let fresh = headers.get(header::IF_NONE_MATCH).is_some_and(|value| value.as_bytes() == etag.as_bytes());
-    let (status, body) = if fresh { (StatusCode::NOT_MODIFIED, Body::empty()) } else { (StatusCode::OK, Body::from(avatar.image)) };
+    let fresh = headers
+        .get(header::IF_NONE_MATCH)
+        .is_some_and(|value| value.as_bytes() == etag.as_bytes());
+    let (status, body) = if fresh {
+        (StatusCode::NOT_MODIFIED, Body::empty())
+    } else {
+        (StatusCode::OK, Body::from(avatar.image))
+    };
     let headers = [
         (header::CONTENT_TYPE, "image/webp".to_owned()),
         (header::X_CONTENT_TYPE_OPTIONS, "nosniff".to_owned()),
@@ -74,14 +85,25 @@ pub async fn show(State(profiles): State<Profiles>, ProfileId(id): ProfileId, Qu
     Ok((status, headers, body).into_response())
 }
 
-pub async fn upload(State(profiles): State<Profiles>, viewer: Viewer, ProfileId(id): ProfileId, headers: HeaderMap, body: Body) -> AppResult<Json<Profile>> {
+pub async fn upload(
+    State(profiles): State<Profiles>,
+    viewer: Viewer,
+    ProfileId(id): ProfileId,
+    headers: HeaderMap,
+    body: Body,
+) -> AppResult<Json<Profile>> {
     profiles.db.run(move |conn| editable(conn, viewer, id)).await?;
-    let content_type = headers.get(header::CONTENT_TYPE).and_then(|value| value.to_str().ok()).unwrap_or_default();
+    let content_type = headers
+        .get(header::CONTENT_TYPE)
+        .and_then(|value| value.to_str().ok())
+        .unwrap_or_default();
     if !content_type.starts_with("image/") {
         return Err(AppError::new(StatusCode::UNSUPPORTED_MEDIA_TYPE, "Upload an image file."));
     }
     let upload = to_bytes(body, MAX_BYTES).await.map_err(unreadable_upload)?;
-    let image = tokio::task::spawn_blocking(move || avatar_webp(&upload)).await.map_err(AppError::internal)??;
+    let image = tokio::task::spawn_blocking(move || avatar_webp(&upload))
+        .await
+        .map_err(AppError::internal)??;
     edit(&profiles, viewer, id, move |conn| store::put(conn, id, &image)).await
 }
 

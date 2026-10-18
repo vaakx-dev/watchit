@@ -64,9 +64,7 @@ pub(crate) fn delete_job(conn: &Connection, key: &str) -> AppResult<()> {
 
 impl Sync {
     pub fn open(db: Db, enabled: bool, metadata: MetadataHours, facets: Arc<Facets>, attribution: Attribution) -> AppResult<Self> {
-        let (jobs, imported) = db.run_blocking(|conn| {
-            Ok((load_jobs(conn)?, browsable_count(conn)?))
-        })?;
+        let (jobs, imported) = db.run_blocking(|conn| Ok((load_jobs(conn)?, browsable_count(conn)?)))?;
         let mut queue = Queue::default();
         for job in jobs {
             queue.insert(job);

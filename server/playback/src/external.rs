@@ -46,7 +46,9 @@ pub struct Candidate {
 }
 
 fn extension(path: &str) -> String {
-    path.rsplit_once('.').map(|(_, extension)| extension.to_ascii_lowercase()).unwrap_or_default()
+    path.rsplit_once('.')
+        .map(|(_, extension)| extension.to_ascii_lowercase())
+        .unwrap_or_default()
 }
 
 fn codec(path: &str) -> Option<&'static str> {
@@ -68,14 +70,24 @@ fn split(path: &str) -> (String, String) {
 
 fn language_of(stem: &str, video_stem: &str) -> Option<String> {
     let rest = stem.strip_prefix(video_stem).unwrap_or(stem);
-    rest.split(|c: char| !c.is_alphanumeric())
-        .find_map(|token| LANGUAGES.iter().find(|(names, _)| names.contains(&token)).map(|(_, code)| (*code).to_owned()))
+    rest.split(|c: char| !c.is_alphanumeric()).find_map(|token| {
+        LANGUAGES
+            .iter()
+            .find(|(names, _)| names.contains(&token))
+            .map(|(_, code)| (*code).to_owned())
+    })
 }
 
 pub fn matching(files: &[SourceFile], video: u32) -> Vec<Candidate> {
-    let Some(video_file) = files.iter().find(|file| file.index == video) else { return Vec::new() };
+    let Some(video_file) = files.iter().find(|file| file.index == video) else {
+        return Vec::new();
+    };
     let (video_folder, video_stem) = split(&video_file.path);
-    let sole_video = files.iter().filter(|file| VIDEO_EXTENSIONS.contains(&extension(&file.path).as_str())).count() <= 1;
+    let sole_video = files
+        .iter()
+        .filter(|file| VIDEO_EXTENSIONS.contains(&extension(&file.path).as_str()))
+        .count()
+        <= 1;
     let mut found: Vec<Candidate> = files
         .iter()
         .filter_map(|file| {

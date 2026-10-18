@@ -126,7 +126,14 @@ pub fn page(conn: &Connection, profile: i64, condition: &str, kind: CatalogKind,
     Ok((rows, has_next))
 }
 
-pub fn shelf_page(conn: &Connection, profile: i64, shelf: Shelf, kind: CatalogKind, sort: LibrarySort, number: u32) -> AppResult<(Vec<LibraryRow>, bool)> {
+pub fn shelf_page(
+    conn: &Connection,
+    profile: i64,
+    shelf: Shelf,
+    kind: CatalogKind,
+    sort: LibrarySort,
+    number: u32,
+) -> AppResult<(Vec<LibraryRow>, bool)> {
     page(conn, profile, &shelf.condition(), kind, sort.order(), number)
 }
 

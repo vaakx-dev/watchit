@@ -14,7 +14,9 @@ pub fn create_table(conn: &Connection) -> AppResult<()> {
 }
 
 pub fn load(conn: &Connection) -> AppResult<Option<Settings>> {
-    let value: Option<String> = conn.query_row("SELECT value FROM torrent_settings WHERE id = 1", [], |row| row.get(0)).optional()?;
+    let value: Option<String> = conn
+        .query_row("SELECT value FROM torrent_settings WHERE id = 1", [], |row| row.get(0))
+        .optional()?;
     value.map(|value| serde_json::from_str(&value).map_err(AppError::internal)).transpose()
 }
 

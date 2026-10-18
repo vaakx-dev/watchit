@@ -1,6 +1,6 @@
 use std::collections::{BTreeSet, HashMap, HashSet};
-use std::path::PathBuf;
 use std::future::Future;
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -10,9 +10,9 @@ use librqbit::limits::LimitsConfig;
 use super::Transfers;
 use super::entry::Entry;
 use super::model::Kind;
+use crate::bandwidth;
 use crate::engine::{self, Handle};
 use crate::locations::root_of;
-use crate::bandwidth;
 use crate::queue;
 
 const TICK: Duration = Duration::from_secs(1);
@@ -55,8 +55,14 @@ impl Transfers {
     fn account(&self, elapsed: Duration) {
         for entry in self.entries().values_mut() {
             let progress = entry.progress();
-            let Some(uploaded) = progress.stats.as_ref().map(|stats| stats.uploaded_bytes) else { continue };
-            let delta = if uploaded >= entry.live_uploaded { uploaded - entry.live_uploaded } else { uploaded };
+            let Some(uploaded) = progress.stats.as_ref().map(|stats| stats.uploaded_bytes) else {
+                continue;
+            };
+            let delta = if uploaded >= entry.live_uploaded {
+                uploaded - entry.live_uploaded
+            } else {
+                uploaded
+            };
             entry.live_uploaded = uploaded;
             entry.record.uploaded_bytes += delta;
             if progress.is_live() && progress.finished() {
@@ -85,7 +91,9 @@ impl Transfers {
         let mut actions: Vec<Action> = limits.into_iter().map(|(handle, limits)| Action::Limit(handle, limits)).collect();
 
         for entry in entries.values() {
-            let (Some(handle), Some(view)) = (entry.handle.clone(), entry.engine.as_ref()) else { continue };
+            let (Some(handle), Some(view)) = (entry.handle.clone(), entry.engine.as_ref()) else {
+                continue;
+            };
             let progress = entry.progress();
             let engine = progress.engine_state();
             let wanted: BTreeSet<usize> = queue::wanted_files(entry, &progress);
@@ -101,8 +109,10 @@ impl Transfers {
 
         if let Some(budget) = settings.disk_budget_bytes {
             let mut over: HashMap<PathBuf, u64> = used.into_iter().map(|(drive, bytes)| (drive, bytes.saturating_sub(budget))).collect();
-            let mut evictable: Vec<&Entry> =
-                entries.values().filter(|entry| entry.record.kind == Kind::Stream && entry.readers == 0 && entry.relocation.is_none()).collect();
+            let mut evictable: Vec<&Entry> = entries
+                .values()
+                .filter(|entry| entry.record.kind == Kind::Stream && entry.readers == 0 && entry.relocation.is_none())
+                .collect();
             evictable.sort_by_key(|entry| entry.record.last_used_at);
             for entry in evictable {
                 let excess = over.entry(root_of(&entry.record.download_dir)).or_insert(0);

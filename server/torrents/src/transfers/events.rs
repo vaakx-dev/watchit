@@ -1,7 +1,7 @@
 use super::Transfers;
-use crate::bandwidth::SpeedStatus;
 use super::model::Transfer;
 use super::snapshot::snapshot;
+use crate::bandwidth::SpeedStatus;
 use crate::notify::{ReadyNotice, take_due};
 use crate::queue;
 

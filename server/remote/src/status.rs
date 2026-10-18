@@ -1,10 +1,10 @@
 use serde::Serialize;
 use ts_rs::TS;
 
+use crate::Remote;
 use crate::address;
 use crate::qr;
 use crate::tailscale::{self, Sharing, TailscaleStatus};
-use crate::Remote;
 
 #[derive(Serialize, TS)]
 #[serde(rename_all = "snake_case")]
@@ -37,7 +37,14 @@ pub struct RemoteStatus {
 
 fn address(kind: AddressKind, label: String, url: String, secure: bool, preferred: bool) -> Address {
     let qr = qr::svg_for(&url);
-    Address { kind, label, url, secure, preferred, qr }
+    Address {
+        kind,
+        label,
+        url,
+        secure,
+        preferred,
+        qr,
+    }
 }
 
 fn tailnet_addresses(tailscale: &TailscaleStatus, network: bool, port: u16) -> Vec<Address> {
@@ -46,7 +53,13 @@ fn tailnet_addresses(tailscale: &TailscaleStatus, network: bool, port: u16) -> V
         found.push(address(AddressKind::Tailscale, "Tailscale".into(), format!("https://{name}"), true, true));
     }
     if let (Some(ip), true) = (&tailscale.ip, network) {
-        found.push(address(AddressKind::Tailscale, "Tailscale, no HTTPS".into(), format!("http://{ip}:{port}"), false, false));
+        found.push(address(
+            AddressKind::Tailscale,
+            "Tailscale, no HTTPS".into(),
+            format!("http://{ip}:{port}"),
+            false,
+            false,
+        ));
     }
     found
 }
@@ -71,6 +84,12 @@ impl Remote {
         if self.network() {
             addresses.extend(self.lan_addresses());
         }
-        RemoteStatus { network: self.network(), manage, port, addresses, tailscale }
+        RemoteStatus {
+            network: self.network(),
+            manage,
+            port,
+            addresses,
+            tailscale,
+        }
     }
 }

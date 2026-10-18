@@ -29,7 +29,11 @@ struct Job {
 
 fn source(transfers: &Transfers, handle: &Handle, index: usize, name: &str) -> Option<Source> {
     let path = transfers.disk_path(handle, index).ok()?;
-    Some(Source { index, name: name.to_owned(), path })
+    Some(Source {
+        index,
+        name: name.to_owned(),
+        path,
+    })
 }
 
 fn labels(entry: &Entry, file_name: &str) -> Vec<String> {
@@ -39,7 +43,11 @@ fn labels(entry: &Entry, file_name: &str) -> Vec<String> {
 }
 
 fn jobs_of(transfers: &Transfers, entry: &Entry) -> Vec<Job> {
-    let Some(handle) = entry.handle.as_ref().filter(|_| entry.record.kind == Kind::Download && entry.relocation.is_none()) else {
+    let Some(handle) = entry
+        .handle
+        .as_ref()
+        .filter(|_| entry.record.kind == Kind::Download && entry.relocation.is_none())
+    else {
         return Vec::new();
     };
     let videos: Vec<Video> = entry
@@ -50,7 +58,9 @@ fn jobs_of(transfers: &Transfers, entry: &Entry) -> Vec<Job> {
         .collect();
     let mut jobs = Vec::new();
     for (position, wanted) in videos.iter().enumerate() {
-        let Some(file) = entry.files.iter().find(|file| file.name == wanted.path) else { continue };
+        let Some(file) = entry.files.iter().find(|file| file.name == wanted.path) else {
+            continue;
+        };
         let linked = entry.library.iter().any(|link| link.file_index == file.index);
         if linked || entry.import_failed.contains(&file.index) || !entry.file_complete(file.index) {
             continue;
@@ -63,13 +73,18 @@ fn jobs_of(transfers: &Transfers, entry: &Entry) -> Vec<Job> {
         if owned.iter().any(|subtitle| !entry.file_complete(subtitle.index)) {
             continue;
         }
-        let Some(video) = source(transfers, handle, file.index, &file.name) else { continue };
+        let Some(video) = source(transfers, handle, file.index, &file.name) else {
+            continue;
+        };
         jobs.push(Job {
             info_hash: entry.record.info_hash.clone(),
             title_id: wanted.title_id.to_owned(),
             labels: labels(entry, &file.name),
             video,
-            subtitles: owned.iter().filter_map(|subtitle| source(transfers, handle, subtitle.index, &subtitle.name)).collect(),
+            subtitles: owned
+                .iter()
+                .filter_map(|subtitle| source(transfers, handle, subtitle.index, &subtitle.name))
+                .collect(),
         });
     }
     jobs
@@ -83,11 +98,23 @@ fn place_job(job: &Job, base: &Path) -> std::io::Result<Vec<LibraryLink>> {
     let extension = files::extension(&job.video.name).unwrap_or_default();
     let mut placed: Vec<LibraryLink> = Vec::new();
     let video_path = free_name(base, &format!(".{extension}"), &job.labels);
-    let mut steps = vec![(job.video.index, Placement { from: job.video.path.clone(), to: video_path.clone() })];
+    let mut steps = vec![(
+        job.video.index,
+        Placement {
+            from: job.video.path.clone(),
+            to: video_path.clone(),
+        },
+    )];
     let video_base = without_extension(&video_path);
     for subtitle in &job.subtitles {
         let to = free_name(&video_base, &suffix(&subtitle.name, &job.video.name), &[]);
-        steps.push((subtitle.index, Placement { from: subtitle.path.clone(), to }));
+        steps.push((
+            subtitle.index,
+            Placement {
+                from: subtitle.path.clone(),
+                to,
+            },
+        ));
     }
     for (file_index, step) in steps {
         if let Err(error) = place(&step) {
@@ -127,7 +154,12 @@ impl Transfers {
             TitleId::Episode { series, season, episode } => {
                 let show = self.titles.name(&series).await?;
                 let named = self.titles.name(title_id).await;
-                let name = EpisodeName { series: &show, season, episode, title: named.as_ref().map(|named| named.title.as_str()) };
+                let name = EpisodeName {
+                    series: &show,
+                    season,
+                    episode,
+                    title: named.as_ref().map(|named| named.title.as_str()),
+                };
                 Some(naming::episode(&settings.shows_folder(), &name))
             }
         }
@@ -188,7 +220,11 @@ impl Transfers {
 
     pub fn finished_path(&self, info_hash: &str, handle: &Handle, index: usize) -> watchit_core::AppResult<PathBuf> {
         let organised = self.entries().get(info_hash).and_then(|entry| {
-            entry.library.iter().find(|link| link.file_index == index && link.path.is_file()).map(|link| link.path.clone())
+            entry
+                .library
+                .iter()
+                .find(|link| link.file_index == index && link.path.is_file())
+                .map(|link| link.path.clone())
         });
         organised.map_or_else(|| self.disk_path(handle, index), Ok)
     }

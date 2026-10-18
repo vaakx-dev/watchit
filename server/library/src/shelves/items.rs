@@ -17,7 +17,11 @@ struct Length {
 
 fn length(conn: &Connection, catalog: &Catalog, row: &LibraryRow, progress: Option<&SeriesProgress>) -> AppResult<Length> {
     if row.kind != MediaKind::Series {
-        return Ok(Length { minutes: catalog.runtime_minutes(conn, &row.id)?, seasons: None, season_episodes: None });
+        return Ok(Length {
+            minutes: catalog.runtime_minutes(conn, &row.id)?,
+            seasons: None,
+            season_episodes: None,
+        });
     }
     let seasons = catalog.season_count(conn, &row.id)?;
     if seasons == 0 {
@@ -27,7 +31,11 @@ fn length(conn: &Connection, catalog: &Catalog, row: &LibraryRow, progress: Opti
         Some(season) => Some(catalog.season_episodes(conn, &row.id, season)?.len() as i64),
         None => None,
     };
-    Ok(Length { minutes: None, seasons: (seasons > 0).then_some(seasons), season_episodes })
+    Ok(Length {
+        minutes: None,
+        seasons: (seasons > 0).then_some(seasons),
+        season_episodes,
+    })
 }
 
 pub fn build_items(conn: &Connection, catalog: &Catalog, profile: i64, rows: &[LibraryRow]) -> AppResult<(Vec<LibraryItem>, ArtworkStatus)> {
@@ -37,8 +45,14 @@ pub fn build_items(conn: &Connection, catalog: &Catalog, profile: i64, rows: &[L
     let mut items = Vec::with_capacity(rows.len());
     for row in rows {
         let Some(title) = by_id.remove(&row.id) else { continue };
-        let progress = (row.kind == MediaKind::Series).then(|| series_progress(conn, catalog, profile, &row.id)).transpose()?;
-        let Length { minutes, seasons, season_episodes } = length(conn, catalog, row, progress.as_ref())?;
+        let progress = (row.kind == MediaKind::Series)
+            .then(|| series_progress(conn, catalog, profile, &row.id))
+            .transpose()?;
+        let Length {
+            minutes,
+            seasons,
+            season_episodes,
+        } = length(conn, catalog, row, progress.as_ref())?;
         items.push(LibraryItem {
             title,
             entry: row.entry(),

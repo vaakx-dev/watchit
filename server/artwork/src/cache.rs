@@ -118,7 +118,14 @@ impl Cache {
                     let flight = async move { task.await.unwrap_or_else(|_| Err(ImageFailure::unavailable("Image download stopped"))) }
                         .boxed()
                         .shared();
-                    requests.insert(key.clone(), Request { flight: flight.clone(), background: flag, promoted });
+                    requests.insert(
+                        key.clone(),
+                        Request {
+                            flight: flight.clone(),
+                            background: flag,
+                            promoted,
+                        },
+                    );
                     flight
                 }
             }
@@ -165,7 +172,13 @@ impl Cache {
             }
         }
         let fetched_at = record.fetched_at.unwrap_or(0);
-        Cached { path: self.path(&record.key), fetched_at, bytes: record.bytes, stale, error }
+        Cached {
+            path: self.path(&record.key),
+            fetched_at,
+            bytes: record.bytes,
+            stale,
+            error,
+        }
     }
 
     async fn refresh(&self, record: &ImageRecord, resident: bool, background: &AtomicBool, promoted: &Notify) -> Result<Cached, ImageFailure> {
@@ -190,9 +203,20 @@ impl Cache {
         let fetched_at = now_ms();
         let accessed_at = if background { record.accessed_at } else { fetched_at };
         let (key, bytes) = (record.key.clone(), encoded.len() as i64);
-        self.db.run(move |conn| records::stored(conn, &key, bytes, fetched_at, accessed_at)).await?;
-        let _ = self.fetched.send(Fetched { key: record.key.clone(), fetched_at });
-        Ok(Cached { path, fetched_at, bytes, stale: false, error: None })
+        self.db
+            .run(move |conn| records::stored(conn, &key, bytes, fetched_at, accessed_at))
+            .await?;
+        let _ = self.fetched.send(Fetched {
+            key: record.key.clone(),
+            fetched_at,
+        });
+        Ok(Cached {
+            path,
+            fetched_at,
+            bytes,
+            stale: false,
+            error: None,
+        })
     }
 
     async fn write(&self, path: &PathBuf, bytes: &[u8]) -> Result<(), ImageFailure> {

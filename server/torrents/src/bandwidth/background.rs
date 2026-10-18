@@ -32,8 +32,13 @@ pub fn steer_background(entries: &mut HashMap<String, Entry>, background: Backgr
         if is_background && background == Background::Paused {
             entry.slot = Slot::Queued(Some(PAUSED_WHILE_WATCHING));
         }
-        let (Some(handle), Some(view)) = (&entry.handle, &entry.engine) else { continue };
-        let wanted = LimitsConfig { download_bps: share(background, active).filter(|_| is_background), upload_bps: None };
+        let (Some(handle), Some(view)) = (&entry.handle, &entry.engine) else {
+            continue;
+        };
+        let wanted = LimitsConfig {
+            download_bps: share(background, active).filter(|_| is_background),
+            upload_bps: None,
+        };
         if view.limits != wanted {
             changes.push((Arc::clone(handle), wanted));
         }

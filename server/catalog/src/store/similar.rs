@@ -46,11 +46,19 @@ pub(crate) fn similar(conn: &Connection, title: &Record, exclude: &[String], set
     );
     let mut statement = conn.prepare_cached(&sql)?;
     let candidates = statement.query_map(
-        params![serde_json::to_string(&ids).unwrap_or_default(), ids.len().min(2) as i64, title.kind.as_str(), CANDIDATES],
+        params![
+            serde_json::to_string(&ids).unwrap_or_default(),
+            ids.len().min(2) as i64,
+            title.kind.as_str(),
+            CANDIDATES
+        ],
         |row| {
             let director: Option<String> = row.get(ENTRY_WIDTH)?;
             let cast: Option<String> = row.get(ENTRY_WIDTH + 1)?;
-            Ok((EntryRow::read(row)?, people(&[director.as_deref().unwrap_or(""), cast.as_deref().unwrap_or("")])))
+            Ok((
+                EntryRow::read(row)?,
+                people(&[director.as_deref().unwrap_or(""), cast.as_deref().unwrap_or("")]),
+            ))
         },
     )?;
     let skipped: HashSet<&str> = exclude.iter().map(String::as_str).chain([title.id.as_str()]).collect();
@@ -65,6 +73,11 @@ pub(crate) fn similar(conn: &Connection, title: &Record, exclude: &[String], set
         let score = score(title, &genres, &crew, &row, &candidate_crew);
         ranked.push((settled.contains(&row.id), score, row));
     }
-    ranked.sort_by(|left, right| left.0.cmp(&right.0).then(right.1.total_cmp(&left.1)).then_with(|| left.2.id.cmp(&right.2.id)));
+    ranked.sort_by(|left, right| {
+        left.0
+            .cmp(&right.0)
+            .then(right.1.total_cmp(&left.1))
+            .then_with(|| left.2.id.cmp(&right.2.id))
+    });
     Ok(ranked.into_iter().take(SIMILAR).map(|(_, _, row)| row).collect())
 }

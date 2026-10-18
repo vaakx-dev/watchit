@@ -20,7 +20,9 @@ pub const TABLE: &str = "
 
 pub fn all(conn: &Connection, profile: i64) -> AppResult<BTreeMap<String, BTreeMap<i64, Rating>>> {
     let mut statement = conn.prepare_cached("SELECT series_id, season, rating FROM season_ratings WHERE profile_id = ?1")?;
-    let rows = statement.query_map([profile], |row| Ok((row.get::<_, String>(0)?, row.get::<_, i64>(1)?, row.get::<_, Rating>(2)?)))?;
+    let rows = statement.query_map([profile], |row| {
+        Ok((row.get::<_, String>(0)?, row.get::<_, i64>(1)?, row.get::<_, Rating>(2)?))
+    })?;
     let mut seasons: BTreeMap<String, BTreeMap<i64, Rating>> = BTreeMap::new();
     for row in rows {
         let (series_id, season, rating) = row?;

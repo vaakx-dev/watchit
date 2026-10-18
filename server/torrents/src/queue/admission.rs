@@ -21,13 +21,21 @@ pub struct Admission {
 
 impl Admission {
     pub fn new(settings: &Settings, used: HashMap<PathBuf, u64>) -> Self {
-        Self { slots: settings.max_active, budget_bytes: settings.disk_budget_bytes, used, drives: HashMap::new() }
+        Self {
+            slots: settings.max_active,
+            budget_bytes: settings.disk_budget_bytes,
+            used,
+            drives: HashMap::new(),
+        }
     }
 
     fn room(&mut self, drive: &Path) -> &mut Room {
         let used = self.used.get(drive).copied().unwrap_or(0);
         let budget = self.budget_bytes.map(|budget| budget.saturating_sub(used));
-        self.drives.entry(drive.to_path_buf()).or_insert_with(|| Room { budget, disk: free_bytes(drive) })
+        self.drives.entry(drive.to_path_buf()).or_insert_with(|| Room {
+            budget,
+            disk: free_bytes(drive),
+        })
     }
 
     pub fn admit(&mut self, drive: &Path, remaining: u64) -> Result<(), Option<&'static str>> {

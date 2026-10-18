@@ -18,7 +18,9 @@ pub fn token(headers: &HeaderMap) -> Option<String> {
 }
 
 pub async fn current(State(profiles): State<Profiles>, viewer: Option<Viewer>) -> AppResult<Json<SessionState>> {
-    let Some(viewer) = viewer else { return Ok(Json(SessionState { profile: None })) };
+    let Some(viewer) = viewer else {
+        return Ok(Json(SessionState { profile: None }));
+    };
     let profile = profiles.db.run(move |conn| profile::get(conn, viewer.profile)).await?;
     Ok(Json(SessionState { profile }))
 }
@@ -46,7 +48,10 @@ pub async fn sign_in(
             if let Some(previous) = previous {
                 store::delete(conn, &previous)?;
             }
-            Ok(ProfileSession { token: store::create(conn, id)?, profile })
+            Ok(ProfileSession {
+                token: store::create(conn, id)?,
+                profile,
+            })
         })
         .await?;
     Ok((StatusCode::CREATED, Json(session)))

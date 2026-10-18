@@ -1,5 +1,5 @@
-mod rules;
 pub mod routes;
+mod rules;
 mod store;
 
 use serde::{Deserialize, Serialize};
@@ -35,7 +35,14 @@ pub struct Quality {
 
 impl Default for Quality {
     fn default() -> Self {
-        Self { resolution: Resolution::Uhd, hdr: Stance::Allow, dolby_vision: Stance::Allow, max_size_bytes: None, languages: Vec::new(), hide_cam: true }
+        Self {
+            resolution: Resolution::Uhd,
+            hdr: Stance::Allow,
+            dolby_vision: Stance::Allow,
+            max_size_bytes: None,
+            languages: Vec::new(),
+            hide_cam: true,
+        }
     }
 }
 
@@ -63,6 +70,10 @@ impl Quality {
     }
 
     pub fn without_filters(&self) -> Self {
-        Self { max_size_bytes: None, hide_cam: false, ..self.clone() }
+        Self {
+            max_size_bytes: None,
+            hide_cam: false,
+            ..self.clone()
+        }
     }
 }

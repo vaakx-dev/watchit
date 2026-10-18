@@ -19,7 +19,11 @@ pub struct AppError {
 
 impl AppError {
     pub fn new(status: StatusCode, message: impl Into<String>) -> Self {
-        Self { status, message: message.into(), retry_after: None }
+        Self {
+            status,
+            message: message.into(),
+            retry_after: None,
+        }
     }
 
     pub fn bad_request(message: impl Into<String>) -> Self {
@@ -39,7 +43,9 @@ impl AppError {
     }
 
     pub fn signed_out() -> Self {
-        Self::unauthorized(format!("Sign in first: POST /api/profiles/:id/session, then send its token in the {SESSION_HEADER} header."))
+        Self::unauthorized(format!(
+            "Sign in first: POST /api/profiles/:id/session, then send its token in the {SESSION_HEADER} header."
+        ))
     }
 
     pub fn internal(cause: impl Display) -> Self {

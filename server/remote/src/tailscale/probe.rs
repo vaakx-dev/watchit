@@ -42,16 +42,27 @@ fn describe(status: Status) -> TailscaleStatus {
     let mut described = TailscaleStatus::new(state(&status.backend, !domains.is_empty()));
     described.login_url = Some(status.auth_url).filter(|url| !url.is_empty());
     if let Some(node) = status.this {
-        described.name = domains.into_iter().next().or_else(|| Some(node.dns_name.trim_end_matches('.').to_owned())).filter(|name| !name.is_empty());
+        described.name = domains
+            .into_iter()
+            .next()
+            .or_else(|| Some(node.dns_name.trim_end_matches('.').to_owned()))
+            .filter(|name| !name.is_empty());
         described.ip = node.ips.into_iter().find(|ip| ip.parse::<std::net::Ipv4Addr>().is_ok());
     }
     described
 }
 
 pub async fn probe(listen: SocketAddr) -> TailscaleStatus {
-    let Some(program) = cli::find() else { return TailscaleStatus::new(TailscaleState::Missing) };
-    let status = cli::run(&program, &["status", "--json"]).await.ok().and_then(|output| serde_json::from_str::<Status>(&output.stdout).ok());
-    let Some(status) = status else { return TailscaleStatus::new(TailscaleState::Stopped) };
+    let Some(program) = cli::find() else {
+        return TailscaleStatus::new(TailscaleState::Missing);
+    };
+    let status = cli::run(&program, &["status", "--json"])
+        .await
+        .ok()
+        .and_then(|output| serde_json::from_str::<Status>(&output.stdout).ok());
+    let Some(status) = status else {
+        return TailscaleStatus::new(TailscaleState::Stopped);
+    };
     let mut described = describe(status);
     let running = matches!(described.state, TailscaleState::Ready | TailscaleState::NoHttps);
     if running

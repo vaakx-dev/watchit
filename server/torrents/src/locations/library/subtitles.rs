@@ -31,13 +31,19 @@ pub fn owner(subtitle: &str, videos: &[Video], torrent_name: &str) -> Option<usi
         return videos.iter().position(|video| is_episode(video.title_id, found));
     }
     let subtitle_stem = stem(subtitle);
-    videos.iter().position(|video| subtitle_stem.starts_with(&stem(video.path))).or_else(|| (videos.len() == 1).then_some(0))
+    videos
+        .iter()
+        .position(|video| subtitle_stem.starts_with(&stem(video.path)))
+        .or_else(|| (videos.len() == 1).then_some(0))
 }
 
 fn tokens(subtitle: &str, video: &str) -> Vec<String> {
     let subtitle_stem = stem(subtitle);
     let own = subtitle_stem.strip_prefix(&stem(video)).unwrap_or(&subtitle_stem).to_owned();
-    let folders = Path::new(subtitle).parent().map(|parent| parent.to_string_lossy().to_lowercase()).unwrap_or_default();
+    let folders = Path::new(subtitle)
+        .parent()
+        .map(|parent| parent.to_string_lossy().to_lowercase())
+        .unwrap_or_default();
     format!("{folders} {own}")
         .split(|c: char| !c.is_alphanumeric())
         .filter(|token| !token.is_empty())

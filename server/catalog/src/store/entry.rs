@@ -76,7 +76,10 @@ pub(crate) fn images<'a>(conn: &Connection, artwork: &Artwork, rows: impl IntoIt
 
 pub(crate) fn freshness(rows: &[EntryRow], metadata_ms: i64) -> Freshness {
     let Some(updated_at) = rows.iter().map(|row| row.updated_at).min() else {
-        return Freshness { updated_at: String::new(), stale: false };
+        return Freshness {
+            updated_at: String::new(),
+            stale: false,
+        };
     };
     let age = now_ms() - updated_at;
     Freshness {

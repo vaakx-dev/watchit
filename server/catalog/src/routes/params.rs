@@ -57,7 +57,13 @@ impl Params {
     }
 
     pub fn hide(&self) -> AppResult<Vec<String>> {
-        let statuses: Vec<String> = self.get("hide").unwrap_or("").split(',').filter(|value| !value.is_empty()).map(str::to_owned).collect();
+        let statuses: Vec<String> = self
+            .get("hide")
+            .unwrap_or("")
+            .split(',')
+            .filter(|value| !value.is_empty())
+            .map(str::to_owned)
+            .collect();
         if statuses.iter().any(|status| !HIDE_STATUSES.contains(&status.as_str())) {
             return Err(AppError::bad_request("hide must list want, watching, paused, watched or dropped."));
         }
@@ -66,5 +72,9 @@ impl Params {
 }
 
 pub(crate) fn title_id(id: &str) -> AppResult<String> {
-    if is_title_id(id) { Ok(id.to_owned()) } else { Err(AppError::bad_request("Invalid title identifier.")) }
+    if is_title_id(id) {
+        Ok(id.to_owned())
+    } else {
+        Err(AppError::bad_request("Invalid title identifier."))
+    }
 }

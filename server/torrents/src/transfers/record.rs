@@ -22,7 +22,10 @@ pub struct Pick {
 impl Pick {
     pub fn files_or(title_id: &str, file_indexes: Option<Vec<usize>>, fallback: Choice) -> Self {
         let choice = file_indexes.map_or(fallback, |indexes| Choice::Files { indexes });
-        Self { title_id: title_id.to_owned(), choice }
+        Self {
+            title_id: title_id.to_owned(),
+            choice,
+        }
     }
 }
 

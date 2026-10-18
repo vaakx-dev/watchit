@@ -8,8 +8,7 @@ const VIDEO_EXTENSIONS: [&str; 17] = [
 
 static SAMPLE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?i)(?:^|[^a-z])sample(?:[^a-z]|$)").expect("valid sample regex"));
 static EXTRAS_FOLDER: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)^(extras?|featurettes?|bonus|behind[ ._]the[ ._]scenes|deleted[ ._]scenes|interviews|trailers?)$")
-        .expect("valid extras regex")
+    Regex::new(r"(?i)^(extras?|featurettes?|bonus|behind[ ._]the[ ._]scenes|deleted[ ._]scenes|interviews|trailers?)$").expect("valid extras regex")
 });
 
 pub fn extension(name: &str) -> Option<String> {

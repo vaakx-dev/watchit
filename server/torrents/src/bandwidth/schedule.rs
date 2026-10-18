@@ -28,7 +28,12 @@ fn minute_of_day(time: &str) -> Option<i64> {
 
 impl Schedule {
     pub fn defaults() -> Self {
-        Self { enabled: false, days: (0..=SATURDAY).collect(), from: "09:00".to_owned(), to: "17:00".to_owned() }
+        Self {
+            enabled: false,
+            days: (0..=SATURDAY).collect(),
+            from: "09:00".to_owned(),
+            to: "17:00".to_owned(),
+        }
     }
 
     pub fn validated(mut self) -> AppResult<Self> {
@@ -47,9 +52,13 @@ impl Schedule {
     }
 
     pub fn contains(&self, time: &DateTime<Local>) -> bool {
-        let (Some(begin), Some(end)) = (minute_of_day(&self.from), minute_of_day(&self.to)) else { return false };
+        let (Some(begin), Some(end)) = (minute_of_day(&self.from), minute_of_day(&self.to)) else {
+            return false;
+        };
         let length = if end > begin { end - begin } else { end + MINUTES_PER_DAY - begin };
         let now = i64::from(time.weekday().num_days_from_sunday()) * MINUTES_PER_DAY + i64::from(time.hour() * 60 + time.minute());
-        self.days.iter().any(|day| (now - i64::from(*day) * MINUTES_PER_DAY - begin).rem_euclid(MINUTES_PER_WEEK) < length)
+        self.days
+            .iter()
+            .any(|day| (now - i64::from(*day) * MINUTES_PER_DAY - begin).rem_euclid(MINUTES_PER_WEEK) < length)
     }
 }

@@ -13,7 +13,13 @@ fn main() {
     for resource in ["../server/playback/resources/ffmpeg", "../web/dist"] {
         fs::create_dir_all(Path::new(env!("CARGO_MANIFEST_DIR")).join(resource)).unwrap();
     }
-    let commands = tauri_build::AppManifest::new().commands(&["mpv_message", "maximize_button_area", "show_system_menu", "check_for_updates", "install_update"]);
+    let commands = tauri_build::AppManifest::new().commands(&[
+        "mpv_message",
+        "maximize_button_area",
+        "show_system_menu",
+        "check_for_updates",
+        "install_update",
+    ]);
     tauri_build::try_build(tauri_build::Attributes::new().app_manifest(commands)).expect("cannot run tauri build");
 }
 

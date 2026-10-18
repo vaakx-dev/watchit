@@ -19,7 +19,12 @@ impl Slot {
     }
 
     pub fn cursor(&self, file: usize, start: u64) -> Cursor {
-        Cursor { slot: self.clone(), file, start, served: 0 }
+        Cursor {
+            slot: self.clone(),
+            file,
+            start,
+            served: 0,
+        }
     }
 
     fn set(&self, position: Position) {
@@ -38,7 +43,10 @@ impl Cursor {
     pub fn advance(&mut self, bytes: u64) {
         self.served += bytes;
         if self.served >= COMMIT_BYTES {
-            self.slot.set(Position { file: self.file, offset: self.start + self.served });
+            self.slot.set(Position {
+                file: self.file,
+                offset: self.start + self.served,
+            });
         }
     }
 }

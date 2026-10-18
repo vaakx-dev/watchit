@@ -17,7 +17,9 @@ pub fn target(listen: SocketAddr) -> String {
 }
 
 pub fn classify(serve_status: &str, name: &str, target: &str) -> (Sharing, bool) {
-    let Ok(config) = serde_json::from_str::<Value>(serve_status) else { return (Sharing::Off, false) };
+    let Ok(config) = serde_json::from_str::<Value>(serve_status) else {
+        return (Sharing::Off, false);
+    };
     let host_port = format!("{name}:{HTTPS_PORT}");
     let public = config["AllowFunnel"][&host_port].as_bool().unwrap_or(false);
     let proxy = config["Web"][&host_port]["Handlers"]["/"]["Proxy"].as_str();

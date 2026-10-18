@@ -23,7 +23,11 @@ pub fn wanted_files(entry: &Entry, progress: &Progress) -> BTreeSet<usize> {
         .files
         .iter()
         .zip(&progress.per_file)
-        .map(|(file, (_, have))| File { episode: episode_of(file.title_id.as_deref()), index: file.index, done: *have >= file.size_bytes })
+        .map(|(file, (_, have))| File {
+            episode: episode_of(file.title_id.as_deref()),
+            index: file.index,
+            done: *have >= file.size_bytes,
+        })
         .collect();
     if files.iter().filter(|file| file.episode.is_some()).count() < 2 {
         return entry.selected();

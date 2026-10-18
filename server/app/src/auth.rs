@@ -13,7 +13,9 @@ pub struct Auth {
 
 fn stream_token(request: &Request) -> Option<String> {
     let query = request.uri().query()?;
-    form_urlencoded::parse(query.as_bytes()).find(|(key, _)| key == "token").map(|(_, value)| value.into_owned())
+    form_urlencoded::parse(query.as_bytes())
+        .find(|(key, _)| key == "token")
+        .map(|(_, value)| value.into_owned())
 }
 
 enum Credential {
@@ -42,7 +44,9 @@ impl Auth {
 }
 
 pub async fn authenticate(State(auth): State<Auth>, mut request: Request, next: Next) -> Response {
-    let Some(credential) = auth.credential(&request) else { return next.run(request).await };
+    let Some(credential) = auth.credential(&request) else {
+        return next.run(request).await;
+    };
     match auth.viewer(credential).await {
         Ok(Some(viewer)) => {
             request.extensions_mut().insert(viewer);

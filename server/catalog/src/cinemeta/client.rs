@@ -26,7 +26,9 @@ pub(crate) struct Client {
 }
 
 fn retry_delay(header: Option<&str>, minimum: Duration) -> Duration {
-    let Some(header) = header.map(str::trim).filter(|header| !header.is_empty()) else { return minimum };
+    let Some(header) = header.map(str::trim).filter(|header| !header.is_empty()) else {
+        return minimum;
+    };
     let wait = match header.parse::<f64>() {
         Ok(seconds) if seconds >= 0.0 => Some(Duration::from_secs_f64(seconds)),
         _ => chrono::DateTime::parse_from_rfc2822(header)
@@ -40,11 +42,18 @@ fn retry_delay(header: Option<&str>, minimum: Duration) -> Duration {
 impl Client {
     pub fn new() -> Self {
         let http = reqwest::Client::builder().connect_timeout(TIMEOUT).build().expect("cinemeta http client");
-        Self { http, cooldown: Mutex::new(None) }
+        Self {
+            http,
+            cooldown: Mutex::new(None),
+        }
     }
 
     fn ready_at(&self) -> Instant {
-        self.cooldown.lock().unwrap().as_ref().map_or_else(Instant::now, |cooldown| cooldown.until)
+        self.cooldown
+            .lock()
+            .unwrap()
+            .as_ref()
+            .map_or_else(Instant::now, |cooldown| cooldown.until)
     }
 
     fn cool_down(&self, until: Instant, error: SourceError) {
@@ -84,7 +93,11 @@ impl Client {
             None => SourceError::new(503, "Cinemeta request timed out."),
             Some(cooldown) => {
                 let wait = cooldown.until.saturating_duration_since(Instant::now());
-                SourceError { status: 503, message: cooldown.error.message.clone(), retry_after: Some(wait.as_millis().div_ceil(1000) as u64) }
+                SourceError {
+                    status: 503,
+                    message: cooldown.error.message.clone(),
+                    retry_after: Some(wait.as_millis().div_ceil(1000) as u64),
+                }
             }
         }
     }
@@ -107,7 +120,11 @@ impl Client {
         if !RETRYABLE.contains(&status.as_u16()) {
             return Err(Failure::Final(error));
         }
-        let retry_after = response.headers().get(RETRY_AFTER).and_then(|value| value.to_str().ok()).map(str::to_owned);
+        let retry_after = response
+            .headers()
+            .get(RETRY_AFTER)
+            .and_then(|value| value.to_str().ok())
+            .map(str::to_owned);
         Err(Failure::Retry { error, retry_after })
     }
 }

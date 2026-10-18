@@ -35,13 +35,22 @@ fn keep_file(bitfield: &Path) -> PathBuf {
 
 fn relative_paths(handle: &Handle) -> anyhow::Result<Vec<PathBuf>> {
     handle.with_metadata(|metadata| {
-        metadata.file_infos.iter().filter(|info| !info.attrs.padding).map(|info| info.relative_filename.clone()).collect()
+        metadata
+            .file_infos
+            .iter()
+            .filter(|info| !info.attrs.padding)
+            .map(|info| info.relative_filename.clone())
+            .collect()
     })
 }
 
 fn output_under(handle: &Handle, from_dir: &Path, to_dir: &Path) -> PathBuf {
     let output = handle.output_folder();
-    if output == from_dir { to_dir.to_path_buf() } else { to_dir.join(output.file_name().unwrap_or_default()) }
+    if output == from_dir {
+        to_dir.to_path_buf()
+    } else {
+        to_dir.join(output.file_name().unwrap_or_default())
+    }
 }
 
 pub fn busy() -> AppError {
@@ -67,7 +76,12 @@ impl Transfers {
                 }
                 Some(handle) => {
                     self.begin_move(entry, &target);
-                    Some(Job { info_hash: info_hash.clone(), handle, from_dir: entry.record.download_dir.clone(), to_dir: target })
+                    Some(Job {
+                        info_hash: info_hash.clone(),
+                        handle,
+                        from_dir: entry.record.download_dir.clone(),
+                        to_dir: target,
+                    })
                 }
             }
         };
@@ -89,7 +103,10 @@ impl Transfers {
         let before = snapshot(entry);
         entry.detach();
         entry.file_error = None;
-        entry.relocation = Some(Moving { target: target.to_path_buf(), before });
+        entry.relocation = Some(Moving {
+            target: target.to_path_buf(),
+            before,
+        });
     }
 
     pub async fn relocate_all(self: &Arc<Self>) {
@@ -159,11 +176,23 @@ impl Transfers {
         let from = job.handle.output_folder().to_path_buf();
         let to = output_under(&job.handle, &job.from_dir, &job.to_dir);
         self.keep_progress(&job.handle).await;
-        self.session.delete(job.handle.id().into(), false).await.map_err(|error| format!("{error:#}"))?;
-        let files: Vec<Relocation> =
-            relative.iter().map(|path| Relocation { from: from.join(path), to: to.join(path) }).collect();
+        self.session
+            .delete(job.handle.id().into(), false)
+            .await
+            .map_err(|error| format!("{error:#}"))?;
+        let files: Vec<Relocation> = relative
+            .iter()
+            .map(|path| Relocation {
+                from: from.join(path),
+                to: to.join(path),
+            })
+            .collect();
         let stop = (from != job.from_dir).then(|| from.clone());
-        let needed: u64 = files.iter().filter_map(|file| std::fs::metadata(&file.from).ok()).map(|meta| meta.len()).sum();
+        let needed: u64 = files
+            .iter()
+            .filter_map(|file| std::fs::metadata(&file.from).ok())
+            .map(|meta| meta.len())
+            .sum();
         if !same_volume(&job.from_dir, &job.to_dir) && needed > free_bytes(&job.to_dir) {
             return Err("There isn't enough free space in that folder.".to_owned());
         }

@@ -33,7 +33,10 @@ pub struct Library {
 impl Library {
     pub fn open(context: &Context, catalog: Catalog) -> AppResult<Self> {
         context.db.run_blocking(|conn| Ok(conn.execute_batch(&tables())?))?;
-        Ok(Self { db: context.db.clone(), catalog })
+        Ok(Self {
+            db: context.db.clone(),
+            catalog,
+        })
     }
 
     pub(crate) async fn title(&self, id: &str) -> AppResult<titles::TitleRef> {

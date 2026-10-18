@@ -56,9 +56,7 @@ fn prop_value(name: &str, data: PropertyData) -> Value {
         PropertyData::Double(value) => json!(value),
         PropertyData::OsdStr(value) => json!(value),
         PropertyData::Str(value) if TRACK_PROPS.contains(&name) => json!(value.parse::<i64>().ok()),
-        PropertyData::Str(value) if JSON_PROPS.contains(&name) => {
-            serde_json::from_str(value).unwrap_or_else(|_| json!(value))
-        }
+        PropertyData::Str(value) if JSON_PROPS.contains(&name) => serde_json::from_str(value).unwrap_or_else(|_| json!(value)),
         PropertyData::Str(value) => json!(value),
     }
 }

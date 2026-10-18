@@ -38,12 +38,23 @@ fn lock_ms(failures: i64) -> i64 {
 
 fn locked(until: i64, now: i64) -> AppError {
     let seconds = (until - now + 999) / 1000;
-    AppError::new(StatusCode::TOO_MANY_REQUESTS, format!("Too many wrong PINs. Try again in {seconds} seconds.")).retry_after(seconds as u64)
+    AppError::new(
+        StatusCode::TOO_MANY_REQUESTS,
+        format!("Too many wrong PINs. Try again in {seconds} seconds."),
+    )
+    .retry_after(seconds as u64)
 }
 
 fn stored(conn: &Connection, profile: i64) -> AppResult<Option<PinHash>> {
     let mut query = conn.prepare_cached("SELECT salt, hash FROM profile_pins WHERE profile_id = ?")?;
-    Ok(query.query_row([profile], |row| Ok(PinHash { salt: row.get(0)?, hash: row.get(1)? })).optional()?)
+    Ok(query
+        .query_row([profile], |row| {
+            Ok(PinHash {
+                salt: row.get(0)?,
+                hash: row.get(1)?,
+            })
+        })
+        .optional()?)
 }
 
 fn locked_until(conn: &Connection, scope: &str) -> AppResult<i64> {
@@ -59,7 +70,10 @@ fn fail(conn: &Connection, scope: &str, now: i64) -> AppResult<i64> {
         |row| row.get(0),
     )?;
     if failures >= FREE_ATTEMPTS {
-        conn.execute("UPDATE pin_attempts SET locked_until = ? WHERE scope = ?", params![now + lock_ms(failures), scope])?;
+        conn.execute(
+            "UPDATE pin_attempts SET locked_until = ? WHERE scope = ?",
+            params![now + lock_ms(failures), scope],
+        )?;
     }
     Ok(failures)
 }
@@ -71,7 +85,9 @@ fn clear(conn: &Connection, scope: &str) -> AppResult<()> {
 
 pub fn check(conn: &Connection, profile: i64, pin: Option<&Pin>, client: &str) -> AppResult<()> {
     let Some(stored) = stored(conn, profile)? else { return Ok(()) };
-    let Some(pin) = pin else { return Err(AppError::forbidden("This profile has a PIN. Enter it to continue.")) };
+    let Some(pin) = pin else {
+        return Err(AppError::forbidden("This profile has a PIN. Enter it to continue."));
+    };
     let now = now_ms();
     let scopes = scopes(profile, client);
     let mut until = 0;
@@ -92,7 +108,10 @@ pub fn check(conn: &Connection, profile: i64, pin: Option<&Pin>, client: &str) -
         return Err(locked(now + lock_ms(failures), now));
     }
     let left = FREE_ATTEMPTS - failures;
-    Err(AppError::forbidden(format!("Wrong PIN. {left} {} left before a pause.", if left == 1 { "try" } else { "tries" })))
+    Err(AppError::forbidden(format!(
+        "Wrong PIN. {left} {} left before a pause.",
+        if left == 1 { "try" } else { "tries" }
+    )))
 }
 
 pub fn set(conn: &Connection, profile: i64, pin: Option<&Pin>) -> AppResult<()> {

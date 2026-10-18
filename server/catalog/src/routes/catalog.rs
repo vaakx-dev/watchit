@@ -27,9 +27,18 @@ impl Catalog {
     fn cache_status(&self, conn: &Connection) -> AppResult<CacheStatus> {
         let images = Artwork::usage(conn)?;
         let metadata_count = conn.query_row("SELECT COUNT(*) FROM titles", [], |row| row.get(0))?;
-        let ImageSettings { images_days, max_stale_days, image_limit_mb } = self.inner.artwork.settings();
+        let ImageSettings {
+            images_days,
+            max_stale_days,
+            image_limit_mb,
+        } = self.inner.artwork.settings();
         Ok(CacheStatus {
-            settings: CacheSettings { metadata_hours: self.inner.metadata.hours(), images_days, max_stale_days, image_limit_mb },
+            settings: CacheSettings {
+                metadata_hours: self.inner.metadata.hours(),
+                images_days,
+                max_stale_days,
+                image_limit_mb,
+            },
             image_bytes: images.image_bytes,
             image_count: images.image_count,
             metadata_count,
@@ -37,9 +46,19 @@ impl Catalog {
     }
 }
 
-pub(crate) async fn list(State(catalog): State<Catalog>, viewer: Viewer, Query(params): Query<Vec<(String, String)>>) -> AppResult<Json<CatalogResponse>> {
+pub(crate) async fn list(
+    State(catalog): State<Catalog>,
+    viewer: Viewer,
+    Query(params): Query<Vec<(String, String)>>,
+) -> AppResult<Json<CatalogResponse>> {
     let params = Params(params);
-    let query = BrowseQuery { page: params.page()?, query: params.query()?, kind: params.kind()?, genre: params.genre()?, sort: params.sort()? };
+    let query = BrowseQuery {
+        page: params.page()?,
+        query: params.query()?,
+        kind: params.kind()?,
+        genre: params.genre()?,
+        sort: params.sort()?,
+    };
     let hide = params.hide()?;
     let response = catalog
         .inner
@@ -76,7 +95,10 @@ pub(crate) async fn trending_list(
             move |conn| {
                 let filter = catalog.hidden(conn, viewer, &hide)?;
                 let page = trending::page(conn, &catalog.inner.artwork, kind, page, filter.as_ref())?;
-                Ok(TrendingResponse { page, imports: catalog.inner.sync.trending(kind) })
+                Ok(TrendingResponse {
+                    page,
+                    imports: catalog.inner.sync.trending(kind),
+                })
             }
         })
         .await?;

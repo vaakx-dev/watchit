@@ -61,7 +61,10 @@ pub async fn probe(tools: &Tools, input: &SourceInput) -> AppResult<Media> {
         .map_err(AppError::internal)?;
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(AppError::new(axum::http::StatusCode::UNPROCESSABLE_ENTITY, format!("Could not read the video: {}", stderr.trim())));
+        return Err(AppError::new(
+            axum::http::StatusCode::UNPROCESSABLE_ENTITY,
+            format!("Could not read the video: {}", stderr.trim()),
+        ));
     }
     let parsed: Output = serde_json::from_slice(&output.stdout).map_err(AppError::internal)?;
     Ok(media(parsed))
@@ -69,11 +72,23 @@ pub async fn probe(tools: &Tools, input: &SourceInput) -> AppResult<Media> {
 
 fn media(output: Output) -> Media {
     let format = output.format;
-    let formats = format.as_ref().and_then(|format| format.format_name.as_deref()).unwrap_or_default().split(',').map(str::to_owned).collect();
+    let formats = format
+        .as_ref()
+        .and_then(|format| format.format_name.as_deref())
+        .unwrap_or_default()
+        .split(',')
+        .map(str::to_owned)
+        .collect();
     let start = format.as_ref().and_then(|format| seconds(format.start_time.as_deref())).unwrap_or(0.0);
-    let duration = format.as_ref().and_then(|format| seconds(format.duration.as_deref())).filter(|duration| *duration > 0.0);
+    let duration = format
+        .as_ref()
+        .and_then(|format| seconds(format.duration.as_deref()))
+        .filter(|duration| *duration > 0.0);
     let streams = &output.streams;
-    let video = of_type(streams, "video").filter(|stream| !flag(stream, "attached_pic")).min_by_key(|stream| !flag(stream, "default")).map(video_stream);
+    let video = of_type(streams, "video")
+        .filter(|stream| !flag(stream, "attached_pic"))
+        .min_by_key(|stream| !flag(stream, "default"))
+        .map(video_stream);
     Media {
         formats,
         start,
@@ -123,7 +138,14 @@ fn subtitle_stream(stream: &Stream) -> SubtitleStream {
     } else {
         SubtitleKind::Other
     };
-    SubtitleStream { index: stream.index, codec, kind, language: tag(stream, "language"), title: tag(stream, "title"), default: flag(stream, "default") }
+    SubtitleStream {
+        index: stream.index,
+        codec,
+        kind,
+        language: tag(stream, "language"),
+        title: tag(stream, "title"),
+        default: flag(stream, "default"),
+    }
 }
 
 fn codec(stream: &Stream) -> String {
@@ -135,7 +157,12 @@ fn flag(stream: &Stream, name: &str) -> bool {
 }
 
 fn tag(stream: &Stream, name: &str) -> Option<String> {
-    stream.tags.iter().find(|(key, _)| key.eq_ignore_ascii_case(name)).map(|(_, value)| value.clone()).filter(|value| !value.is_empty() && value != "und")
+    stream
+        .tags
+        .iter()
+        .find(|(key, _)| key.eq_ignore_ascii_case(name))
+        .map(|(_, value)| value.clone())
+        .filter(|value| !value.is_empty() && value != "und")
 }
 
 fn seconds(value: Option<&str>) -> Option<f64> {
@@ -170,7 +197,10 @@ fn transfer(value: Option<&str>) -> Transfer {
 }
 
 fn dolby_vision(stream: &Stream) -> Option<DolbyVision> {
-    let record = stream.side_data_list.iter().find(|side| side.side_data_type.as_deref() == Some("DOVI configuration record"))?;
+    let record = stream
+        .side_data_list
+        .iter()
+        .find(|side| side.side_data_type.as_deref() == Some("DOVI configuration record"))?;
     let base = match record.dv_bl_signal_compatibility_id {
         Some(1 | 6) => Some(Transfer::Pq),
         Some(2) => Some(Transfer::Sdr),

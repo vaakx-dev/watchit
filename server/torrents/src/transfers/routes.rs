@@ -81,7 +81,11 @@ pub struct DeleteQuery {
 
 pub async fn list(State(torrents): State<Torrents>) -> AppResult<Json<TransferList>> {
     let transfers = torrents.transfers().await?;
-    Ok(Json(TransferList { transfers: transfers.all(), disks: transfers.disks(), speed: transfers.bandwidth.status() }))
+    Ok(Json(TransferList {
+        transfers: transfers.all(),
+        disks: transfers.disks(),
+        speed: transfers.bandwidth.status(),
+    }))
 }
 
 pub async fn create(State(torrents): State<Torrents>, JsonBody(body): JsonBody<NewTransfer>) -> AppResult<Json<Transfer>> {
@@ -95,7 +99,10 @@ pub async fn create(State(torrents): State<Torrents>, JsonBody(body): JsonBody<N
     };
     let pick = Pick::files_or(&title, body.file_indexes, fallback);
     let transfers = torrents.transfers().await?;
-    transfers.add(&body.info_hash, pick, body.kind, body.notify_when_ready.unwrap_or(false)).await.map(Json)
+    transfers
+        .add(&body.info_hash, pick, body.kind, body.notify_when_ready.unwrap_or(false))
+        .await
+        .map(Json)
 }
 
 pub async fn season(State(torrents): State<Torrents>, viewer: Viewer, JsonBody(body): JsonBody<SeasonDownload>) -> AppResult<Json<Vec<Transfer>>> {
@@ -115,7 +122,18 @@ pub async fn update(State(torrents): State<Torrents>, Path(id): Path<String>, Js
         return Err(AppError::bad_request("A transfer can only be changed into a download."));
     }
     let transfers = torrents.transfers().await?;
-    transfers.change(&id, Change { paused: body.paused, kind: body.kind, queue_position: body.queue_position, notify_when_ready: body.notify_when_ready }).await.map(Json)
+    transfers
+        .change(
+            &id,
+            Change {
+                paused: body.paused,
+                kind: body.kind,
+                queue_position: body.queue_position,
+                notify_when_ready: body.notify_when_ready,
+            },
+        )
+        .await
+        .map(Json)
 }
 
 pub async fn remove(State(torrents): State<Torrents>, Path(id): Path<String>, Query(query): Query<DeleteQuery>) -> AppResult<StatusCode> {
@@ -138,7 +156,13 @@ pub async fn events(State(torrents): State<Torrents>) -> AppResult<Sse<impl Stre
     let stopping = torrents.stopping();
     let live = BroadcastStream::new(transfers.subscribe()).filter_map(|event| future::ready(event.ok()));
     let speed = TransferEvent::Speed(transfers.bandwidth.status());
-    let current = futures::stream::iter(transfers.all().into_iter().map(|transfer| TransferEvent::Changed(Box::new(transfer))).chain([speed]));
+    let current = futures::stream::iter(
+        transfers
+            .all()
+            .into_iter()
+            .map(|transfer| TransferEvent::Changed(Box::new(transfer)))
+            .chain([speed]),
+    );
     let stream = current
         .chain(live)
         .filter_map(|event| future::ready(sse_event(event).map(Ok)))

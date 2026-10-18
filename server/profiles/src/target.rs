@@ -22,5 +22,9 @@ impl<S: Send + Sync> FromRequestParts<S> for ProfileId {
 }
 
 pub fn require_self_or_admin(viewer: Viewer, id: i64) -> AppResult<()> {
-    if viewer.profile == id || viewer.admin { Ok(()) } else { Err(AppError::forbidden("You can only change your own profile.")) }
+    if viewer.profile == id || viewer.admin {
+        Ok(())
+    } else {
+        Err(AppError::forbidden("You can only change your own profile."))
+    }
 }

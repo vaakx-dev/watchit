@@ -34,7 +34,10 @@ fn limits(settings: &Settings, alternative: bool) -> LimitsConfig {
     } else {
         (settings.max_download_bps, settings.max_upload_bps)
     };
-    LimitsConfig { download_bps: download.and_then(NonZeroU32::new), upload_bps: upload.and_then(NonZeroU32::new) }
+    LimitsConfig {
+        download_bps: download.and_then(NonZeroU32::new),
+        upload_bps: upload.and_then(NonZeroU32::new),
+    }
 }
 
 fn background_limit(settings: &Settings, alternative: bool) -> u32 {
@@ -42,7 +45,9 @@ fn background_limit(settings: &Settings, alternative: bool) -> u32 {
         WhileWatching::Throttle => settings.while_watching_bps.unwrap_or(0),
         WhileWatching::Pause | WhileWatching::None => 0,
     };
-    limits(settings, alternative).download_bps.map_or(allowed, |global| global.get().min(allowed))
+    limits(settings, alternative)
+        .download_bps
+        .map_or(allowed, |global| global.get().min(allowed))
 }
 
 fn status(settings: &Settings, alternative: bool, watching: bool) -> SpeedStatus {
@@ -54,7 +59,11 @@ fn status(settings: &Settings, alternative: bool, watching: bool) -> SpeedStatus
             (false, false) => SpeedMode::Normal,
         },
         alternative,
-        download_bps_limit: if watching { Some(background_limit(settings, alternative)) } else { global.download_bps.map(NonZeroU32::get) },
+        download_bps_limit: if watching {
+            Some(background_limit(settings, alternative))
+        } else {
+            global.download_bps.map(NonZeroU32::get)
+        },
         upload_bps_limit: global.upload_bps.map(NonZeroU32::get),
     }
 }

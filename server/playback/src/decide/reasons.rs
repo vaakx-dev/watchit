@@ -14,6 +14,9 @@ pub enum Reason {
 
 impl Reason {
     pub fn allows_video_copy(self) -> bool {
-        matches!(self, Self::ContainerNotSupported | Self::AudioCodecNotSupported | Self::SecondaryAudioNotSupported)
+        matches!(
+            self,
+            Self::ContainerNotSupported | Self::AudioCodecNotSupported | Self::SecondaryAudioNotSupported
+        )
     }
 }

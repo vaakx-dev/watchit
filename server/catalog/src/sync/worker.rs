@@ -27,7 +27,8 @@ impl Sync {
             .flat_map(|kind| [Self::discovery_job(kind), Self::trending_job(kind)]);
         let saved: Vec<Job> = {
             let mut queue = self.inner.queue.lock().unwrap();
-            jobs.filter_map(|job| queue.ensure(job, Priority::Crawl, self.inner.metadata.ms())).collect()
+            jobs.filter_map(|job| queue.ensure(job, Priority::Crawl, self.inner.metadata.ms()))
+                .collect()
         };
         let db = self.inner.db.clone();
         let inner = self.inner.clone();
@@ -124,7 +125,9 @@ impl Inner {
                     demote = false;
                 }
                 let published = |key: &str| {
-                    step.published.iter().any(|id| key.strip_prefix("title:").or_else(|| key.strip_prefix("episodes:")) == Some(id.as_str()))
+                    step.published
+                        .iter()
+                        .any(|id| key.strip_prefix("title:").or_else(|| key.strip_prefix("episodes:")) == Some(id.as_str()))
                 };
                 for other in queue.jobs.iter_mut().filter(|other| other.detail() && published(&other.key)) {
                     other.complete = true;

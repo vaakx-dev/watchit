@@ -19,19 +19,31 @@ pub struct ImageFailure {
 
 impl ImageFailure {
     pub(crate) fn origin(status: u16, retry_at: i64) -> Self {
-        Self { message: format!("Image origin returned {status}"), cause: Cause::Origin { status, retry_at } }
+        Self {
+            message: format!("Image origin returned {status}"),
+            cause: Cause::Origin { status, retry_at },
+        }
     }
 
     pub(crate) fn redirect(status: u16, detail: &str) -> Self {
-        Self { message: format!("Image origin returned {status}: {detail}"), cause: Cause::Redirect }
+        Self {
+            message: format!("Image origin returned {status}: {detail}"),
+            cause: Cause::Redirect,
+        }
     }
 
     pub(crate) fn rejected(message: impl Into<String>) -> Self {
-        Self { message: message.into(), cause: Cause::Rejected }
+        Self {
+            message: message.into(),
+            cause: Cause::Rejected,
+        }
     }
 
     pub(crate) fn unavailable(message: impl Into<String>) -> Self {
-        Self { message: message.into(), cause: Cause::Unavailable }
+        Self {
+            message: message.into(),
+            cause: Cause::Unavailable,
+        }
     }
 
     pub(crate) fn retry_at(&self) -> i64 {
@@ -64,7 +76,11 @@ impl From<ImageFailure> for AppError {
         let retry_at = failure.retry_at();
         let error = AppError::new(status, failure.message);
         let wait = retry_at - now_ms();
-        if wait > 0 { error.retry_after((wait as u64).div_ceil(1000)) } else { error }
+        if wait > 0 {
+            error.retry_after((wait as u64).div_ceil(1000))
+        } else {
+            error
+        }
     }
 }
 

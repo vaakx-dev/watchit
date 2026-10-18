@@ -42,6 +42,13 @@ pub struct SharingChange {
 
 impl TailscaleStatus {
     pub fn new(state: TailscaleState) -> Self {
-        Self { state, name: None, ip: None, login_url: None, sharing: Sharing::Off, public: false }
+        Self {
+            state,
+            name: None,
+            ip: None,
+            login_url: None,
+            sharing: Sharing::Off,
+            public: false,
+        }
     }
 }

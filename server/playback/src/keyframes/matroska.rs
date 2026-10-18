@@ -47,13 +47,20 @@ async fn read_element(reader: &ByteReader, offset: u64) -> Result<(Vec<u8>, Elem
     let header = reader.read(offset, HEADER_BYTES).await?;
     let element = element_at(&header, 0).ok_or("Invalid Matroska element")?;
     let bytes = reader.read(offset + element.start as u64, (element.end - element.start) as u64).await?;
-    let root = Element { id: element.id, start: 0, end: bytes.len() };
+    let root = Element {
+        id: element.id,
+        start: 0,
+        end: bytes.len(),
+    };
     Ok((bytes, root))
 }
 
 fn seek_positions(head: &[u8]) -> HashMap<u64, u64> {
     let mut positions = HashMap::new();
-    let Some(segment) = element_at(head, 0).and_then(|header| element_at(head, header.end)).filter(|segment| segment.id == SEGMENT) else {
+    let Some(segment) = element_at(head, 0)
+        .and_then(|header| element_at(head, header.end))
+        .filter(|segment| segment.id == SEGMENT)
+    else {
         return positions;
     };
     for seek_head in children(head, segment).into_iter().filter(|element| element.id == SEEK_HEAD) {
@@ -81,7 +88,9 @@ fn cue_times(bytes: &[u8], cues: Element, track: u64) -> Vec<u64> {
         .filter_map(|point| {
             let parts = children(bytes, point);
             let time = parts.iter().find(|element| element.id == CUE_TIME)?;
-            let on_track = parts.iter().any(|element| element.id == CUE_TRACK_POSITIONS && child_value(bytes, *element, CUE_TRACK) == Some(track));
+            let on_track = parts
+                .iter()
+                .any(|element| element.id == CUE_TRACK_POSITIONS && child_value(bytes, *element, CUE_TRACK) == Some(track));
             on_track.then(|| unsigned(bytes, *time))
         })
         .collect()

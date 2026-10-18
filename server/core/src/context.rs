@@ -15,6 +15,11 @@ impl Context {
         let paths = Paths::new(data_dir)?;
         let db = Db::open(&paths.database())?;
         let tokens = StreamTokens::load(&paths)?;
-        Ok(Self { paths, db, tokens, background: Background::default() })
+        Ok(Self {
+            paths,
+            db,
+            tokens,
+            background: Background::default(),
+        })
     }
 }

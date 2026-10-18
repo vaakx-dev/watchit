@@ -23,7 +23,11 @@ pub struct ImageSettingsPatch {
 
 impl Default for ImageSettings {
     fn default() -> Self {
-        Self { images_days: 30.0, max_stale_days: 7.0, image_limit_mb: 1024.0 }
+        Self {
+            images_days: 30.0,
+            max_stale_days: 7.0,
+            image_limit_mb: 1024.0,
+        }
     }
 }
 
@@ -108,8 +112,12 @@ impl ImageSettingsPatch {
     }
 
     fn entries(&self) -> impl Iterator<Item = (&'static str, f64)> {
-        [("images_days", self.images_days), ("max_stale_days", self.max_stale_days), ("image_limit_mb", self.image_limit_mb)]
-            .into_iter()
-            .filter_map(|(key, value)| value.map(|value| (key, value)))
+        [
+            ("images_days", self.images_days),
+            ("max_stale_days", self.max_stale_days),
+            ("image_limit_mb", self.image_limit_mb),
+        ]
+        .into_iter()
+        .filter_map(|(key, value)| value.map(|value| (key, value)))
     }
 }

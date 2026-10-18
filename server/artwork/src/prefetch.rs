@@ -43,7 +43,12 @@ pub(crate) struct Overview {
 
 impl Prefetch {
     pub fn new(cache: Arc<Cache>, db: Db) -> Self {
-        Self { cache, db, state: Mutex::new(State::default()), wake: Notify::new() }
+        Self {
+            cache,
+            db,
+            state: Mutex::new(State::default()),
+            wake: Notify::new(),
+        }
     }
 
     pub fn running(&self, key: &ImageKey) -> bool {

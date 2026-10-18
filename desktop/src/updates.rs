@@ -17,7 +17,10 @@ pub struct Updates {
 
 impl Updates {
     pub fn new(item: MenuItem<Wry>) -> Self {
-        Self { item, pending: Mutex::new(None) }
+        Self {
+            item,
+            pending: Mutex::new(None),
+        }
     }
 }
 
@@ -80,4 +83,3 @@ async fn install(app: &AppHandle, update: Update) -> anyhow::Result<()> {
     update.install(installer)?;
     Ok(())
 }
-

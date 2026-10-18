@@ -39,7 +39,8 @@ pub fn put(conn: &Connection, profile: i64, id: &str, source: Option<&str>) -> A
             .execute(params![profile, target, source])?;
         }
         None => {
-            conn.prepare_cached("DELETE FROM playback_sources WHERE profile_id = ?1 AND id = ?2")?.execute(params![profile, target])?;
+            conn.prepare_cached("DELETE FROM playback_sources WHERE profile_id = ?1 AND id = ?2")?
+                .execute(params![profile, target])?;
         }
     }
     Ok(())

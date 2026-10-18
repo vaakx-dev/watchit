@@ -20,14 +20,19 @@ pub enum Requested {
 }
 
 pub fn requested(headers: &HeaderMap, len: u64) -> Requested {
-    let Some(spec) = headers.get(header::RANGE).and_then(|value| value.to_str().ok()).and_then(|value| value.trim().strip_prefix("bytes="))
+    let Some(spec) = headers
+        .get(header::RANGE)
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| value.trim().strip_prefix("bytes="))
     else {
         return Requested::Whole;
     };
     if spec.contains(',') {
         return Requested::Whole;
     }
-    let Some((start, end)) = spec.split_once('-') else { return Requested::Whole };
+    let Some((start, end)) = spec.split_once('-') else {
+        return Requested::Whole;
+    };
     let last = len.saturating_sub(1);
     let (start, end) = match (start.trim().parse::<u64>().ok(), end.trim().parse::<u64>().ok()) {
         (Some(start), Some(end)) => (start, end.min(last)),

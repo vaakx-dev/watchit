@@ -81,12 +81,22 @@ fn file(row: &Row) -> rusqlite::Result<(String, FileRecord)> {
 }
 
 pub fn load(conn: &Connection) -> AppResult<Vec<(Record, Vec<FileRecord>)>> {
-    let records = conn.prepare("SELECT * FROM transfers ORDER BY added_at")?.query_map([], record)?.collect::<Result<Vec<_>, _>>()?;
-    let files = conn.prepare("SELECT * FROM transfer_files ORDER BY file_index")?.query_map([], file)?.collect::<Result<Vec<_>, _>>()?;
+    let records = conn
+        .prepare("SELECT * FROM transfers ORDER BY added_at")?
+        .query_map([], record)?
+        .collect::<Result<Vec<_>, _>>()?;
+    let files = conn
+        .prepare("SELECT * FROM transfer_files ORDER BY file_index")?
+        .query_map([], file)?
+        .collect::<Result<Vec<_>, _>>()?;
     Ok(records
         .into_iter()
         .map(|record| {
-            let own = files.iter().filter(|(hash, _)| *hash == record.info_hash).map(|(_, file)| file.clone()).collect();
+            let own = files
+                .iter()
+                .filter(|(hash, _)| *hash == record.info_hash)
+                .map(|(_, file)| file.clone())
+                .collect();
             (record, own)
         })
         .collect())
@@ -124,7 +134,13 @@ pub fn save(conn: &Connection, record: &Record, files: &[FileRecord]) -> AppResu
     tx.execute("DELETE FROM transfer_files WHERE info_hash = ?1", [&record.info_hash])?;
     let mut insert = tx.prepare("INSERT INTO transfer_files (info_hash, file_index, name, size_bytes, title_id) VALUES (?1, ?2, ?3, ?4, ?5)")?;
     for file in files {
-        insert.execute(params![record.info_hash, signed(file.index as u64), file.name, signed(file.size_bytes), file.title_id])?;
+        insert.execute(params![
+            record.info_hash,
+            signed(file.index as u64),
+            file.name,
+            signed(file.size_bytes),
+            file.title_id
+        ])?;
     }
     drop(insert);
     tx.commit()?;

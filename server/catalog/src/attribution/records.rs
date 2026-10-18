@@ -116,13 +116,23 @@ pub(crate) fn local_images(title: &Title) -> Vec<LocalImage> {
     let mut images: Vec<LocalImage> = title
         .images
         .iter()
-        .filter_map(|image| local(&image.url).map(|(key, url)| LocalImage { key, url, credit: credit(Some(image)) }))
+        .filter_map(|image| {
+            local(&image.url).map(|(key, url)| LocalImage {
+                key,
+                url,
+                credit: credit(Some(image)),
+            })
+        })
         .collect();
     for value in [&title.entry.artwork, &title.backdrop] {
         if let Some((key, url)) = local(value)
             && images.iter().all(|image| image.key != key)
         {
-            images.push(LocalImage { key, url, credit: credit(None) });
+            images.push(LocalImage {
+                key,
+                url,
+                credit: credit(None),
+            });
         }
     }
     images
@@ -132,7 +142,10 @@ pub(crate) fn title_record<'a>(title: &'a Title, images: &'a [LocalImage], recor
     let mut references: Vec<ImageReference<'_>> = Vec::new();
     for image in images {
         if references.iter().all(|reference| reference.key != image.key) {
-            references.push(ImageReference { key: &image.key, url: &image.url });
+            references.push(ImageReference {
+                key: &image.key,
+                url: &image.url,
+            });
         }
     }
     TitleRecord {
@@ -156,7 +169,10 @@ pub(crate) fn title_record<'a>(title: &'a Title, images: &'a [LocalImage], recor
             tmdb_id: title.tmdb_id,
             season: title.season,
             episode: title.episode,
-            series: title.series.as_ref().map(|series| SeriesName { id: &series.id, title: &series.title }),
+            series: title.series.as_ref().map(|series| SeriesName {
+                id: &series.id,
+                title: &series.title,
+            }),
         },
         artwork: local(&title.entry.artwork).map(|(_, url)| url),
         backdrop: local(&title.backdrop).map(|(_, url)| url),

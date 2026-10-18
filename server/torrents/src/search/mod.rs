@@ -29,7 +29,11 @@ pub struct Search {
 
 impl Search {
     pub fn new(http: reqwest::Client, titles: Arc<dyn Titles>) -> Self {
-        Self { http, titles, trackers: Arc::default() }
+        Self {
+            http,
+            titles,
+            trackers: Arc::default(),
+        }
     }
 
     pub async fn ranked(&self, title: &TitleId, quality: &Quality) -> AppResult<Ranked> {

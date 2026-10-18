@@ -14,8 +14,9 @@ pub fn create_table(conn: &Connection) -> AppResult<()> {
 }
 
 pub fn load(conn: &Connection, profile: i64) -> AppResult<Quality> {
-    let value: Option<String> =
-        conn.query_row("SELECT value FROM torrent_quality WHERE profile_id = ?1", [profile], |row| row.get(0)).optional()?;
+    let value: Option<String> = conn
+        .query_row("SELECT value FROM torrent_quality WHERE profile_id = ?1", [profile], |row| row.get(0))
+        .optional()?;
     match value {
         Some(value) => serde_json::from_str(&value).map_err(AppError::internal),
         None => Ok(Quality::default()),

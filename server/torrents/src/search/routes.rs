@@ -32,5 +32,8 @@ pub async fn search(State(torrents): State<Torrents>, viewer: Viewer, Query(quer
     let quality = torrents.quality(viewer.profile).await?;
     let quality = if query.unfiltered { quality.without_filters() } else { quality };
     let found = torrents.search().ranked(&title, &quality).await?;
-    Ok(Json(SearchResponse { results: found.candidates.into_iter().map(|candidate| candidate.result).collect(), hidden: found.hidden }))
+    Ok(Json(SearchResponse {
+        results: found.candidates.into_iter().map(|candidate| candidate.result).collect(),
+        hidden: found.hidden,
+    }))
 }

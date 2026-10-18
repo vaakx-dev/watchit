@@ -21,13 +21,20 @@ pub fn valid_info_hash(value: &str) -> AppResult<String> {
 }
 
 fn folder_name(name: &str) -> String {
-    let cleaned: String = name.chars().map(|c| if c.is_control() || r#"<>:"/\|?*"#.contains(c) { '_' } else { c }).collect();
+    let cleaned: String = name
+        .chars()
+        .map(|c| if c.is_control() || r#"<>:"/\|?*"#.contains(c) { '_' } else { c })
+        .collect();
     let trimmed = cleaned.trim().trim_end_matches(['.', ' ']);
     if trimmed.is_empty() { "torrent".to_owned() } else { trimmed.to_owned() }
 }
 
 fn output_folder(download_dir: PathBuf, metadata: &Metadata) -> PathBuf {
-    if metadata.files.len() > 1 { download_dir.join(folder_name(&metadata.name)) } else { download_dir }
+    if metadata.files.len() > 1 {
+        download_dir.join(folder_name(&metadata.name))
+    } else {
+        download_dir
+    }
 }
 
 impl Transfers {
@@ -92,7 +99,11 @@ impl Transfers {
         let transfers = Arc::clone(self);
         let hash = info_hash.to_owned();
         let task = tokio::spawn(async move {
-            let trackers = transfers.entries().get(&hash).map(|entry| entry.record.trackers.clone()).unwrap_or_default();
+            let trackers = transfers
+                .entries()
+                .get(&hash)
+                .map(|entry| entry.record.trackers.clone())
+                .unwrap_or_default();
             let outcome = match engine::resolve(&transfers.session, &hash, &trackers).await {
                 Ok(metadata) => transfers.attach(&hash, metadata).await,
                 Err(error) => Err(AppError::internal(format!("{error:#}"))),
@@ -133,7 +144,9 @@ impl Transfers {
                 trackers: entry.record.trackers.clone(),
             }
         };
-        let handle = engine::add_resolved(&self.session, &metadata, request).await.map_err(|error| AppError::internal(format!("{error:#}")))?;
+        let handle = engine::add_resolved(&self.session, &metadata, request)
+            .await
+            .map_err(|error| AppError::internal(format!("{error:#}")))?;
         let attached = match self.entries().get_mut(info_hash) {
             Some(entry) => {
                 entry.attach(handle.clone());

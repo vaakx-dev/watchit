@@ -45,11 +45,13 @@ pub fn remember(conn: &Connection, profile: i64, query: &str) -> AppResult<()> {
 }
 
 pub fn forget(conn: &Connection, profile: i64, query: &str) -> AppResult<()> {
-    conn.prepare_cached("DELETE FROM recent_searches WHERE profile_id = ?1 AND key = ?2")?.execute(params![profile, key(query.trim())])?;
+    conn.prepare_cached("DELETE FROM recent_searches WHERE profile_id = ?1 AND key = ?2")?
+        .execute(params![profile, key(query.trim())])?;
     Ok(())
 }
 
 pub fn clear(conn: &Connection, profile: i64) -> AppResult<()> {
-    conn.prepare_cached("DELETE FROM recent_searches WHERE profile_id = ?1")?.execute([profile])?;
+    conn.prepare_cached("DELETE FROM recent_searches WHERE profile_id = ?1")?
+        .execute([profile])?;
     Ok(())
 }

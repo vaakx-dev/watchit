@@ -1,7 +1,10 @@
 use std::path::Path;
 
 fn main() -> anyhow::Result<()> {
-    let root = Path::new(env!("CARGO_MANIFEST_DIR")).ancestors().nth(2).expect("app crate sits in server/app");
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .ancestors()
+        .nth(2)
+        .expect("app crate sits in server/app");
     let out_dir = root.join("web/src/generated");
     if out_dir.exists() {
         std::fs::remove_dir_all(&out_dir)?;

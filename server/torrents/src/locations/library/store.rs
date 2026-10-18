@@ -21,12 +21,21 @@ pub fn create_table(conn: &Connection) -> AppResult<()> {
 fn link(row: &Row) -> rusqlite::Result<(String, LibraryLink)> {
     let index: i64 = row.get("file_index")?;
     let path: String = row.get("path")?;
-    Ok((row.get("info_hash")?, LibraryLink { file_index: index.max(0) as usize, path: PathBuf::from(path) }))
+    Ok((
+        row.get("info_hash")?,
+        LibraryLink {
+            file_index: index.max(0) as usize,
+            path: PathBuf::from(path),
+        },
+    ))
 }
 
 pub fn load(conn: &Connection) -> AppResult<HashMap<String, Vec<LibraryLink>>> {
     let mut found: HashMap<String, Vec<LibraryLink>> = HashMap::new();
-    let rows = conn.prepare("SELECT info_hash, file_index, path FROM library_files")?.query_map([], link)?.collect::<Result<Vec<_>, _>>()?;
+    let rows = conn
+        .prepare("SELECT info_hash, file_index, path FROM library_files")?
+        .query_map([], link)?
+        .collect::<Result<Vec<_>, _>>()?;
     for (hash, link) in rows {
         found.entry(hash).or_default().push(link);
     }

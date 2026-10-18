@@ -15,12 +15,22 @@ pub(crate) struct Stored {
 
 pub(crate) fn stored(conn: &Connection, id: &str) -> AppResult<Option<Stored>> {
     let Some(record) = load(conn, id)? else { return Ok(None) };
-    let updated_at: i64 = conn.prepare_cached("SELECT updated_at FROM titles WHERE id = ?1")?.query_row([id], |row| row.get(0))?;
-    Ok(Some(Stored { poster: record.poster_key(), record, updated_at }))
+    let updated_at: i64 = conn
+        .prepare_cached("SELECT updated_at FROM titles WHERE id = ?1")?
+        .query_row([id], |row| row.get(0))?;
+    Ok(Some(Stored {
+        poster: record.poster_key(),
+        record,
+        updated_at,
+    }))
 }
 
 fn terms_url(source_url: &str) -> &'static str {
-    if source_url.starts_with("https://m.media-amazon.com/") { "https://www.imdb.com/conditions" } else { "https://www.metahub.space/terms" }
+    if source_url.starts_with("https://m.media-amazon.com/") {
+        "https://www.imdb.com/conditions"
+    } else {
+        "https://www.metahub.space/terms"
+    }
 }
 
 fn credit(role: &'static str, source_url: &str, description_url: &str, url: String, retrieved_at: Option<String>) -> ImageCredit {
@@ -91,9 +101,7 @@ pub(crate) fn view(stored: &Stored, images: &ImageSet) -> Title {
 
 pub(crate) fn rows(conn: &Connection, ids: &[String]) -> AppResult<Vec<EntryRow>> {
     let list = serde_json::to_string(ids).unwrap_or_default();
-    let sql = format!(
-        "SELECT {ENTRY_COLUMNS} FROM json_each(?1) AS wanted JOIN titles ON titles.id = wanted.value ORDER BY wanted.key"
-    );
+    let sql = format!("SELECT {ENTRY_COLUMNS} FROM json_each(?1) AS wanted JOIN titles ON titles.id = wanted.value ORDER BY wanted.key");
     let mut statement = conn.prepare_cached(&sql)?;
     let rows = statement.query_map([list], EntryRow::read)?;
     Ok(rows.collect::<rusqlite::Result<_>>()?)

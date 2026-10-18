@@ -9,7 +9,9 @@ pub struct About {
 }
 
 async fn show() -> Json<About> {
-    Json(About { version: env!("CARGO_PKG_VERSION") })
+    Json(About {
+        version: env!("CARGO_PKG_VERSION"),
+    })
 }
 
 pub fn router() -> Router {

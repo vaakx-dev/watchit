@@ -14,7 +14,16 @@ use crate::ids::genre_id;
 use crate::model::{CatalogKind, MediaKind};
 
 const SOURCE_PAGE_SIZE: u32 = 50;
-const COMPONENT: &AsciiSet = &NON_ALPHANUMERIC.remove(b'-').remove(b'_').remove(b'.').remove(b'!').remove(b'~').remove(b'*').remove(b'\'').remove(b'(').remove(b')');
+const COMPONENT: &AsciiSet = &NON_ALPHANUMERIC
+    .remove(b'-')
+    .remove(b'_')
+    .remove(b'.')
+    .remove(b'!')
+    .remove(b'~')
+    .remove(b'*')
+    .remove(b'\'')
+    .remove(b'(')
+    .remove(b')');
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) struct SourceQuery {
@@ -39,7 +48,10 @@ fn encode(value: &str) -> String {
 
 impl Source {
     pub fn new() -> Self {
-        Self { client: Client::new(), manifest: Mutex::new(None) }
+        Self {
+            client: Client::new(),
+            manifest: Mutex::new(None),
+        }
     }
 
     async fn manifest(&self) -> Result<Manifest, SourceError> {
@@ -56,9 +68,16 @@ impl Source {
     async fn genre_label(&self, kind: MediaKind, wanted: &str) -> Result<Option<String>, SourceError> {
         let wanted = canonical_ids(wanted);
         let manifest = self.manifest().await?;
-        let catalog = manifest.catalogs.iter().find(|catalog| catalog.kind == kind.as_str() && catalog.id == "top");
+        let catalog = manifest
+            .catalogs
+            .iter()
+            .find(|catalog| catalog.kind == kind.as_str() && catalog.id == "top");
         Ok(catalog.and_then(|catalog| {
-            catalog.genres.iter().find(|label| canonical_ids(&genre_id(label)).iter().any(|id| wanted.contains(id))).cloned()
+            catalog
+                .genres
+                .iter()
+                .find(|label| canonical_ids(&genre_id(label)).iter().any(|id| wanted.contains(id)))
+                .cloned()
         }))
     }
 
@@ -73,7 +92,11 @@ impl Source {
         for kind in kinds {
             let mut extras = Vec::new();
             if !query.genre.is_empty() || query.kind == CatalogKind::Anime {
-                let wanted = if query.kind == CatalogKind::Anime { "animation" } else { query.genre.as_str() };
+                let wanted = if query.kind == CatalogKind::Anime {
+                    "animation"
+                } else {
+                    query.genre.as_str()
+                };
                 let Some(label) = self.genre_label(kind, wanted).await? else { continue };
                 extras.push(format!("genre={}", encode(&label)));
             }

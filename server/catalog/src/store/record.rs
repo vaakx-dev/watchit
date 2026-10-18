@@ -60,7 +60,11 @@ impl Record {
     }
 
     pub fn poster_key(&self) -> Option<ImageKey> {
-        self.detail.poster.as_deref().and_then(|url| ImageKey::for_source(url).ok()).map(|(key, _)| key)
+        self.detail
+            .poster
+            .as_deref()
+            .and_then(|url| ImageKey::for_source(url).ok())
+            .map(|(key, _)| key)
     }
 
     pub fn genre_labels(&self) -> Vec<String> {
@@ -89,7 +93,9 @@ pub(crate) fn load(conn: &Connection, id: &str) -> AppResult<Option<Record>> {
             ))
         })
         .optional()?;
-    let Some((kind, title, year, anime, imdb_rating, popularity, season, episode, detail, genres)) = row else { return Ok(None) };
+    let Some((kind, title, year, anime, imdb_rating, popularity, season, episode, detail, genres)) = row else {
+        return Ok(None);
+    };
     let labels: Vec<String> = serde_json::from_str(&genres).map_err(AppError::internal)?;
     let genres = labels.into_iter().map(|label| Genre { id: genre_id(&label), label }).collect();
     Ok(Some(Record {
@@ -157,7 +163,8 @@ fn write(conn: &Connection, record: &Record, now: i64, verified_at: Option<i64>)
         now,
         verified_at,
     ])?;
-    conn.prepare_cached("DELETE FROM title_genres WHERE title_id = ?1")?.execute([&record.id])?;
+    conn.prepare_cached("DELETE FROM title_genres WHERE title_id = ?1")?
+        .execute([&record.id])?;
     let mut insert = conn.prepare_cached("INSERT INTO title_genres (title_id, genre_id, label) VALUES (?1, ?2, ?3)")?;
     for genre in &record.genres {
         insert.execute(params![record.id, genre.id, genre.label])?;
@@ -184,8 +191,10 @@ pub(crate) fn verified_kind(conn: &Connection, id: &str) -> AppResult<Option<Med
 }
 
 pub(crate) fn kind_of(conn: &Connection, id: &str) -> AppResult<Option<MediaKind>> {
-    let kind: Option<String> =
-        conn.prepare_cached("SELECT kind FROM titles WHERE id = ?1")?.query_row([id], |row| row.get(0)).optional()?;
+    let kind: Option<String> = conn
+        .prepare_cached("SELECT kind FROM titles WHERE id = ?1")?
+        .query_row([id], |row| row.get(0))
+        .optional()?;
     Ok(kind.as_deref().and_then(MediaKind::parse))
 }
 

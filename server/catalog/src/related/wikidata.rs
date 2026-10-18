@@ -73,9 +73,18 @@ fn members<'a>(rows: impl Iterator<Item = &'a Row>) -> Vec<Member> {
             continue;
         }
         let ordinal = row.ordinal.as_deref().and_then(leading_number).unwrap_or(f64::INFINITY);
-        unique.push(Member { imdb: row.imdb.clone(), ordinal, date: row.date.clone().unwrap_or_else(|| "9999".into()) });
+        unique.push(Member {
+            imdb: row.imdb.clone(),
+            ordinal,
+            date: row.date.clone().unwrap_or_else(|| "9999".into()),
+        });
     }
-    unique.sort_by(|left, right| left.ordinal.total_cmp(&right.ordinal).then_with(|| left.date.cmp(&right.date)).then_with(|| left.imdb.cmp(&right.imdb)));
+    unique.sort_by(|left, right| {
+        left.ordinal
+            .total_cmp(&right.ordinal)
+            .then_with(|| left.date.cmp(&right.date))
+            .then_with(|| left.imdb.cmp(&right.imdb))
+    });
     unique
 }
 
@@ -103,7 +112,10 @@ fn smallest_series(id: &str, rows: &[Row]) -> Option<FranchiseList> {
         .map(|(_, group)| (group[0].name.clone(), members(group.into_iter())))
         .filter(|(_, list)| list.len() > 1 && list.iter().any(|member| member.imdb == id))
         .min_by_key(|(_, list)| list.len())
-        .map(|(name, list)| FranchiseList { name, ids: list.into_iter().map(|member| member.imdb).collect() })
+        .map(|(name, list)| FranchiseList {
+            name,
+            ids: list.into_iter().map(|member| member.imdb).collect(),
+        })
 }
 
 fn chain(id: &str, rows: &[Row]) -> FranchiseList {
@@ -114,7 +126,10 @@ fn chain(id: &str, rows: &[Row]) -> FranchiseList {
     let index = list.iter().position(|member| member.imdb == id).map_or(-1, |index| index as isize);
     let start = (index - CHAIN_REACH as isize).max(0) as usize;
     let end = ((index + CHAIN_REACH as isize + 1).max(0) as usize).min(list.len());
-    FranchiseList { name: None, ids: list[start..end.max(start)].iter().map(|member| member.imdb.clone()).collect() }
+    FranchiseList {
+        name: None,
+        ids: list[start..end.max(start)].iter().map(|member| member.imdb.clone()).collect(),
+    }
 }
 
 pub(crate) async fn fetch_franchise(client: &reqwest::Client, imdb_id: &str) -> Result<FranchiseList, String> {
@@ -137,7 +152,13 @@ pub(crate) async fn fetch_franchise(client: &reqwest::Client, imdb_id: &str) -> 
         .into_iter()
         .map(|mut binding| {
             let mut take = |key: &str| binding.remove(key).map(|binding| binding.value);
-            Row { series: take("series"), name: take("name"), imdb: take("imdb").unwrap_or_default(), ordinal: take("ordinal"), date: take("date") }
+            Row {
+                series: take("series"),
+                name: take("name"),
+                imdb: take("imdb").unwrap_or_default(),
+                ordinal: take("ordinal"),
+                date: take("date"),
+            }
         })
         .collect();
     Ok(smallest_series(imdb_id, &rows).unwrap_or_else(|| chain(imdb_id, &rows)))

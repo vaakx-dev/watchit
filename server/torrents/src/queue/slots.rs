@@ -34,7 +34,11 @@ impl Slot {
 }
 
 fn seeding_done(entry: &Entry, progress: &Progress, settings: &Settings) -> bool {
-    let ratio = if progress.size_bytes == 0 { 0.0 } else { entry.record.uploaded_bytes as f64 / progress.size_bytes as f64 };
+    let ratio = if progress.size_bytes == 0 {
+        0.0
+    } else {
+        entry.record.uploaded_bytes as f64 / progress.size_bytes as f64
+    };
     settings.seeding_done(ratio, entry.record.seeded_seconds / 60)
 }
 
@@ -47,7 +51,11 @@ fn slot(entry: &Entry, settings: &Settings, admission: &mut Admission) -> Slot {
     } else if entry.readers > 0 {
         Slot::Watching
     } else if progress.finished() {
-        if seeding_done(entry, &progress, settings) { Slot::Finished } else { Slot::Seeding }
+        if seeding_done(entry, &progress, settings) {
+            Slot::Finished
+        } else {
+            Slot::Seeding
+        }
     } else if entry.record.kind == Kind::Stream {
         Slot::Streaming
     } else {

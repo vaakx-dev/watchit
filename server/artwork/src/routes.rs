@@ -1,9 +1,9 @@
+use axum::Json;
 use axum::Router;
 use axum::extract::{Path, Query, State};
 use axum::http::{HeaderMap, HeaderValue, StatusCode, header};
 use axum::response::{IntoResponse, Response};
 use axum::routing::get;
-use axum::Json;
 use serde::Deserialize;
 use watchit_core::{AppError, AppResult};
 
@@ -38,15 +38,14 @@ fn cache_control(artwork: &Artwork, key: &ImageKey, cached: &Cached, version: Op
     }
     let remaining = artwork.settings().lifetime_ms(key.jitter()) - (now_ms() - cached.fetched_at);
     let seconds = remaining / 1000;
-    if seconds > 0 { format!("private, max-age={seconds}, immutable") } else { NO_IMAGE_CACHE.into() }
+    if seconds > 0 {
+        format!("private, max-age={seconds}, immutable")
+    } else {
+        NO_IMAGE_CACHE.into()
+    }
 }
 
-async fn image(
-    State(artwork): State<Artwork>,
-    Path(key): Path<String>,
-    Query(query): Query<ImageQuery>,
-    request: HeaderMap,
-) -> AppResult<Response> {
+async fn image(State(artwork): State<Artwork>, Path(key): Path<String>, Query(query): Query<ImageQuery>, request: HeaderMap) -> AppResult<Response> {
     let key = ImageKey::parse(&key).ok_or_else(|| AppError::not_found("API route not found."))?;
     let lookup = key.clone();
     if artwork.db().run(move |conn| records::get(conn, &lookup)).await?.is_none() {
@@ -63,7 +62,10 @@ async fn image(
     if cached.stale {
         headers.insert("x-watchit-stale", HeaderValue::from_static("true"));
     }
-    if request.get(header::IF_NONE_MATCH).is_some_and(|value| value.as_bytes() == etag.as_bytes()) {
+    if request
+        .get(header::IF_NONE_MATCH)
+        .is_some_and(|value| value.as_bytes() == etag.as_bytes())
+    {
         return Ok((StatusCode::NOT_MODIFIED, headers).into_response());
     }
     let body = tokio::fs::read(&cached.path)

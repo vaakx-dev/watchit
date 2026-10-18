@@ -12,7 +12,9 @@ pub fn create_table(conn: &Connection) -> AppResult<()> {
 }
 
 pub fn load(conn: &Connection) -> AppResult<bool> {
-    let alternative = conn.query_row("SELECT alternative FROM torrent_speed WHERE id = 1", [], |row| row.get(0)).optional()?;
+    let alternative = conn
+        .query_row("SELECT alternative FROM torrent_speed WHERE id = 1", [], |row| row.get(0))
+        .optional()?;
     Ok(alternative.unwrap_or(false))
 }
 

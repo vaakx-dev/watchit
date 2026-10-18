@@ -12,7 +12,11 @@ fn vint(bytes: &[u8], position: usize, keep_marker: bool) -> Option<(u64, usize)
     }
     let length = first.leading_zeros() as usize + 1;
     let tail = bytes.get(position + 1..position + length)?;
-    let head = if keep_marker { u64::from(first) } else { u64::from(first) & (0xff_u64 >> length) };
+    let head = if keep_marker {
+        u64::from(first)
+    } else {
+        u64::from(first) & (0xff_u64 >> length)
+    };
     Some((tail.iter().fold(head, |value, byte| (value << 8) | u64::from(*byte)), length))
 }
 
@@ -37,9 +41,14 @@ pub fn children(bytes: &[u8], parent: Element) -> Vec<Element> {
 }
 
 pub fn unsigned(bytes: &[u8], element: Element) -> u64 {
-    bytes[element.start..element.end.min(bytes.len())].iter().fold(0, |value, byte| (value << 8) | u64::from(*byte))
+    bytes[element.start..element.end.min(bytes.len())]
+        .iter()
+        .fold(0, |value, byte| (value << 8) | u64::from(*byte))
 }
 
 pub fn child_value(bytes: &[u8], parent: Element, id: u64) -> Option<u64> {
-    children(bytes, parent).into_iter().find(|element| element.id == id).map(|element| unsigned(bytes, element))
+    children(bytes, parent)
+        .into_iter()
+        .find(|element| element.id == id)
+        .map(|element| unsigned(bytes, element))
 }

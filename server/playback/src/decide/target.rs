@@ -16,7 +16,12 @@ pub fn video_target(video: &VideoStream, client: &ClientProfile, encoders: Encod
     let hdr = video.displayed_transfer().filter(|transfer| *transfer != Transfer::Sdr);
     let keeps_hdr = client.hdr && supports(&client.video_codecs, "hevc") && encoders.hevc_nvenc && !burns_in;
     let keep_hdr = hdr.filter(|_| keeps_hdr);
-    VideoTarget { width, height, keep_hdr, tonemap: video.is_hdr() && keep_hdr.is_none() }
+    VideoTarget {
+        width,
+        height,
+        keep_hdr,
+        tonemap: video.is_hdr() && keep_hdr.is_none(),
+    }
 }
 
 fn fit(video: &VideoStream, (max_width, max_height): (u32, u32)) -> (u32, u32) {

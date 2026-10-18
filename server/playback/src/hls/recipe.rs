@@ -14,7 +14,8 @@ const DEFAULT_FRAME_RATE: f64 = 24.0;
 const KEYFRAME_SEEK_OFFSET: f64 = 0.5;
 const KEYFRAME_SEEK_MARGIN: f64 = 0.04;
 const TIMELINE_OFFSET: f64 = 1.0;
-const FRAGMENTED_MP4: &str = "movflags=+frag_keyframe+empty_moov+default_base_moof+delay_moov+frag_discont+skip_trailer:use_editlist=0:avoid_negative_ts=disabled";
+const FRAGMENTED_MP4: &str =
+    "movflags=+frag_keyframe+empty_moov+default_base_moof+delay_moov+frag_discont+skip_trailer:use_editlist=0:avoid_negative_ts=disabled";
 
 #[derive(Clone, Debug)]
 enum Video {
@@ -33,11 +34,17 @@ pub struct Recipe {
 
 impl Recipe {
     pub fn new(input: SourceInput, media: &Media, decision: &Decision, keyframes: Option<Vec<f64>>, encoders: Encoders) -> AppResult<Self> {
-        let duration = media.duration.ok_or_else(|| AppError::new(StatusCode::UNPROCESSABLE_ENTITY, "The video has no known duration."))?;
+        let duration = media
+            .duration
+            .ok_or_else(|| AppError::new(StatusCode::UNPROCESSABLE_ENTITY, "The video has no known duration."))?;
         let (video, segments, keyframes) = match (decision.video, &media.video) {
             (Some(VideoPlan::Copy), Some(stream)) => {
                 let hevc = stream.codec == "hevc";
-                let video = Video::Copy { stream: stream.index, hevc, strip_dolby_vision: hevc && stream.dolby_vision.is_some() };
+                let video = Video::Copy {
+                    stream: stream.index,
+                    hevc,
+                    strip_dolby_vision: hevc && stream.dolby_vision.is_some(),
+                };
                 let segments = match &keyframes {
                     Some(keyframes) => keyframe_segments(keyframes, duration),
                     None => equal_segments(duration, SEGMENT_SECONDS),
@@ -47,18 +54,31 @@ impl Recipe {
             (Some(VideoPlan::Encode(target)), Some(stream)) => {
                 let frame_rate = stream.frame_rate.unwrap_or(DEFAULT_FRAME_RATE);
                 let gop = gop_frames(frame_rate);
-                let nvenc = if target.keep_hdr.is_some() { encoders.hevc_nvenc } else { encoders.h264_nvenc };
+                let nvenc = if target.keep_hdr.is_some() {
+                    encoders.hevc_nvenc
+                } else {
+                    encoders.h264_nvenc
+                };
                 let encode = Encode::new(stream, target, nvenc, gop, decision.burn_in);
                 (Some(Video::Encode(encode)), equal_segments(duration, f64::from(gop) / frame_rate), None)
             }
             _ => (None, equal_segments(duration, SEGMENT_SECONDS), None),
         };
-        Ok(Self { input, segments, keyframes, video, audio: decision.audio })
+        Ok(Self {
+            input,
+            segments,
+            keyframes,
+            video,
+            audio: decision.audio,
+        })
     }
 
     pub fn run_end(&self, first: usize) -> usize {
         let limit = self.segments[first].start + RUN_SECONDS;
-        let after = self.segments[first..].iter().position(|segment| segment.start >= limit).map_or(self.segments.len(), |offset| first + offset);
+        let after = self.segments[first..]
+            .iter()
+            .position(|segment| segment.start >= limit)
+            .map_or(self.segments.len(), |offset| first + offset);
         after.max(first + 1)
     }
 
@@ -80,10 +100,35 @@ impl Recipe {
         args.extend(strings(&["-i", &self.input.ffmpeg_input()]));
         args.extend(self.video_args());
         args.extend(self.audio_args());
-        args.extend(strings(&["-map_metadata", "-1", "-map_chapters", "-1", "-copyts", "-start_at_zero", "-avoid_negative_ts", "disabled", "-output_ts_offset", &seconds(TIMELINE_OFFSET), "-max_muxing_queue_size", "2048"]));
-        args.extend(strings(&["-f", "segment", "-segment_format", "mp4", "-segment_format_options", FRAGMENTED_MP4, "-segment_start_number", &first.to_string()]));
+        args.extend(strings(&[
+            "-map_metadata",
+            "-1",
+            "-map_chapters",
+            "-1",
+            "-copyts",
+            "-start_at_zero",
+            "-avoid_negative_ts",
+            "disabled",
+            "-output_ts_offset",
+            &seconds(TIMELINE_OFFSET),
+            "-max_muxing_queue_size",
+            "2048",
+        ]));
+        args.extend(strings(&[
+            "-f",
+            "segment",
+            "-segment_format",
+            "mp4",
+            "-segment_format_options",
+            FRAGMENTED_MP4,
+            "-segment_start_number",
+            &first.to_string(),
+        ]));
         let origin = self.segments[first].start;
-        let cuts: Vec<String> = self.segments[first + 1..end].iter().map(|segment| seconds(segment.start - origin)).collect();
+        let cuts: Vec<String> = self.segments[first + 1..end]
+            .iter()
+            .map(|segment| seconds(segment.start - origin))
+            .collect();
         if !cuts.is_empty() {
             args.extend(strings(&["-segment_times", &cuts.join(","), "-segment_time_delta", "0.05"]));
         }
@@ -93,7 +138,9 @@ impl Recipe {
 
     fn seek(&self, first: usize) -> f64 {
         let start = self.segments[first].start;
-        let Some(keyframes) = self.keyframes.as_ref().filter(|_| start > 0.0) else { return start };
+        let Some(keyframes) = self.keyframes.as_ref().filter(|_| start > 0.0) else {
+            return start;
+        };
         let next = keyframes.iter().find(|keyframe| **keyframe > start).copied().unwrap_or(f64::INFINITY);
         start + KEYFRAME_SEEK_OFFSET.min(next - start - KEYFRAME_SEEK_MARGIN).max(0.0)
     }
@@ -101,7 +148,11 @@ impl Recipe {
     fn video_args(&self) -> Vec<String> {
         match &self.video {
             None => Vec::new(),
-            Some(Video::Copy { stream, hevc, strip_dolby_vision }) => {
+            Some(Video::Copy {
+                stream,
+                hevc,
+                strip_dolby_vision,
+            }) => {
                 let mut args = strings(&["-map", &format!("0:{stream}"), "-c:v", "copy"]);
                 if *hevc {
                     args.extend(strings(&["-tag:v", HEVC_TAG]));

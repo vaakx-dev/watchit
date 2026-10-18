@@ -45,7 +45,12 @@ pub struct Output {
 
 pub async fn run(program: &PathBuf, args: &[&str]) -> AppResult<Output> {
     let mut command = Command::new(program);
-    command.args(args).stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped()).kill_on_drop(true);
+    command
+        .args(args)
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .kill_on_drop(true);
     #[cfg(windows)]
     command.creation_flags(NO_WINDOW);
     let output = timeout(WAIT, command.output())

@@ -49,7 +49,7 @@ pub fn from_flags(line: &str) -> Vec<String> {
 }
 
 pub fn is_flag_line(line: &str) -> bool {
-    line.split('/').map(str::trim).any(|part| {
-        FLAGS.iter().any(|(flag, _)| *flag == part) || matches!(part, "Multi Audio" | "Multi Subs" | "Dual Audio" | "Dubbed")
-    })
+    line.split('/')
+        .map(str::trim)
+        .any(|part| FLAGS.iter().any(|(flag, _)| *flag == part) || matches!(part, "Multi Audio" | "Multi Subs" | "Dual Audio" | "Dubbed"))
 }

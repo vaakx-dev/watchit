@@ -11,13 +11,21 @@ use crate::query::Params;
 pub async fn show(State(library): State<Library>, viewer: Viewer, params: Params) -> AppResult<Json<Rankings>> {
     let kind = params.kind()?;
     let catalog = library.catalog.clone();
-    library.db.run(move |conn| store::rankings(conn, &catalog, viewer.profile, kind)).await.map(Json)
+    library
+        .db
+        .run(move |conn| store::rankings(conn, &catalog, viewer.profile, kind))
+        .await
+        .map(Json)
 }
 
 pub async fn unrated(State(library): State<Library>, viewer: Viewer, params: Params) -> AppResult<Json<UnratedTitles>> {
     let kind = params.kind()?;
     let catalog = library.catalog.clone();
-    library.db.run(move |conn| store::unrated(conn, &catalog, viewer.profile, kind)).await.map(Json)
+    library
+        .db
+        .run(move |conn| store::unrated(conn, &catalog, viewer.profile, kind))
+        .await
+        .map(Json)
 }
 
 pub async fn place(

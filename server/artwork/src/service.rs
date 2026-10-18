@@ -3,8 +3,8 @@ use std::sync::Arc;
 
 use rusqlite::Connection;
 use serde::Serialize;
-use ts_rs::TS;
 use tokio::sync::broadcast;
+use ts_rs::TS;
 use watchit_core::{AppError, AppResult, Background, Context, Db};
 
 use crate::cache::{Cache, Cached, Fetched};
@@ -72,8 +72,18 @@ impl Artwork {
         let cache = Arc::new(Cache::new(db.clone(), folder, settings, used));
         let prefetch = Arc::new(Prefetch::new(cache.clone(), db.clone()));
         let background = context.background.clone();
-        let prefetching = ["WATCHIT_SYNC", "WATCHIT_ARTWORK"].iter().all(|name| std::env::var(name).map_or(true, |value| value != "off"));
-        let artwork = Self { inner: Arc::new(Inner { db, cache, prefetch, prefetching, background }) };
+        let prefetching = ["WATCHIT_SYNC", "WATCHIT_ARTWORK"]
+            .iter()
+            .all(|name| std::env::var(name).map_or(true, |value| value != "off"));
+        let artwork = Self {
+            inner: Arc::new(Inner {
+                db,
+                cache,
+                prefetch,
+                prefetching,
+                background,
+            }),
+        };
         artwork.start();
         Ok(artwork)
     }
@@ -94,7 +104,10 @@ impl Artwork {
             .into_iter()
             .filter_map(|record| record.fetched_at.map(|fetched_at| (record.key, fetched_at)))
             .collect();
-        Ok(ImageSet { versions, status: ArtworkStatus::default() })
+        Ok(ImageSet {
+            versions,
+            status: ArtworkStatus::default(),
+        })
     }
 
     pub fn lookup(&self, conn: &Connection, keys: &[ImageKey]) -> AppResult<ImageSet> {
@@ -118,9 +131,14 @@ impl Artwork {
         let error = stale.iter().find_map(|record| record.error.clone());
         let pending = active && !stale.is_empty();
         if active {
-            self.inner.prefetch.prioritise(stale.into_iter().filter(|record| record.retry_at <= now).map(|record| record.key));
+            self.inner
+                .prefetch
+                .prioritise(stale.into_iter().filter(|record| record.retry_at <= now).map(|record| record.key));
         }
-        Ok(ImageSet { versions, status: ArtworkStatus { pending, running, error } })
+        Ok(ImageSet {
+            versions,
+            status: ArtworkStatus { pending, running, error },
+        })
     }
 
     pub fn status(&self) -> ArtworkStatus {

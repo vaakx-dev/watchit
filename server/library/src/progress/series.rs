@@ -21,7 +21,13 @@ fn last_opened(conn: &Connection, profile: i64, series_id: &str) -> AppResult<Op
              WHERE e.profile_id = ?1 AND e.series_id = ?2 AND e.opened_at IS NOT NULL
              ORDER BY e.opened_at DESC LIMIT 1",
         )?
-        .query_row(params![profile, series_id], |row| Ok(Opened { id: row.get(0)?, opened_at: row.get(1)?, unfinished: row.get(2)? }))
+        .query_row(params![profile, series_id], |row| {
+            Ok(Opened {
+                id: row.get(0)?,
+                opened_at: row.get(1)?,
+                unfinished: row.get(2)?,
+            })
+        })
         .optional()?;
     Ok(found)
 }
@@ -30,7 +36,9 @@ fn furthest(conn: &Connection, profile: i64, series_id: &str, last_id: Option<&s
     let mut statement = conn.prepare_cached(
         "SELECT id, COALESCE(id = ?3, 0) FROM library_entries WHERE profile_id = ?1 AND series_id = ?2 AND (id = ?3 OR status = 'watched')",
     )?;
-    let rows = statement.query_map(params![profile, series_id, last_id], |row| Ok((row.get::<_, String>(0)?, row.get::<_, bool>(1)?)))?;
+    let rows = statement.query_map(params![profile, series_id, last_id], |row| {
+        Ok((row.get::<_, String>(0)?, row.get::<_, bool>(1)?))
+    })?;
     let mut best: Option<Position> = None;
     for row in rows {
         let (id, is_last) = row?;
@@ -61,5 +69,10 @@ pub fn series_progress(conn: &Connection, catalog: &Catalog, profile: i64, serie
     };
     let resume = next.as_ref().map(|next| get(conn, profile, &next.entry.id)).transpose()?.flatten();
     let opened_at = last.as_ref().and(opened.map(|opened| opened.opened_at));
-    Ok(SeriesProgress { last, next, resume, opened_at })
+    Ok(SeriesProgress {
+        last,
+        next,
+        resume,
+        opened_at,
+    })
 }

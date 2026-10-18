@@ -15,7 +15,11 @@ pub struct Viewer {
 
 impl Viewer {
     pub fn require_admin(&self) -> AppResult<()> {
-        if self.admin { Ok(()) } else { Err(AppError::forbidden("Only an admin can do that.")) }
+        if self.admin {
+            Ok(())
+        } else {
+            Err(AppError::forbidden("Only an admin can do that."))
+        }
     }
 }
 

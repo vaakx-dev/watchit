@@ -23,7 +23,16 @@ pub struct Encode {
 impl Encode {
     pub fn new(video: &VideoStream, target: VideoTarget, nvenc: bool, gop: u32, burn_in: Option<u32>) -> Self {
         let source_transfer = if video.dolby_vision.is_some() { Transfer::Pq } else { video.transfer };
-        Self { stream: video.index, target, nvenc, gpu_decode: nvenc && nvdec_decodes(video), ten_bit: video.bit_depth > 8, source_transfer, gop, burn_in }
+        Self {
+            stream: video.index,
+            target,
+            nvenc,
+            gpu_decode: nvenc && nvdec_decodes(video),
+            ten_bit: video.bit_depth > 8,
+            source_transfer,
+            gop,
+            burn_in,
+        }
     }
 
     pub fn input_args(&self) -> Vec<String> {
@@ -32,7 +41,16 @@ impl Encode {
             args.extend(strings(&["-init_hw_device", "cuda=cu:0", "-filter_hw_device", "cu"]));
         }
         if self.gpu_decode {
-            args.extend(strings(&["-hwaccel", "cuda", "-hwaccel_output_format", "cuda", "-hwaccel_flags", "+unsafe_output", "-threads", "1"]));
+            args.extend(strings(&[
+                "-hwaccel",
+                "cuda",
+                "-hwaccel_output_format",
+                "cuda",
+                "-hwaccel_flags",
+                "+unsafe_output",
+                "-threads",
+                "1",
+            ]));
         }
         args
     }
@@ -45,13 +63,21 @@ impl Encode {
     }
 
     fn gpu_graph(&self) -> String {
-        let VideoTarget { width, height, keep_hdr, tonemap } = self.target;
+        let VideoTarget {
+            width,
+            height,
+            keep_hdr,
+            tonemap,
+        } = self.target;
         let mut graph = format!("[0:{}]", self.stream);
         if !self.gpu_decode {
             graph += &format!("format={},hwupload,", if self.ten_bit { "p010le" } else { "nv12" });
         }
         if tonemap {
-            graph += &format!("setparams=color_primaries=bt2020:color_trc={}:colorspace=bt2020nc,scale_cuda=w={width}:h={height},{TONEMAP_CUDA}", trc(self.source_transfer));
+            graph += &format!(
+                "setparams=color_primaries=bt2020:color_trc={}:colorspace=bt2020nc,scale_cuda=w={width}:h={height},{TONEMAP_CUDA}",
+                trc(self.source_transfer)
+            );
         } else {
             let format = if keep_hdr.is_some() { "p010le" } else { "yuv420p" };
             graph += &format!("scale_cuda=w={width}:h={height}:format={format}");
@@ -86,9 +112,29 @@ impl Encode {
         let gop_args = ["-g:v:0", &gop, "-keyint_min:v:0", &gop];
         let mut args = match (self.nvenc, self.target.keep_hdr) {
             (true, Some(transfer)) => {
-                let mut args = strings(&["-c:v", "hevc_nvenc", "-preset", "p4", "-profile:v", "main10", "-tag:v", HEVC_TAG, "-spatial-aq", "1", "-aq-strength", "15"]);
+                let mut args = strings(&[
+                    "-c:v",
+                    "hevc_nvenc",
+                    "-preset",
+                    "p4",
+                    "-profile:v",
+                    "main10",
+                    "-tag:v",
+                    HEVC_TAG,
+                    "-spatial-aq",
+                    "1",
+                    "-aq-strength",
+                    "15",
+                ]);
                 args.extend(bitrate_args(h264_bitrate * 2 / 3));
-                args.extend(strings(&["-color_primaries", "bt2020", "-color_trc", trc(transfer), "-colorspace", "bt2020nc"]));
+                args.extend(strings(&[
+                    "-color_primaries",
+                    "bt2020",
+                    "-color_trc",
+                    trc(transfer),
+                    "-colorspace",
+                    "bt2020nc",
+                ]));
                 args
             }
             (true, None) => {
@@ -97,8 +143,24 @@ impl Encode {
                 args
             }
             (false, _) => {
-                let mut args = strings(&["-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-profile:v", "high", "-sc_threshold:v:0", "0"]);
-                args.extend(strings(&["-maxrate", &h264_bitrate.to_string(), "-bufsize", &(h264_bitrate * 2).to_string()]));
+                let mut args = strings(&[
+                    "-c:v",
+                    "libx264",
+                    "-preset",
+                    "veryfast",
+                    "-crf",
+                    "23",
+                    "-profile:v",
+                    "high",
+                    "-sc_threshold:v:0",
+                    "0",
+                ]);
+                args.extend(strings(&[
+                    "-maxrate",
+                    &h264_bitrate.to_string(),
+                    "-bufsize",
+                    &(h264_bitrate * 2).to_string(),
+                ]));
                 args
             }
         };
@@ -130,7 +192,14 @@ fn h264_bitrate(width: u32, height: u32) -> u64 {
 }
 
 fn bitrate_args(bitrate: u64) -> Vec<String> {
-    strings(&["-b:v", &bitrate.to_string(), "-maxrate", &bitrate.to_string(), "-bufsize", &(bitrate * 2).to_string()])
+    strings(&[
+        "-b:v",
+        &bitrate.to_string(),
+        "-maxrate",
+        &bitrate.to_string(),
+        "-bufsize",
+        &(bitrate * 2).to_string(),
+    ])
 }
 
 pub fn strings(args: &[&str]) -> Vec<String> {

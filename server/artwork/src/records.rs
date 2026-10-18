@@ -74,10 +74,8 @@ pub(crate) fn many(conn: &Connection, keys: &[ImageKey]) -> AppResult<Vec<ImageR
 }
 
 pub(crate) fn stored(conn: &Connection, key: &ImageKey, bytes: i64, fetched_at: i64, accessed_at: i64) -> AppResult<()> {
-    conn.prepare_cached(
-        "UPDATE images SET bytes = ?2, fetched_at = ?3, accessed_at = ?4, retry_at = 0, failures = 0, error = NULL WHERE key = ?1",
-    )?
-    .execute(params![key.as_str(), bytes, fetched_at, accessed_at])?;
+    conn.prepare_cached("UPDATE images SET bytes = ?2, fetched_at = ?3, accessed_at = ?4, retry_at = 0, failures = 0, error = NULL WHERE key = ?1")?
+        .execute(params![key.as_str(), bytes, fetched_at, accessed_at])?;
     Ok(())
 }
 
@@ -90,7 +88,8 @@ pub(crate) fn clear(conn: &Connection, keys: &[ImageKey]) -> AppResult<()> {
 }
 
 pub(crate) fn touch(conn: &Connection, key: &ImageKey, at: i64) -> AppResult<()> {
-    conn.prepare_cached("UPDATE images SET accessed_at = ?2 WHERE key = ?1")?.execute(params![key.as_str(), at])?;
+    conn.prepare_cached("UPDATE images SET accessed_at = ?2 WHERE key = ?1")?
+        .execute(params![key.as_str(), at])?;
     Ok(())
 }
 
@@ -101,8 +100,7 @@ pub(crate) fn failed(conn: &Connection, key: &ImageKey, retry_at: i64, error: &s
 }
 
 pub(crate) fn least_recent(conn: &Connection, limit: usize) -> AppResult<Vec<(ImageKey, i64)>> {
-    let mut statement =
-        conn.prepare_cached("SELECT key, bytes FROM images WHERE fetched_at IS NOT NULL ORDER BY accessed_at, key LIMIT ?1")?;
+    let mut statement = conn.prepare_cached("SELECT key, bytes FROM images WHERE fetched_at IS NOT NULL ORDER BY accessed_at, key LIMIT ?1")?;
     let rows = statement.query_map([limit as i64], |row| {
         let key: String = row.get(0)?;
         Ok((ImageKey::parse(&key), row.get::<_, i64>(1)?))

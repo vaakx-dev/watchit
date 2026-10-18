@@ -29,7 +29,11 @@ fn decode(bytes: &[u8], format: ImageFormat) -> Result<DynamicImage, ImageFailur
     let orientation = decoder.orientation().unwrap_or(Orientation::NoTransforms);
     let mut image = DynamicImage::from_decoder(decoder).map_err(|error| ImageFailure::rejected(format!("Image could not be decoded: {error}")))?;
     image.apply_orientation(orientation);
-    Ok(if image.color().has_alpha() { DynamicImage::ImageRgba8(image.into_rgba8()) } else { DynamicImage::ImageRgb8(image.into_rgb8()) })
+    Ok(if image.color().has_alpha() {
+        DynamicImage::ImageRgba8(image.into_rgba8())
+    } else {
+        DynamicImage::ImageRgb8(image.into_rgb8())
+    })
 }
 
 fn fitted(width: u32, height: u32) -> (u32, u32) {
@@ -47,7 +51,9 @@ fn resize(image: &DynamicImage) -> Result<(Vec<u8>, u32, u32), ImageFailure> {
     if (target_width, target_height) == (width, height) {
         return Ok((image.as_bytes().to_vec(), width, height));
     }
-    let pixel_type = image.pixel_type().ok_or_else(|| ImageFailure::rejected("Unsupported image pixel layout"))?;
+    let pixel_type = image
+        .pixel_type()
+        .ok_or_else(|| ImageFailure::rejected("Unsupported image pixel layout"))?;
     let mut target = Image::new(target_width, target_height, pixel_type);
     Resizer::new()
         .resize(image, &mut target, None)

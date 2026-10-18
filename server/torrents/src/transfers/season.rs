@@ -28,10 +28,19 @@ impl Transfers {
         let TitleId::Title(series) = TitleId::parse(&request.series)? else {
             return Err(AppError::bad_request("A season download needs a series id."));
         };
-        let SeasonRequest { season, notify_when_ready, .. } = request;
+        let SeasonRequest {
+            season, notify_when_ready, ..
+        } = request;
         let pack = |info_hash: String| {
-            let pick = Pick { title_id: series.clone(), choice: Choice::Season { season } };
-            async move { self.add(&info_hash, pick, Kind::Download, notify_when_ready).await.map(|transfer| vec![transfer]) }
+            let pick = Pick {
+                title_id: series.clone(),
+                choice: Choice::Season { season },
+            };
+            async move {
+                self.add(&info_hash, pick, Kind::Download, notify_when_ready)
+                    .await
+                    .map(|transfer| vec![transfer])
+            }
         };
         if let Some(info_hash) = request.info_hash {
             return pack(info_hash).await;
@@ -43,12 +52,18 @@ impl Transfers {
             return pack(best.result.info_hash.clone()).await;
         }
         if episodes.is_empty() {
-            return Err(AppError::not_found("No season pack was found and the season's episode list is unavailable."));
+            return Err(AppError::not_found(
+                "No season pack was found and the season's episode list is unavailable.",
+            ));
         }
         let mut added = Vec::new();
         for number in episodes {
             let title = TitleId::episode(&series, season, number);
-            let results = if number == first { found.clone() } else { self.search.ranked(&title, quality).await?.candidates };
+            let results = if number == first {
+                found.clone()
+            } else {
+                self.search.ranked(&title, quality).await?.candidates
+            };
             let Some(best) = results.first() else { continue };
             let pick = Pick::files_or(&title.to_string(), best.result.file_index.map(|index| vec![index]), Choice::Main);
             added.push(self.add(&best.result.info_hash, pick, Kind::Download, notify_when_ready).await?);

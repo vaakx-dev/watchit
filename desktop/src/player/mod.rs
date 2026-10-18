@@ -9,7 +9,6 @@ use std::sync::{Arc, Mutex};
 use libmpv2::{Format, Mpv};
 use tauri::Webview;
 
-
 pub struct Player {
     mpv: Arc<Mpv>,
     observe: Mutex<Sender<(String, Format)>>,
@@ -22,7 +21,10 @@ impl Player {
         let (observe, observe_rx) = channel();
         events::spawn(client, observe_rx, webview);
         display::spawn_output_thread(Arc::clone(&mpv), wid);
-        Self { mpv, observe: Mutex::new(observe) }
+        Self {
+            mpv,
+            observe: Mutex::new(observe),
+        }
     }
 
     pub fn pause(&self) {

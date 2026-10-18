@@ -73,7 +73,10 @@ fn classify(meta: &Meta, labels: &[String]) -> Classification {
     let ids: Vec<String> = labels.iter().map(|label| genre_id(label)).collect();
     let animation = ids.iter().any(|id| id == "animation");
     let anime = ids.iter().any(|id| id == "anime") || (animation && meta.primary_country().as_deref() == Some("japan"));
-    Classification { anime, known: anime || !animation || meta.fields.has("country") }
+    Classification {
+        anime,
+        known: anime || !animation || meta.fields.has("country"),
+    }
 }
 
 pub(crate) fn lacks(meta: &Meta, anime: bool, genres: bool) -> bool {
@@ -120,7 +123,10 @@ pub(crate) fn apply(previous: Option<Record>, meta: &Meta) -> Option<Record> {
         record.detail.cast = names(fields, "cast");
     }
     if fields.has("moviedb_id") {
-        record.detail.tmdb_id = fields.number("moviedb_id").filter(|id| id.fract() == 0.0 && *id > 0.0).map(|id| id as i64);
+        record.detail.tmdb_id = fields
+            .number("moviedb_id")
+            .filter(|id| id.fract() == 0.0 && *id > 0.0)
+            .map(|id| id as i64);
     }
     if fields.has("poster") {
         record.detail.poster = fields.text("poster").and_then(|url| approved_url(url).ok());
@@ -165,7 +171,10 @@ fn episode(video: &Fields, parent: &Record) -> Option<Record> {
     if video.text("id").is_some_and(|value| !value.is_empty() && value != id) {
         return None;
     }
-    let title = video.text("name").or_else(|| video.text("title")).map_or_else(|| format!("Episode {number}"), str::to_owned);
+    let title = video
+        .text("name")
+        .or_else(|| video.text("title"))
+        .map_or_else(|| format!("Episode {number}"), str::to_owned);
     Some(Record {
         id,
         kind: MediaKind::Episode,
@@ -178,7 +187,11 @@ fn episode(video: &Fields, parent: &Record) -> Option<Record> {
         season: Some(season),
         episode: Some(number),
         detail: Detail {
-            synopsis: video.text("description").or_else(|| video.text("overview")).unwrap_or_default().to_owned(),
+            synopsis: video
+                .text("description")
+                .or_else(|| video.text("overview"))
+                .unwrap_or_default()
+                .to_owned(),
             poster: video.text("thumbnail").and_then(|url| approved_url(url).ok()),
             source_url: parent.detail.source_url.clone(),
             series: Some(SeriesRef {

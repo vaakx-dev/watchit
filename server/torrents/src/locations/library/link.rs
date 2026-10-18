@@ -23,7 +23,10 @@ pub fn free_name(base: &Path, suffix: &str, labels: &[String]) -> PathBuf {
             return labelled;
         }
     }
-    (2..).map(|copy| with_extension(base, &format!(".{copy}{suffix}"))).find(|path| !path.exists()).expect("a free name")
+    (2..)
+        .map(|copy| with_extension(base, &format!(".{copy}{suffix}")))
+        .find(|path| !path.exists())
+        .expect("a free name")
 }
 
 pub fn place(file: &Placement) -> io::Result<()> {
@@ -40,8 +43,14 @@ pub fn unplace(path: &Path, roots: &[PathBuf]) {
     if std::fs::remove_file(path).is_err() {
         return;
     }
-    let Some(root) = roots.iter().find(|root| path.starts_with(root)) else { return };
-    for folder in path.ancestors().skip(1).take_while(|folder| *folder != root.as_path() && folder.starts_with(root)) {
+    let Some(root) = roots.iter().find(|root| path.starts_with(root)) else {
+        return;
+    };
+    for folder in path
+        .ancestors()
+        .skip(1)
+        .take_while(|folder| *folder != root.as_path() && folder.starts_with(root))
+    {
         if std::fs::remove_dir(folder).is_err() {
             break;
         }

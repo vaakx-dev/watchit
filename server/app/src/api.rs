@@ -27,7 +27,10 @@ async fn not_found() -> AppError {
 
 pub fn router(context: &Context, listen: SocketAddr, ffmpeg_dir: &Path) -> AppResult<Router> {
     let profiles = Profiles::open(context)?;
-    let auth = Auth { profiles: profiles.clone(), tokens: context.tokens.clone() };
+    let auth = Auth {
+        profiles: profiles.clone(),
+        tokens: context.tokens.clone(),
+    };
     let artwork = Artwork::open(context)?;
     let catalog = Catalog::open(context, artwork.clone())?;
     let library = Library::open(context, catalog.clone())?;
@@ -49,7 +52,10 @@ pub fn router(context: &Context, listen: SocketAddr, ffmpeg_dir: &Path) -> AppRe
         .merge(signed_in)
         .route("/api", any(not_found))
         .route("/api/{*path}", any(not_found))
-        .layer(SetResponseHeaderLayer::if_not_present(header::CACHE_CONTROL, HeaderValue::from_static("no-store")))
+        .layer(SetResponseHeaderLayer::if_not_present(
+            header::CACHE_CONTROL,
+            HeaderValue::from_static("no-store"),
+        ))
         .layer(middleware::from_fn_with_state(auth, authenticate))
         .layer(middleware::from_fn(reject_cross_origin_writes));
     Ok(router)

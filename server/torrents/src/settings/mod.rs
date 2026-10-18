@@ -61,7 +61,13 @@ impl Settings {
         if self.max_active == 0 {
             return Err(AppError::bad_request("At least one download must be allowed to run."));
         }
-        let rates = [self.max_download_bps, self.max_upload_bps, self.alt_download_bps, self.alt_upload_bps, self.while_watching_bps];
+        let rates = [
+            self.max_download_bps,
+            self.max_upload_bps,
+            self.alt_download_bps,
+            self.alt_upload_bps,
+            self.while_watching_bps,
+        ];
         if rates.contains(&Some(0)) {
             return Err(AppError::bad_request("Rate limits must be above zero, or empty for no limit."));
         }

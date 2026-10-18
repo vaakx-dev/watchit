@@ -19,7 +19,11 @@ pub struct Readiness {
 }
 
 impl Readiness {
-    pub const UNKNOWN: Self = Self { state: Verdict::Unknown, ready_in_seconds: None, bitrate_bps: None };
+    pub const UNKNOWN: Self = Self {
+        state: Verdict::Unknown,
+        ready_in_seconds: None,
+        bitrate_bps: None,
+    };
 }
 
 impl Default for Readiness {

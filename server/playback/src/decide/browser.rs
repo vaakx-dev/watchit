@@ -25,7 +25,11 @@ fn container_names(media: &Media, audio: Option<&AudioStream>) -> Vec<String> {
     if !media.is_matroska() {
         return media.formats.clone();
     }
-    let codecs = media.video.iter().map(|video| video.codec.as_str()).chain(audio.map(|audio| audio.codec.as_str()));
+    let codecs = media
+        .video
+        .iter()
+        .map(|video| video.codec.as_str())
+        .chain(audio.map(|audio| audio.codec.as_str()));
     let webm = codecs.into_iter().all(|codec| WEBM_CODECS.contains(&codec));
     let mut names = vec!["mkv".to_owned(), "matroska".to_owned()];
     if webm {

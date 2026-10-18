@@ -39,18 +39,25 @@ struct BehaviorHints {
 }
 
 static SEEDERS: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"👤\s*(\d+)").expect("valid seeders regex"));
-static SIZE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"💾\s*([\d.]+)\s*(B|kB|KB|MB|GB|TB)\b").expect("valid size regex"));
+static SIZE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"💾\s*([\d.]+)\s*(B|kB|KB|MB|GB|TB)\b").expect("valid size regex"));
 static SITE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"⚙\u{FE0F}?\s*(.+?)\s*$").expect("valid site regex"));
 
 pub async fn streams(http: &reqwest::Client, title: &TitleId) -> AppResult<Vec<Candidate>> {
     let kind = if title.is_episode() { "series" } else { "movie" };
     let url = format!("{ADDON}/stream/{kind}/{title}.json");
-    let response = http.get(url).timeout(TIMEOUT).send().await.map_err(|_| unavailable("Torrent search is unavailable."))?;
+    let response = http
+        .get(url)
+        .timeout(TIMEOUT)
+        .send()
+        .await
+        .map_err(|_| unavailable("Torrent search is unavailable."))?;
     if !response.status().is_success() {
         return Err(unavailable(&format!("Torrent search failed with HTTP {}.", response.status().as_u16())));
     }
-    let body: Response = response.json().await.map_err(|_| unavailable("Torrent search returned an unreadable response."))?;
+    let body: Response = response
+        .json()
+        .await
+        .map_err(|_| unavailable("Torrent search returned an unreadable response."))?;
     Ok(body.streams.into_iter().filter_map(|stream| candidate(stream, title)).collect())
 }
 
@@ -64,14 +71,23 @@ fn candidate(stream: Stream, title: &TitleId) -> Option<Candidate> {
         return None;
     }
     let lines: Vec<&str> = stream.title.lines().map(str::trim).collect();
-    let stats_at = lines.iter().position(|line| line.contains('👤') || line.contains('💾') || line.contains('⚙'));
+    let stats_at = lines
+        .iter()
+        .position(|line| line.contains('👤') || line.contains('💾') || line.contains('⚙'));
     let stats = stats_at.map_or("", |at| lines[at]);
-    let language_line = stats_at.and_then(|at| lines.get(at + 1)).copied().filter(|line| languages::is_flag_line(line));
+    let language_line = stats_at
+        .and_then(|at| lines.get(at + 1))
+        .copied()
+        .filter(|line| languages::is_flag_line(line));
     let torrent_name = lines.first().copied().unwrap_or_default().to_owned();
     let file_path = stats_at.filter(|at| *at > 1).map(|at| lines[1..at].join(" "));
     let filename = stream.behavior_hints.and_then(|hints| hints.filename);
     let label = stream.name.lines().skip(1).collect::<Vec<_>>().join(" ");
-    let text = [Some(torrent_name.as_str()), file_path.as_deref(), filename.as_deref()].into_iter().flatten().collect::<Vec<_>>().join(" ");
+    let text = [Some(torrent_name.as_str()), file_path.as_deref(), filename.as_deref()]
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>()
+        .join(" ");
 
     let resolution = label_resolution(&label).or_else(|| video::resolution(&text));
     let hdr = merged_hdr(&label, &text);
@@ -86,7 +102,12 @@ fn candidate(stream: Stream, title: &TitleId) -> Option<Candidate> {
         TitleId::Episode { season, .. } => episode::coverage(&torrent_name).is_pack_for(*season),
         TitleId::Title(_) => false,
     };
-    let trackers = stream.sources.iter().filter_map(|source| source.strip_prefix("tracker:")).map(str::to_owned).collect();
+    let trackers = stream
+        .sources
+        .iter()
+        .filter_map(|source| source.strip_prefix("tracker:"))
+        .map(str::to_owned)
+        .collect();
     Some(Candidate {
         result: TorrentResult {
             info_hash,

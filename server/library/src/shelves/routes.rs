@@ -21,7 +21,14 @@ pub async fn page(State(library): State<Library>, viewer: Viewer, params: Params
             let counts = counts(conn, viewer.profile, kind)?;
             let (rows, has_next) = shelf_page(conn, viewer.profile, shelf, kind, sort, number)?;
             let (items, artwork_status) = build_items(conn, &catalog, viewer.profile, &rows)?;
-            Ok(LibraryPage { items, page: number, has_next, total: shelf.total(&counts), counts, artwork_status })
+            Ok(LibraryPage {
+                items,
+                page: number,
+                has_next,
+                total: shelf.total(&counts),
+                counts,
+                artwork_status,
+            })
         })
         .await?;
     Ok(Json(page))
@@ -39,7 +46,12 @@ pub async fn continuing(State(library): State<Library>, viewer: Viewer, params: 
             for item in items.iter().filter(|item| item.title.kind == MediaKind::Series) {
                 catalog.episodes_pending(conn, &item.title.id)?;
             }
-            Ok(ContinuePage { items, page: number, has_next, artwork_status })
+            Ok(ContinuePage {
+                items,
+                page: number,
+                has_next,
+                artwork_status,
+            })
         })
         .await?;
     Ok(Json(page))

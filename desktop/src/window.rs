@@ -46,4 +46,3 @@ pub fn on_event(window: &Window, event: &WindowEvent) {
         }
     }
 }
-

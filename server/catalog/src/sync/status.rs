@@ -28,12 +28,19 @@ impl Sync {
     }
 
     fn key_status(&self, key: Option<&str>) -> ImportStatus {
-        self.inner.queue.lock().unwrap().status(key, self.inner.enabled, self.imported(), self.inner.metadata.ms())
+        self.inner
+            .queue
+            .lock()
+            .unwrap()
+            .status(key, self.inner.enabled, self.imported(), self.inner.metadata.ms())
     }
 
     fn browse_status(&self, empty: bool, key: Option<&str>) -> ImportStatus {
         let status = self.key_status(key);
-        ImportStatus { pending: empty && status.pending, ..status }
+        ImportStatus {
+            pending: empty && status.pending,
+            ..status
+        }
     }
 
     pub fn status(&self) -> ImportStatus {
@@ -41,8 +48,21 @@ impl Sync {
     }
 
     pub fn discovery_job(kind: CatalogKind) -> Job {
-        let query = SourceQuery { kind, query: String::new(), genre: String::new() };
-        Job::new(format!("discover:{}", kind.as_str()), Work::Catalog { query, discovery: true, previous: Vec::new(), details: Default::default(), has_next: false })
+        let query = SourceQuery {
+            kind,
+            query: String::new(),
+            genre: String::new(),
+        };
+        Job::new(
+            format!("discover:{}", kind.as_str()),
+            Work::Catalog {
+                query,
+                discovery: true,
+                previous: Vec::new(),
+                details: Default::default(),
+                has_next: false,
+            },
+        )
     }
 
     pub fn trending_job(kind: CatalogKind) -> Job {
@@ -60,9 +80,19 @@ impl Sync {
             self.ensure(conn, job, if empty { Priority::Visible } else { Priority::Crawl })?;
             return Ok(self.browse_status(empty, Some(&key)));
         }
-        let source = SourceQuery { kind: query.kind, query: text.to_owned(), genre: query.genre.clone() };
+        let source = SourceQuery {
+            kind: query.kind,
+            query: text.to_owned(),
+            genre: query.genre.clone(),
+        };
         let key = format!("search:{}", serde_json::json!([source.kind.as_str(), source.query, source.genre]));
-        let work = Work::Catalog { query: source, discovery: false, previous: Vec::new(), details: Default::default(), has_next: false };
+        let work = Work::Catalog {
+            query: source,
+            discovery: false,
+            previous: Vec::new(),
+            details: Default::default(),
+            has_next: false,
+        };
         self.ensure(conn, Job::new(key.clone(), work), Priority::Visible)?;
         Ok(self.key_status(Some(&key)))
     }
@@ -75,7 +105,10 @@ impl Sync {
     }
 
     fn import_title(&self, conn: &Connection, id: &str, hint: Option<MediaKind>, priority: Priority) -> AppResult<ImportStatus> {
-        let work = Work::Title { id: id.to_owned(), kind: kind_of(conn, id)?.or(hint) };
+        let work = Work::Title {
+            id: id.to_owned(),
+            kind: kind_of(conn, id)?.or(hint),
+        };
         self.request(conn, format!("title:{id}"), id, work, priority, false)
     }
 
@@ -97,7 +130,11 @@ impl Sync {
 
     pub fn titles(&self, ids: &[String]) -> ImportStatus {
         let keys: Vec<String> = ids.iter().map(|id| format!("title:{id}")).collect();
-        self.inner.queue.lock().unwrap().group_status(&keys, self.inner.enabled, self.imported(), self.inner.metadata.ms())
+        self.inner
+            .queue
+            .lock()
+            .unwrap()
+            .group_status(&keys, self.inner.enabled, self.imported(), self.inner.metadata.ms())
     }
 
     pub fn trending(&self, kind: CatalogKind) -> ImportStatus {
@@ -105,6 +142,10 @@ impl Sync {
             CatalogKind::All => vec!["trending:movie".into(), "trending:series".into()],
             other => vec![format!("trending:{}", other.as_str())],
         };
-        self.inner.queue.lock().unwrap().group_status(&keys, self.inner.enabled, self.imported(), self.inner.metadata.ms())
+        self.inner
+            .queue
+            .lock()
+            .unwrap()
+            .group_status(&keys, self.inner.enabled, self.imported(), self.inner.metadata.ms())
     }
 }

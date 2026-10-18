@@ -36,15 +36,31 @@ pub(crate) fn page(conn: &Connection, artwork: &Artwork, series_id: &str, page: 
 pub(crate) fn position(conn: &Connection, id: &str) -> AppResult<Option<Position>> {
     Ok(conn
         .prepare_cached("SELECT series_id, season, episode FROM titles WHERE id = ?1 AND kind = 'episode'")?
-        .query_row([id], |row| Ok((row.get::<_, Option<String>>(0)?, row.get::<_, Option<i64>>(1)?, row.get::<_, Option<i64>>(2)?)))
+        .query_row([id], |row| {
+            Ok((
+                row.get::<_, Option<String>>(0)?,
+                row.get::<_, Option<i64>>(1)?,
+                row.get::<_, Option<i64>>(2)?,
+            ))
+        })
         .optional()?
-        .and_then(|(series_id, season, episode)| Some(Position { series_id: series_id?, season: season?, episode: episode?, id: id.to_owned() })))
+        .and_then(|(series_id, season, episode)| {
+            Some(Position {
+                series_id: series_id?,
+                season: season?,
+                episode: episode?,
+                id: id.to_owned(),
+            })
+        }))
 }
 
 pub(crate) fn neighbour(conn: &Connection, at: &Position, later: bool) -> AppResult<Option<EntryRow>> {
     let (comparison, order) = if later { (">", RANK) } else { ("<", RANK_DESC) };
     let sql = format!("SELECT {ENTRY_COLUMNS} {EPISODES} AND {NUMBERED} AND ({RANK}) {comparison} (?2, ?3, ?4) ORDER BY {order} LIMIT 1");
-    Ok(conn.prepare_cached(&sql)?.query_row(params![at.series_id, at.season, at.episode, at.id], EntryRow::read).optional()?)
+    Ok(conn
+        .prepare_cached(&sql)?
+        .query_row(params![at.series_id, at.season, at.episode, at.id], EntryRow::read)
+        .optional()?)
 }
 
 pub(crate) fn first(conn: &Connection, series_id: &str) -> AppResult<Option<EntryRow>> {
@@ -80,19 +96,25 @@ pub(crate) fn navigation(
             let sql = format!("SELECT COUNT(*) {EPISODES} AND titles.season = ?2 AND titles.episode IS NOT NULL AND ({RANK}) <= (?3, ?4, ?5)");
             let rank: i64 = conn
                 .prepare_cached(&sql)?
-                .query_row(params![current.series_id, selected, current.season, current.episode, current.id], |row| row.get(0))?;
+                .query_row(params![current.series_id, selected, current.season, current.episode, current.id], |row| {
+                    row.get(0)
+                })?;
             u32::try_from((rank.max(1) + PAGE_SIZE as i64 - 1) / PAGE_SIZE as i64).unwrap_or(1)
         }
         None => 1,
     };
     let sql = format!("SELECT {ENTRY_COLUMNS} {EPISODES} AND titles.season = ?2 AND titles.episode IS NOT NULL ORDER BY {RANK} LIMIT ?3 OFFSET ?4");
-    let (rows, has_next) =
-        page_rows(&mut *conn.prepare_cached(&sql)?, params![current.series_id, selected, PAGE_SIZE as i64 + 1, offset(selected_page)])?;
+    let (rows, has_next) = page_rows(
+        &mut *conn.prepare_cached(&sql)?,
+        params![current.series_id, selected, PAGE_SIZE as i64 + 1, offset(selected_page)],
+    )?;
     let previous = neighbour(conn, &current, false)?;
     let next = neighbour(conn, &current, true)?;
     let sql = format!("SELECT DISTINCT titles.season {EPISODES} AND {NUMBERED} ORDER BY titles.season");
     let mut statement = conn.prepare_cached(&sql)?;
-    let seasons = statement.query_map([&current.series_id], |row| row.get(0))?.collect::<rusqlite::Result<Vec<i64>>>()?;
+    let seasons = statement
+        .query_map([&current.series_id], |row| row.get(0))?
+        .collect::<rusqlite::Result<Vec<i64>>>()?;
     let images = images(conn, artwork, rows.iter().chain(previous.iter()).chain(next.iter()))?;
     Ok(Some(EpisodeNavigation {
         page: EpisodePage {

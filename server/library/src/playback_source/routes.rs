@@ -17,6 +17,9 @@ pub async fn update(
     let target = series_of(&id).to_owned();
     let source = patch.source;
     let saved = source.clone();
-    library.db.run(move |conn| store::put(conn, viewer.profile, &id, saved.as_deref())).await?;
+    library
+        .db
+        .run(move |conn| store::put(conn, viewer.profile, &id, saved.as_deref()))
+        .await?;
     Ok(Json(PlaybackPreference { id: target, source }))
 }

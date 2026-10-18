@@ -20,7 +20,10 @@ pub(crate) struct Providers {
 
 impl Providers {
     pub fn new(file: PathBuf) -> Self {
-        Self { file, loaded: Mutex::new(None) }
+        Self {
+            file,
+            loaded: Mutex::new(None),
+        }
     }
 
     pub fn ids(&self, id: &str) -> AppResult<Option<ProviderIds>> {
@@ -35,12 +38,18 @@ impl Providers {
             let mappings = serde_json::from_str(&text).map_err(|error| AppError::internal(format!("Invalid providers.json: {error}")))?;
             *loaded = Some((modified, mappings));
         }
-        let Some(value) = loaded.as_ref().and_then(|(_, mappings)| mappings.get(id)).and_then(|mapping| mapping.one_anime.as_ref()) else {
+        let Some(value) = loaded
+            .as_ref()
+            .and_then(|(_, mappings)| mappings.get(id))
+            .and_then(|mapping| mapping.one_anime.as_ref())
+        else {
             return Ok(None);
         };
         match value.as_str() {
             Some(one_anime) if one_anime.len() == 32 && one_anime.bytes().all(|byte| matches!(byte, b'0'..=b'9' | b'a'..=b'f')) => {
-                Ok(Some(ProviderIds { one_anime: one_anime.to_owned() }))
+                Ok(Some(ProviderIds {
+                    one_anime: one_anime.to_owned(),
+                }))
             }
             _ => Err(AppError::internal(format!("Invalid 1Anime mapping for {id} in providers.json."))),
         }

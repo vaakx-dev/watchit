@@ -14,9 +14,8 @@ pub struct Db {
 impl Db {
     pub fn open(file: &Path) -> Result<Self, AppError> {
         Connection::open(file)?.execute_batch("PRAGMA journal_mode = WAL;")?;
-        let manager = SqliteConnectionManager::file(file).with_init(|conn| {
-            conn.execute_batch("PRAGMA busy_timeout = 5000; PRAGMA synchronous = NORMAL; PRAGMA foreign_keys = ON;")
-        });
+        let manager = SqliteConnectionManager::file(file)
+            .with_init(|conn| conn.execute_batch("PRAGMA busy_timeout = 5000; PRAGMA synchronous = NORMAL; PRAGMA foreign_keys = ON;"));
         let pool = Pool::builder().max_size(16).build(manager).map_err(AppError::internal)?;
         Ok(Self { pool })
     }

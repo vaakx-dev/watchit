@@ -50,12 +50,24 @@ impl Catalog {
         sync.start(&context.background);
         franchises.start(&context.background);
         let providers = Providers::new(context.paths.root().join("providers.json"));
-        let inner = Inner { db, artwork, sync, franchises, facets, metadata, providers, personal: OnceLock::new() };
+        let inner = Inner {
+            db,
+            artwork,
+            sync,
+            franchises,
+            facets,
+            metadata,
+            providers,
+            personal: OnceLock::new(),
+        };
         Ok(Self { inner: Arc::new(inner) })
     }
 
     pub fn set_personal(&self, personal: Arc<dyn Personal>) -> AppResult<()> {
-        self.inner.personal.set(personal).map_err(|_| AppError::internal("personal data provider is already set"))
+        self.inner
+            .personal
+            .set(personal)
+            .map_err(|_| AppError::internal("personal data provider is already set"))
     }
 
     pub(crate) fn personal(&self) -> Option<&Arc<dyn Personal>> {
@@ -81,7 +93,12 @@ impl Catalog {
     pub fn next_episode(&self, conn: &Connection, series_id: &str, after: Option<(i64, i64, &str)>) -> AppResult<Option<EpisodeEntry>> {
         let row = match after {
             Some((season, episode, id)) => {
-                let at = episodes::Position { series_id: series_id.to_owned(), season, episode, id: id.to_owned() };
+                let at = episodes::Position {
+                    series_id: series_id.to_owned(),
+                    season,
+                    episode,
+                    id: id.to_owned(),
+                };
                 episodes::neighbour(conn, &at, true)?
             }
             None => episodes::first(conn, series_id)?,
@@ -117,9 +134,18 @@ impl Catalog {
 
     pub(crate) fn default_extras(&self, conn: &Connection, series_id: Option<&str>) -> AppResult<TitleExtras> {
         let progress = match series_id {
-            Some(series_id) => Some(SeriesProgress { last: None, next: self.next_episode(conn, series_id, None)?, resume: None, opened_at: None }),
+            Some(series_id) => Some(SeriesProgress {
+                last: None,
+                next: self.next_episode(conn, series_id, None)?,
+                resume: None,
+                opened_at: None,
+            }),
             None => None,
         };
-        Ok(TitleExtras { playback_source: None, progress, resume: None })
+        Ok(TitleExtras {
+            playback_source: None,
+            progress,
+            resume: None,
+        })
     }
 }

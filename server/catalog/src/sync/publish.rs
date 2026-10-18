@@ -70,7 +70,12 @@ impl Inner {
                 let mut published = Vec::with_capacity(records.len());
                 for (record, lacking) in records.into_iter().zip(lacking) {
                     let needs_detail = lacking && !detail_fresh(&transaction, &record.id, false, metadata_ms)?;
-                    published.push(Published { id: record.id, kind: record.kind, anime: record.anime, needs_detail });
+                    published.push(Published {
+                        id: record.id,
+                        kind: record.kind,
+                        anime: record.anime,
+                        needs_detail,
+                    });
                 }
                 transaction.commit()?;
                 Ok((published, changed))

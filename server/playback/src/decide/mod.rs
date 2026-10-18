@@ -35,7 +35,13 @@ pub struct Decision {
 pub fn decide(media: &Media, request: &CreateSession, encoders: Encoders) -> AppResult<Decision> {
     let client = &request.client;
     if client.player == Player::Mpv {
-        return Ok(Decision { mode: Mode::Direct, reasons: Vec::new(), video: None, audio: None, burn_in: None });
+        return Ok(Decision {
+            mode: Mode::Direct,
+            reasons: Vec::new(),
+            video: None,
+            audio: None,
+            burn_in: None,
+        });
     }
     let audio = chosen_audio(media, request.audio_track)?;
     let burn_in = chosen_burn_in(media, request.subtitle_track)?;
@@ -50,38 +56,78 @@ pub fn decide(media: &Media, request: &CreateSession, encoders: Encoders) -> App
         reasons.push(Reason::SubtitleCodecNotSupported);
     }
     if reasons.is_empty() {
-        return Ok(Decision { mode: Mode::Direct, reasons, video: None, audio: None, burn_in: None });
+        return Ok(Decision {
+            mode: Mode::Direct,
+            reasons,
+            video: None,
+            audio: None,
+            burn_in: None,
+        });
     }
     let audio = audio.map(|audio| (audio.index, audio_plan(audio, client)));
-    let copies_video = media.video.as_ref().is_none_or(|video| browser::HLS_VIDEO_CODECS.contains(&video.codec.as_str()));
+    let copies_video = media
+        .video
+        .as_ref()
+        .is_none_or(|video| browser::HLS_VIDEO_CODECS.contains(&video.codec.as_str()));
     if copies_video && reasons.iter().all(|reason| reason.allows_video_copy()) {
-        let mode = if audio.is_some_and(|(_, plan)| plan == AudioPlan::Aac) { Mode::Audio } else { Mode::Remux };
-        return Ok(Decision { mode, reasons, video: media.video.as_ref().map(|_| VideoPlan::Copy), audio, burn_in });
+        let mode = if audio.is_some_and(|(_, plan)| plan == AudioPlan::Aac) {
+            Mode::Audio
+        } else {
+            Mode::Remux
+        };
+        return Ok(Decision {
+            mode,
+            reasons,
+            video: media.video.as_ref().map(|_| VideoPlan::Copy),
+            audio,
+            burn_in,
+        });
     }
     if !copies_video && !reasons.contains(&Reason::VideoCodecNotSupported) {
         reasons.push(Reason::VideoCodecNotSupported);
     }
-    let video = media.video.as_ref().map(|video| VideoPlan::Encode(target::video_target(video, client, encoders, burn_in.is_some())));
-    Ok(Decision { mode: Mode::Transcode, reasons, video, audio, burn_in })
+    let video = media
+        .video
+        .as_ref()
+        .map(|video| VideoPlan::Encode(target::video_target(video, client, encoders, burn_in.is_some())));
+    Ok(Decision {
+        mode: Mode::Transcode,
+        reasons,
+        video,
+        audio,
+        burn_in,
+    })
 }
 
 fn audio_plan(audio: &AudioStream, client: &ClientProfile) -> AudioPlan {
-    if browser::hls_copies_audio(audio, client) { AudioPlan::Copy } else { AudioPlan::Aac }
+    if browser::hls_copies_audio(audio, client) {
+        AudioPlan::Copy
+    } else {
+        AudioPlan::Aac
+    }
 }
 
 fn chosen_audio(media: &Media, requested: Option<u32>) -> AppResult<Option<&AudioStream>> {
     match requested {
-        Some(index) => media.audio(index).map(Some).ok_or_else(|| AppError::bad_request(format!("No audio track {index}."))),
+        Some(index) => media
+            .audio(index)
+            .map(Some)
+            .ok_or_else(|| AppError::bad_request(format!("No audio track {index}."))),
         None => Ok(media.default_audio()),
     }
 }
 
 fn chosen_burn_in(media: &Media, requested: Option<u32>) -> AppResult<Option<u32>> {
     let Some(index) = requested else { return Ok(None) };
-    let subtitle = media.subtitle(index).ok_or_else(|| AppError::bad_request(format!("No subtitle track {index}.")))?;
+    let subtitle = media
+        .subtitle(index)
+        .ok_or_else(|| AppError::bad_request(format!("No subtitle track {index}.")))?;
     match subtitle.kind {
         SubtitleKind::Image if media.video.is_some() => Ok(Some(index)),
-        SubtitleKind::Image | SubtitleKind::Other => Err(AppError::new(StatusCode::UNPROCESSABLE_ENTITY, format!("Subtitle track {index} can't be shown."))),
+        SubtitleKind::Image | SubtitleKind::Other => Err(AppError::new(
+            StatusCode::UNPROCESSABLE_ENTITY,
+            format!("Subtitle track {index} can't be shown."),
+        )),
         SubtitleKind::Text => Ok(None),
     }
 }

@@ -14,8 +14,9 @@ pub(crate) struct MetadataHours(Arc<AtomicU64>);
 
 impl MetadataHours {
     pub fn load(conn: &Connection) -> AppResult<Self> {
-        let stored: Option<f64> =
-            conn.query_row("SELECT value FROM catalog_settings WHERE key = ?1", [KEY], |row| row.get(0)).optional()?;
+        let stored: Option<f64> = conn
+            .query_row("SELECT value FROM catalog_settings WHERE key = ?1", [KEY], |row| row.get(0))
+            .optional()?;
         Ok(Self(Arc::new(AtomicU64::new(stored.unwrap_or(DEFAULT_HOURS).to_bits()))))
     }
 

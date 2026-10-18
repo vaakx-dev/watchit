@@ -10,7 +10,11 @@ struct Ewma {
 
 impl Ewma {
     fn new(half_life: f64) -> Self {
-        Self { half_life, estimate: 0.0, weight: 0.0 }
+        Self {
+            half_life,
+            estimate: 0.0,
+            weight: 0.0,
+        }
     }
 
     fn decay(&self, seconds: f64) -> f64 {
@@ -24,7 +28,11 @@ impl Ewma {
     }
 
     fn value(&self) -> f64 {
-        if self.weight <= 0.0 { 0.0 } else { self.estimate / (1.0 - self.decay(self.weight)) }
+        if self.weight <= 0.0 {
+            0.0
+        } else {
+            self.estimate / (1.0 - self.decay(self.weight))
+        }
     }
 }
 
@@ -36,7 +44,10 @@ pub struct Smoother {
 
 impl Default for Smoother {
     fn default() -> Self {
-        Self { fast: Ewma::new(FAST_HALF_LIFE), slow: Ewma::new(SLOW_HALF_LIFE) }
+        Self {
+            fast: Ewma::new(FAST_HALF_LIFE),
+            slow: Ewma::new(SLOW_HALF_LIFE),
+        }
     }
 }
 

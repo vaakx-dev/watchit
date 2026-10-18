@@ -76,5 +76,8 @@ pub fn backdrop_url(source: &str) -> AppResult<String> {
     if !url.host_str().is_some_and(|host| host.ends_with(".metahub.space")) {
         return Ok(approved);
     }
-    Ok(format!("https://live.metahub.space{}", url.path().replace("/background/medium/", "/background/large/")))
+    Ok(format!(
+        "https://live.metahub.space{}",
+        url.path().replace("/background/medium/", "/background/large/")
+    ))
 }

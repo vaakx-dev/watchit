@@ -7,7 +7,11 @@ pub(crate) struct SourceError {
 
 impl SourceError {
     pub fn new(status: u16, message: impl Into<String>) -> Self {
-        Self { status, message: message.into(), retry_after: None }
+        Self {
+            status,
+            message: message.into(),
+            retry_after: None,
+        }
     }
 
     pub fn missing() -> Self {

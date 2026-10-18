@@ -115,7 +115,11 @@ fn genre_options(conn: &Connection, facets: &Facets, query: &BrowseQuery, condit
     let mut statement = conn.prepare_cached(&sql)?;
     let rows = statement.query_map(rusqlite::params_from_iter(parameters), |row| {
         let id: String = row.get(0)?;
-        Ok(GenreOption { minor: is_minor(&id), id, label: row.get(1)? })
+        Ok(GenreOption {
+            minor: is_minor(&id),
+            id,
+            label: row.get(1)?,
+        })
     })?;
     let mut options: Vec<GenreOption> = rows.collect::<rusqlite::Result<_>>()?;
     options.sort_by_cached_key(|option| option.label.to_lowercase());

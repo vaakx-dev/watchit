@@ -12,7 +12,10 @@ pub struct ByteReader {
 
 impl ByteReader {
     pub fn new(input: SourceInput) -> Self {
-        Self { input, client: reqwest::Client::new() }
+        Self {
+            input,
+            client: reqwest::Client::new(),
+        }
     }
 
     pub async fn read(&self, start: u64, length: u64) -> Result<Vec<u8>, String> {
@@ -30,7 +33,13 @@ impl ByteReader {
 
     async fn read_url(&self, url: &str, start: u64, length: u64) -> Result<Vec<u8>, String> {
         let range = format!("bytes={start}-{}", start + length - 1);
-        let response = self.client.get(url).header(header::RANGE, range).send().await.map_err(|error| error.to_string())?;
+        let response = self
+            .client
+            .get(url)
+            .header(header::RANGE, range)
+            .send()
+            .await
+            .map_err(|error| error.to_string())?;
         if response.status() != StatusCode::PARTIAL_CONTENT {
             return Err(format!("Range request failed with {}", response.status()));
         }

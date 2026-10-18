@@ -71,7 +71,11 @@ fn number(text: &str) -> Option<u32> {
 }
 
 fn expand(start: u32, end: u32) -> Vec<u32> {
-    if end >= start && end - start < 200 { (start..=end).collect() } else { vec![start] }
+    if end >= start && end - start < 200 {
+        (start..=end).collect()
+    } else {
+        vec![start]
+    }
 }
 
 fn tail_numbers(tail: &str) -> Vec<u32> {
@@ -104,7 +108,12 @@ pub fn seasons(text: &str) -> Vec<u32> {
     {
         return expand(start, end);
     }
-    SEASONS.iter().find_map(|pattern| pattern.captures(text)).and_then(|found| number(&found[1])).into_iter().collect()
+    SEASONS
+        .iter()
+        .find_map(|pattern| pattern.captures(text))
+        .and_then(|found| number(&found[1]))
+        .into_iter()
+        .collect()
 }
 
 pub fn episodes(text: &str) -> Vec<u32> {
@@ -113,14 +122,27 @@ pub fn episodes(text: &str) -> Vec<u32> {
     {
         return expand(start, end);
     }
-    EPISODES.iter().find_map(|pattern| pattern.captures(text)).and_then(|found| number(&found[1])).into_iter().collect()
+    EPISODES
+        .iter()
+        .find_map(|pattern| pattern.captures(text))
+        .and_then(|found| number(&found[1]))
+        .into_iter()
+        .collect()
 }
 
 pub fn coverage(title: &str) -> Coverage {
     if let Some((season, episodes)) = season_episode(title) {
-        return Coverage { seasons: vec![season], episodes, complete: false };
+        return Coverage {
+            seasons: vec![season],
+            episodes,
+            complete: false,
+        };
     }
-    Coverage { seasons: seasons(title), episodes: episodes(title), complete: COMPLETE.is_match(title) }
+    Coverage {
+        seasons: seasons(title),
+        episodes: episodes(title),
+        complete: COMPLETE.is_match(title),
+    }
 }
 
 impl Coverage {
@@ -146,13 +168,20 @@ pub fn file_episode(path: &str, torrent_name: &str) -> Option<EpisodeNumber> {
     let (file, folders) = parts.split_last()?;
     let file = stem(file);
     if let Some((season, episodes)) = season_episode(file) {
-        return Some(EpisodeNumber { season, episode: *episodes.first()? });
+        return Some(EpisodeNumber {
+            season,
+            episode: *episodes.first()?,
+        });
     }
     let episode = *episodes(file).first()?;
     let season = folders
         .iter()
         .rev()
-        .find_map(|folder| season_episode(folder).map(|(season, _)| season).or_else(|| seasons(folder).first().copied()))
+        .find_map(|folder| {
+            season_episode(folder)
+                .map(|(season, _)| season)
+                .or_else(|| seasons(folder).first().copied())
+        })
         .or_else(|| match seasons(torrent_name).as_slice() {
             [season] => Some(*season),
             _ => None,

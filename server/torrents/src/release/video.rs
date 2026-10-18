@@ -84,19 +84,23 @@ static XVID: LazyLock<Regex> = LazyLock::new(|| regex(r"(?i)\b(xvid|divx)\b"));
 static MPEG2: LazyLock<Regex> = LazyLock::new(|| regex(r"(?i)\bmpeg-?2\b"));
 
 static REMUX: LazyLock<Regex> = LazyLock::new(|| regex(r"(?i)remux"));
-static DISC_IMAGE: LazyLock<Regex> = LazyLock::new(|| {
-    regex(r"(?i)\.iso$|\b(iso|bdmv|bd25|bd50|bd66|bd100)\b|\bcomplete[ .-]+(uhd[ .-]+)?blu-?ray\b")
-});
-static CAM: LazyLock<Regex> = LazyLock::new(|| {
-    regex(r"(?i)\b(cam|camrip|hdcam|ts|hdts|telesync|tc|telecine|scr|screener|dvdscr)\b")
-});
+static DISC_IMAGE: LazyLock<Regex> =
+    LazyLock::new(|| regex(r"(?i)\.iso$|\b(iso|bdmv|bd25|bd50|bd66|bd100)\b|\bcomplete[ .-]+(uhd[ .-]+)?blu-?ray\b"));
+static CAM: LazyLock<Regex> = LazyLock::new(|| regex(r"(?i)\b(cam|camrip|hdcam|ts|hdts|telesync|tc|telecine|scr|screener|dvdscr)\b"));
 static THREE_D: LazyLock<Regex> = LazyLock::new(|| regex(r"(?i)\b3d\b"));
 
 pub fn resolution(text: &str) -> Option<Resolution> {
-    [(&UHD, Resolution::Uhd), (&QHD, Resolution::Qhd), (&FULL_HD, Resolution::FullHd), (&HD, Resolution::Hd), (&SD, Resolution::Sd), (&LOW, Resolution::Low)]
-        .into_iter()
-        .find(|(pattern, _)| pattern.is_match(text))
-        .map(|(_, resolution)| resolution)
+    [
+        (&UHD, Resolution::Uhd),
+        (&QHD, Resolution::Qhd),
+        (&FULL_HD, Resolution::FullHd),
+        (&HD, Resolution::Hd),
+        (&SD, Resolution::Sd),
+        (&LOW, Resolution::Low),
+    ]
+    .into_iter()
+    .find(|(pattern, _)| pattern.is_match(text))
+    .map(|(_, resolution)| resolution)
 }
 
 pub fn hdr(text: &str) -> Vec<Hdr> {
@@ -121,10 +125,17 @@ pub fn dolby_vision_without_fallback(text: &str, hdr: &[Hdr]) -> bool {
 }
 
 pub fn codec(text: &str) -> Option<&'static str> {
-    [(&HEVC, "HEVC"), (&AVC, "AVC"), (&AV1, "AV1"), (&VP9, "VP9"), (&XVID, "XviD"), (&MPEG2, "MPEG-2")]
-        .into_iter()
-        .find(|(pattern, _)| pattern.is_match(text))
-        .map(|(_, name)| name)
+    [
+        (&HEVC, "HEVC"),
+        (&AVC, "AVC"),
+        (&AV1, "AV1"),
+        (&VP9, "VP9"),
+        (&XVID, "XviD"),
+        (&MPEG2, "MPEG-2"),
+    ]
+    .into_iter()
+    .find(|(pattern, _)| pattern.is_match(text))
+    .map(|(_, name)| name)
 }
 
 pub fn is_remux(text: &str) -> bool {

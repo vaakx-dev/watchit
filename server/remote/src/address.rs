@@ -21,7 +21,11 @@ pub fn is_tailnet(ip: Ipv4Addr) -> bool {
 }
 
 fn reachable(ip: Ipv4Addr, listen: SocketAddr) -> bool {
-    !ip.is_loopback() && !ip.is_link_local() && !ip.is_unspecified() && !is_tailnet(ip) && (listen.ip().is_unspecified() || listen.ip() == IpAddr::V4(ip))
+    !ip.is_loopback()
+        && !ip.is_link_local()
+        && !ip.is_unspecified()
+        && !is_tailnet(ip)
+        && (listen.ip().is_unspecified() || listen.ip() == IpAddr::V4(ip))
 }
 
 pub fn lan(listen: SocketAddr) -> Vec<Lan> {
@@ -30,7 +34,11 @@ pub fn lan(listen: SocketAddr) -> Vec<Lan> {
         .unwrap_or_default()
         .into_iter()
         .filter_map(|interface| match interface.ip() {
-            IpAddr::V4(ip) if reachable(ip, listen) => Some(Lan { label: interface.name, ip, preferred: Some(ip) == primary }),
+            IpAddr::V4(ip) if reachable(ip, listen) => Some(Lan {
+                label: interface.name,
+                ip,
+                preferred: Some(ip) == primary,
+            }),
             _ => None,
         })
         .collect();

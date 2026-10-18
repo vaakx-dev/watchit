@@ -44,10 +44,7 @@ impl Transfers {
     pub async fn sample_readiness(&self, elapsed: Duration) {
         let jobs = self.readiness_jobs(elapsed.as_secs_f64().min(LONGEST_SAMPLE));
         let session = Arc::clone(&self.session);
-        let measured = tokio::task::spawn_blocking(move || {
-            jobs.into_iter().map(|job| (have_ahead(&session, &job), job)).collect::<Vec<_>>()
-        })
-        .await;
+        let measured = tokio::task::spawn_blocking(move || jobs.into_iter().map(|job| (have_ahead(&session, &job), job)).collect::<Vec<_>>()).await;
         let Ok(measured) = measured else { return };
         let mut results = Vec::with_capacity(measured.len());
         for (have_ahead, job) in measured {
@@ -65,7 +62,13 @@ impl Transfers {
                 running: job.running,
                 was_ready: job.was_ready,
             });
-            results.push(Sampled { info_hash: job.info_hash, file: job.target.index, title_id, runtime, readiness });
+            results.push(Sampled {
+                info_hash: job.info_hash,
+                file: job.target.index,
+                title_id,
+                runtime,
+                readiness,
+            });
         }
         let mut entries = self.entries();
         for sampled in results {
@@ -85,7 +88,10 @@ impl Transfers {
             let live = progress.stats.as_ref().and_then(|stats| stats.live.as_ref());
             let running = progress.is_live() && !entry.record.paused && !progress.finished();
             match live.filter(|_| running) {
-                Some(live) => entry.readiness.speed.update(seconds.max(f64::EPSILON), live.download_speed.as_bytes() as f64),
+                Some(live) => entry
+                    .readiness
+                    .speed
+                    .update(seconds.max(f64::EPSILON), live.download_speed.as_bytes() as f64),
                 None => entry.readiness.speed.reset(),
             }
             let Some(target) = choose(entry, &progress) else {

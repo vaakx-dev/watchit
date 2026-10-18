@@ -25,10 +25,16 @@ impl EngineView {
 
 impl Transfers {
     pub async fn refresh_engine(&self) {
-        let handles: Vec<(String, Handle)> =
-            self.entries().iter().filter_map(|(hash, entry)| Some((hash.clone(), entry.handle.clone()?))).collect();
+        let handles: Vec<(String, Handle)> = self
+            .entries()
+            .iter()
+            .filter_map(|(hash, entry)| Some((hash.clone(), entry.handle.clone()?)))
+            .collect();
         let read = tokio::task::spawn_blocking(move || {
-            handles.into_iter().map(|(hash, handle)| (hash, EngineView::read(&handle), handle)).collect::<Vec<_>>()
+            handles
+                .into_iter()
+                .map(|(hash, handle)| (hash, EngineView::read(&handle), handle))
+                .collect::<Vec<_>>()
         })
         .await;
         let Ok(read) = read else { return };

@@ -8,8 +8,8 @@ use tokio::sync::OnceCell;
 use watchit_core::{AppError, AppResult, Background, Context, StreamTokens, Viewer};
 
 use crate::api::{CreateSession, Mode, PlaybackSession, Player};
-use crate::external::{self, ExternalSubtitle};
 use crate::decide::{VideoPlan, decide};
+use crate::external::{self, ExternalSubtitle};
 use crate::ffmpeg::{Encoders, Tools, detect};
 use crate::hls::{Job, Recipe, segment_at, vod_playlist};
 use crate::keyframes::keyframes;
@@ -79,17 +79,39 @@ impl Playback {
             Mode::Direct => None,
             _ => {
                 let copies_video = matches!(decision.video, Some(VideoPlan::Copy));
-                let keyframes = if copies_video { cached(&self.keyframes, &source, || async { Ok(keyframes(&input, &media).await) }).await? } else { None };
+                let keyframes = if copies_video {
+                    cached(&self.keyframes, &source, || async { Ok(keyframes(&input, &media).await) }).await?
+                } else {
+                    None
+                };
                 let recipe = Recipe::new(input.clone(), &media, &decision, keyframes, encoders)?;
                 let first = segment_at(&recipe.segments, request.start_seconds.unwrap_or(0.0));
-                Some(Job::start(recipe, self.tools.clone(), self.background.clone(), self.sessions_dir.join(&id), first)?)
+                Some(Job::start(
+                    recipe,
+                    self.tools.clone(),
+                    self.background.clone(),
+                    self.sessions_dir.join(&id),
+                    first,
+                )?)
             }
         };
         let external = self.external_subtitles(viewer, &source).await;
         let token = self.tokens.mint(viewer.profile, &session_prefix(&id));
         let direct_url = self.tokens.url(viewer.profile, &raw_path(&source));
         let converts_subtitles = request.client.player == Player::Browser;
-        let parts = SessionParts { id: id.clone(), owner: viewer.profile, source, input, media, mode: decision.mode, job, token, direct_url, converts_subtitles, external };
+        let parts = SessionParts {
+            id: id.clone(),
+            owner: viewer.profile,
+            source,
+            input,
+            media,
+            mode: decision.mode,
+            job,
+            token,
+            direct_url,
+            converts_subtitles,
+            external,
+        };
         let session = Session::new(parts);
         let response = session.response.clone();
         self.lock_sessions().insert(id, Arc::new(session));
@@ -134,11 +156,18 @@ impl Playback {
     }
 
     async fn external_subtitles(&self, viewer: &Viewer, source: &SourceRef) -> Vec<ExternalSubtitle> {
-        let Ok(files) = self.sources.files(&source.info_hash).await else { return Vec::new() };
+        let Ok(files) = self.sources.files(&source.info_hash).await else {
+            return Vec::new();
+        };
         let mut found = Vec::new();
         for (offset, candidate) in external::matching(&files, source.file_index).into_iter().enumerate() {
-            let subtitle_source = SourceRef { info_hash: source.info_hash.clone(), file_index: candidate.file_index };
-            let Ok(input) = self.sources.resolve(viewer, &subtitle_source).await else { continue };
+            let subtitle_source = SourceRef {
+                info_hash: source.info_hash.clone(),
+                file_index: candidate.file_index,
+            };
+            let Ok(input) = self.sources.resolve(viewer, &subtitle_source).await else {
+                continue;
+            };
             found.push(ExternalSubtitle {
                 index: external::FIRST_INDEX + offset as u32,
                 source: subtitle_source,
@@ -156,7 +185,11 @@ impl Playback {
         if let Some(subtitle) = session.external.iter().find(|subtitle| subtitle.index == stream) {
             return self.subtitles.webvtt(&subtitle.source, &subtitle.input, 0).await;
         }
-        let listed = session.response.subtitle_tracks.iter().any(|track| track.index == stream && track.url.is_some());
+        let listed = session
+            .response
+            .subtitle_tracks
+            .iter()
+            .any(|track| track.index == stream && track.url.is_some());
         if !listed {
             return Err(not_found());
         }
@@ -235,7 +268,12 @@ where
     F: FnOnce() -> Fut,
     Fut: Future<Output = AppResult<V>>,
 {
-    let cell = cache.lock().unwrap_or_else(|poisoned| poisoned.into_inner()).entry(key.clone()).or_default().clone();
+    let cell = cache
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
+        .entry(key.clone())
+        .or_default()
+        .clone();
     cell.get_or_try_init(init).await.cloned()
 }
 

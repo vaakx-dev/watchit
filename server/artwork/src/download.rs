@@ -32,7 +32,10 @@ fn retry_at(response: &Response) -> i64 {
     let header = response.headers().get(RETRY_AFTER).and_then(|value| value.to_str().ok()).map(str::trim);
     let time = header.and_then(|value| match value.parse::<f64>() {
         Ok(seconds) if seconds >= 0.0 => Some(now + (seconds * 1000.0) as i64),
-        _ => httpdate::parse_http_date(value).ok().and_then(|date| date.duration_since(UNIX_EPOCH).ok()).map(|at| at.as_millis() as i64),
+        _ => httpdate::parse_http_date(value)
+            .ok()
+            .and_then(|date| date.duration_since(UNIX_EPOCH).ok())
+            .map(|at| at.as_millis() as i64),
     });
     match time {
         Some(time) => time.max(now),
@@ -69,7 +72,10 @@ impl Transport {
             .read_timeout(TIMEOUT)
             .build()
             .expect("image http client");
-        Self { client, pauses: Mutex::new(HashMap::new()) }
+        Self {
+            client,
+            pauses: Mutex::new(HashMap::new()),
+        }
     }
 
     pub async fn download(&self, source: &str, limit: usize) -> Result<Downloaded, ImageFailure> {
@@ -126,8 +132,15 @@ impl Transport {
 }
 
 async fn read_body(response: Response, limit: usize) -> Result<Downloaded, ImageFailure> {
-    let header = |name| response.headers().get(name).and_then(|value: &reqwest::header::HeaderValue| value.to_str().ok());
-    let content_type = header(CONTENT_TYPE).and_then(|value| value.split(';').next()).map(|value| value.trim().to_ascii_lowercase());
+    let header = |name| {
+        response
+            .headers()
+            .get(name)
+            .and_then(|value: &reqwest::header::HeaderValue| value.to_str().ok())
+    };
+    let content_type = header(CONTENT_TYPE)
+        .and_then(|value| value.split(';').next())
+        .map(|value| value.trim().to_ascii_lowercase());
     let format = content_type
         .as_deref()
         .and_then(format_of)

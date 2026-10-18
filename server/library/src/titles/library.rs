@@ -58,7 +58,10 @@ impl LibraryRow {
             saved: row.get(9)?,
             last_opened_at: row.get(10)?,
             opened_at: row.get(11)?,
-            resume: position.zip(duration).map(|(position_seconds, duration_seconds)| SavedPosition { position_seconds, duration_seconds }),
+            resume: position.zip(duration).map(|(position_seconds, duration_seconds)| SavedPosition {
+                position_seconds,
+                duration_seconds,
+            }),
             status_changed_at: row.get(15)?,
         })
     }

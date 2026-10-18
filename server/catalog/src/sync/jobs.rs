@@ -60,7 +60,16 @@ pub(crate) struct Job {
 
 impl Job {
     pub fn new(key: String, work: Work) -> Self {
-        let mut job = Self { key, work, page: 1, complete: false, updated_at: 0, retry_at: 0, error: None, priority: Priority::Crawl };
+        let mut job = Self {
+            key,
+            work,
+            page: 1,
+            complete: false,
+            updated_at: 0,
+            retry_at: 0,
+            error: None,
+            priority: Priority::Crawl,
+        };
         job.priority = job.default_priority();
         job
     }
@@ -131,7 +140,12 @@ impl Queue {
 
     pub fn wait(&self, now: i64, metadata_ms: i64) -> i64 {
         let paused = self.next_retry_at.filter(|retry_at| *retry_at > now).map(|retry_at| retry_at - now);
-        let retry = self.jobs.iter().filter(|job| job.pending(now, metadata_ms) && job.retry_at > now).map(|job| job.retry_at - now).min();
+        let retry = self
+            .jobs
+            .iter()
+            .filter(|job| job.pending(now, metadata_ms) && job.retry_at > now)
+            .map(|job| job.retry_at - now)
+            .min();
         [paused, retry].into_iter().flatten().min().unwrap_or(60_000)
     }
 
@@ -146,7 +160,9 @@ impl Queue {
     }
 
     pub fn crawling(&self) -> bool {
-        self.jobs.iter().any(|job| job.priority == Priority::Crawl && self.active.contains(&job.key))
+        self.jobs
+            .iter()
+            .any(|job| job.priority == Priority::Crawl && self.active.contains(&job.key))
     }
 
     pub fn ensure(&mut self, job: Job, priority: Priority, metadata_ms: i64) -> Option<Job> {

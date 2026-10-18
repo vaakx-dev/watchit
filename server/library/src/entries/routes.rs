@@ -20,6 +20,9 @@ pub async fn update(
     JsonBody(patch): JsonBody<PersonalPatch>,
 ) -> AppResult<Json<LibrarySnapshot>> {
     let title = library.title(&id).await?;
-    library.db.run(move |conn| store::apply(conn, viewer.profile, &id, &title, &patch)).await?;
+    library
+        .db
+        .run(move |conn| store::apply(conn, viewer.profile, &id, &title, &patch))
+        .await?;
     library.snapshot(viewer.profile).await.map(Json)
 }

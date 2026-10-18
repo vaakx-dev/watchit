@@ -11,7 +11,11 @@ use crate::progress::series_progress;
 
 fn season_number(segment: &str) -> AppResult<i64> {
     let valid = segment.bytes().all(|byte| byte.is_ascii_digit()) && !segment.is_empty() && (segment == "0" || !segment.starts_with('0'));
-    segment.parse().ok().filter(|season| valid && *season <= 99_999).ok_or_else(|| AppError::bad_request("Invalid season number."))
+    segment
+        .parse()
+        .ok()
+        .filter(|season| valid && *season <= 99_999)
+        .ok_or_else(|| AppError::bad_request("Invalid season number."))
 }
 
 pub async fn update(
@@ -38,7 +42,9 @@ pub async fn update(
             .db
             .run(move |conn| {
                 if catalog.episodes_pending(conn, &id)? {
-                    return Err(AppError::new(StatusCode::CONFLICT, "Episodes for this season are still importing. Try again shortly.").retry_after(2));
+                    return Err(
+                        AppError::new(StatusCode::CONFLICT, "Episodes for this season are still importing. Try again shortly.").retry_after(2),
+                    );
                 }
                 store::mark_watched(conn, &catalog, profile, &id, season, watched)
             })

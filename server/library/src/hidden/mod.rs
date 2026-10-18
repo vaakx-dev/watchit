@@ -11,6 +11,9 @@ pub fn ids(conn: &Connection, profile: i64, statuses: &[Status]) -> AppResult<Ve
     let sql = format!("SELECT id FROM library_entries WHERE profile_id = ? AND status IN ({marks})");
     let parameters = std::iter::once(rusqlite::types::Value::Integer(profile))
         .chain(statuses.iter().map(|status| rusqlite::types::Value::Text(status.as_str().to_owned())));
-    let ids = conn.prepare_cached(&sql)?.query_map(params_from_iter(parameters), |row| row.get(0))?.collect::<rusqlite::Result<_>>()?;
+    let ids = conn
+        .prepare_cached(&sql)?
+        .query_map(params_from_iter(parameters), |row| row.get(0))?
+        .collect::<rusqlite::Result<_>>()?;
     Ok(ids)
 }

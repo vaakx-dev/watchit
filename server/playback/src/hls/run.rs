@@ -25,10 +25,23 @@ pub enum RunExit {
     Failed(String),
 }
 
-pub fn spawn(tools: &Tools, background: &Background, directory: &Path, args: &[String], stop: oneshot::Receiver<()>, on_event: impl Fn(RunEvent) + Send + Sync + 'static) -> std::io::Result<()> {
+pub fn spawn(
+    tools: &Tools,
+    background: &Background,
+    directory: &Path,
+    args: &[String],
+    stop: oneshot::Receiver<()>,
+    on_event: impl Fn(RunEvent) + Send + Sync + 'static,
+) -> std::io::Result<()> {
     std::fs::create_dir_all(directory)?;
     tracing::debug!(args = %args.join(" "), "ffmpeg");
-    let mut child = tools.ffmpeg().args(args).current_dir(directory).stdout(Stdio::null()).stderr(Stdio::piped()).spawn()?;
+    let mut child = tools
+        .ffmpeg()
+        .args(args)
+        .current_dir(directory)
+        .stdout(Stdio::null())
+        .stderr(Stdio::piped())
+        .spawn()?;
     let stderr = child.stderr.take().expect("stderr is piped");
     let directory = directory.to_path_buf();
     background.spawn(async move {
@@ -48,7 +61,11 @@ pub fn spawn(tools: &Tools, background: &Background, directory: &Path, args: &[S
     Ok(())
 }
 
-async fn supervise(mut child: Child, mut stop: oneshot::Receiver<()>, reading: impl Future<Output = String>) -> (std::io::Result<ExitStatus>, bool, String) {
+async fn supervise(
+    mut child: Child,
+    mut stop: oneshot::Receiver<()>,
+    reading: impl Future<Output = String>,
+) -> (std::io::Result<ExitStatus>, bool, String) {
     let waiting = async {
         let stopped = tokio::select! {
             _ = child.wait() => false,

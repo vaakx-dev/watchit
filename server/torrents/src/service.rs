@@ -54,7 +54,15 @@ struct Launch {
 }
 
 async fn launch(launch: Launch) {
-    let Launch { context, folder, settings, alternative, search, titles, ready } = launch;
+    let Launch {
+        context,
+        folder,
+        settings,
+        alternative,
+        search,
+        titles,
+        ready,
+    } = launch;
     let bandwidth = Bandwidth::new(&settings, alternative);
     let session = match engine::start(&folder, listen_port(), settings.download_dir(), bandwidth.limits()).await {
         Ok(session) => session,
@@ -64,7 +72,15 @@ async fn launch(launch: Launch) {
             return;
         }
     };
-    let transfers = Transfers::new(context.db.clone(), Arc::clone(&session), search, titles, engine::session_folder(&folder), settings, bandwidth);
+    let transfers = Transfers::new(
+        context.db.clone(),
+        Arc::clone(&session),
+        search,
+        titles,
+        engine::session_folder(&folder),
+        settings,
+        bandwidth,
+    );
     if let Err(error) = transfers.restore().await {
         tracing::error!(%error, "could not restore transfers");
     }
@@ -85,14 +101,31 @@ impl Torrents {
         })?;
         let folder = std::path::absolute(context.paths.folder("torrents")?)?;
         let default_download_dir = std::path::absolute(context.paths.folder("downloads")?)?;
-        let settings = context.db.run_blocking(|conn| settings::load(conn))?.unwrap_or_else(|| Settings::defaults(default_download_dir));
+        let settings = context
+            .db
+            .run_blocking(|conn| settings::load(conn))?
+            .unwrap_or_else(|| Settings::defaults(default_download_dir));
         let alternative = context.db.run_blocking(|conn| bandwidth::load(conn))?;
         std::fs::create_dir_all(settings.download_dir())?;
         let search = Search::new(reqwest::Client::new(), Arc::clone(&titles));
         let (ready, startup) = watch::channel(Startup::Starting);
-        let launching = Launch { context: context.clone(), folder, settings, alternative, search: search.clone(), titles, ready };
+        let launching = Launch {
+            context: context.clone(),
+            folder,
+            settings,
+            alternative,
+            search: search.clone(),
+            titles,
+            ready,
+        };
         context.background.spawn(launch(launching));
-        Ok(Self { search, db: context.db.clone(), tokens: context.tokens.clone(), background: context.background.clone(), startup })
+        Ok(Self {
+            search,
+            db: context.db.clone(),
+            tokens: context.tokens.clone(),
+            background: context.background.clone(),
+            startup,
+        })
     }
 
     pub async fn quality(&self, profile: i64) -> AppResult<Quality> {
@@ -140,13 +173,22 @@ impl Torrents {
         if transfers.complete_file(&info_hash, file_index) {
             return Ok(MediaSource::File(transfers.finished_path(&info_hash, &handle, file_index)?));
         }
-        Ok(MediaSource::Url(format!("{origin}{}", raw_url(&self.tokens, viewer.profile, &info_hash, file_index))))
+        Ok(MediaSource::Url(format!(
+            "{origin}{}",
+            raw_url(&self.tokens, viewer.profile, &info_hash, file_index)
+        )))
     }
 
     pub async fn files(&self, info_hash: &str) -> AppResult<Vec<TorrentFile>> {
         let transfers = self.transfers().await?;
         let handle = transfers.ready_handle(&info_hash.to_ascii_lowercase()).await?;
         let files = engine::files_of(&handle).map_err(AppError::internal)?;
-        Ok(files.into_iter().map(|file| TorrentFile { index: file.index, path: file.path }).collect())
+        Ok(files
+            .into_iter()
+            .map(|file| TorrentFile {
+                index: file.index,
+                path: file.path,
+            })
+            .collect())
     }
 }

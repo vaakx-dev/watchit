@@ -54,14 +54,20 @@ pub async fn save(
     let saved = library
         .db
         .run(move |conn| {
-            let mut patch = PersonalPatch { opened: Some(true), ..PersonalPatch::default() };
+            let mut patch = PersonalPatch {
+                opened: Some(true),
+                ..PersonalPatch::default()
+            };
             match outcome {
                 Outcome::Watched => patch.status = Some(Some(Status::Watched)),
                 Outcome::Resume => store::put(conn, viewer.profile, &id, position, duration)?,
                 Outcome::Clear => store::forget(conn, viewer.profile, &id)?,
             }
             entries::apply(conn, viewer.profile, &id, &title, &patch)?;
-            Ok(ProgressSaved { resume: store::get(conn, viewer.profile, &id)?, entry: entries::entry(conn, viewer.profile, &id)? })
+            Ok(ProgressSaved {
+                resume: store::get(conn, viewer.profile, &id)?,
+                entry: entries::entry(conn, viewer.profile, &id)?,
+            })
         })
         .await?;
     Ok(Json(saved))
@@ -72,7 +78,10 @@ pub async fn clear(State(library): State<Library>, viewer: Viewer, TitleId(id): 
         .db
         .run(move |conn| {
             store::forget(conn, viewer.profile, &id)?;
-            Ok(ProgressSaved { resume: None, entry: entries::entry(conn, viewer.profile, &id)? })
+            Ok(ProgressSaved {
+                resume: None,
+                entry: entries::entry(conn, viewer.profile, &id)?,
+            })
         })
         .await?;
     Ok(Json(saved))

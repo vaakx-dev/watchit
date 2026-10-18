@@ -5,7 +5,10 @@ pub fn root_of(path: &Path) -> PathBuf {
 }
 
 pub fn drives() -> Vec<PathBuf> {
-    platform::drives().into_iter().filter(|drive| fs4::available_space(drive).is_ok()).collect()
+    platform::drives()
+        .into_iter()
+        .filter(|drive| fs4::available_space(drive).is_ok())
+        .collect()
 }
 
 pub fn free_bytes(path: &Path) -> u64 {

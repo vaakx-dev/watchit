@@ -4,9 +4,9 @@ use librqbit::TorrentStatsState;
 use watchit_core::{AppError, AppResult};
 
 use super::Transfers;
-use crate::locations::busy;
 use super::add::valid_info_hash;
 use super::model::{Kind, Transfer};
+use crate::locations::busy;
 
 pub struct Change {
     pub paused: Option<bool>,
@@ -46,7 +46,10 @@ impl Transfers {
             self.fetch_metadata(&info_hash);
         }
         if let Some(handle) = restart {
-            self.session.unpause(&handle).await.map_err(|error| AppError::internal(format!("{error:#}")))?;
+            self.session
+                .unpause(&handle)
+                .await
+                .map_err(|error| AppError::internal(format!("{error:#}")))?;
         }
         self.wake();
         self.transfer(&info_hash).ok_or_else(|| AppError::not_found("Transfer not found."))
@@ -67,7 +70,10 @@ impl Transfers {
         let hash = info_hash.clone();
         self.db.run(move |conn| super::store::delete(conn, &hash)).await?;
         if let Some(handle) = &entry.handle {
-            self.session.delete(handle.id().into(), delete_files).await.map_err(|error| AppError::internal(format!("{error:#}")))?;
+            self.session
+                .delete(handle.id().into(), delete_files)
+                .await
+                .map_err(|error| AppError::internal(format!("{error:#}")))?;
         }
         if delete_files {
             Transfers::unlink_library(entry.library, self.settings().download_dir()).await;
@@ -80,7 +86,16 @@ impl Transfers {
     pub async fn resume_for_playback(self: &Arc<Self>, info_hash: &str) -> AppResult<()> {
         let paused = self.entries().get(info_hash).is_some_and(|entry| entry.record.paused);
         if paused {
-            self.change(info_hash, Change { paused: Some(false), kind: None, queue_position: None, notify_when_ready: None }).await?;
+            self.change(
+                info_hash,
+                Change {
+                    paused: Some(false),
+                    kind: None,
+                    queue_position: None,
+                    notify_when_ready: None,
+                },
+            )
+            .await?;
         }
         Ok(())
     }

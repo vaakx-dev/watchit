@@ -64,10 +64,27 @@ impl Run {
 
 impl Job {
     pub fn start(recipe: Recipe, tools: Tools, background: Background, directory: PathBuf, first: usize) -> AppResult<Self> {
-        let state = State { ready: BTreeMap::new(), run: None, runs: 0, last_request: first, last_access: Instant::now(), waiting: 0 };
-        let inner = Arc::new(Inner { recipe, tools, background, directory, state: Mutex::new(state), changed: Notify::new() });
+        let state = State {
+            ready: BTreeMap::new(),
+            run: None,
+            runs: 0,
+            last_request: first,
+            last_access: Instant::now(),
+            waiting: 0,
+        };
+        let inner = Arc::new(Inner {
+            recipe,
+            tools,
+            background,
+            directory,
+            state: Mutex::new(state),
+            changed: Notify::new(),
+        });
         inner.start_run(&mut inner.lock(), first)?;
-        Ok(Self { inner, init: OnceCell::new() })
+        Ok(Self {
+            inner,
+            init: OnceCell::new(),
+        })
     }
 
     pub fn recipe(&self) -> &Recipe {
@@ -115,7 +132,11 @@ impl Job {
 
     pub fn idle_for(&self) -> Duration {
         let state = self.inner.lock();
-        if state.waiting > 0 { Duration::ZERO } else { state.last_access.elapsed() }
+        if state.waiting > 0 {
+            Duration::ZERO
+        } else {
+            state.last_access.elapsed()
+        }
     }
 
     pub fn pause(&self) {
@@ -146,8 +167,23 @@ impl Inner {
         let (stop, stopped) = oneshot::channel();
         let directory = self.directory.join(format!("run-{id}"));
         let weak = Arc::downgrade(self);
-        spawn(&self.tools, &self.background, &directory, &self.recipe.arguments(first, end), stopped, move |event| on_event(&weak, id, event)).map_err(AppError::internal)?;
-        state.run = Some(Run { id, first, end, latest: None, exit: None, stop: Some(stop) });
+        spawn(
+            &self.tools,
+            &self.background,
+            &directory,
+            &self.recipe.arguments(first, end),
+            stopped,
+            move |event| on_event(&weak, id, event),
+        )
+        .map_err(AppError::internal)?;
+        state.run = Some(Run {
+            id,
+            first,
+            end,
+            latest: None,
+            exit: None,
+            stop: Some(stop),
+        });
         Ok(())
     }
 }

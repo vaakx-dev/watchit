@@ -1,8 +1,8 @@
 use serde::Serialize;
 use ts_rs::TS;
 
-use crate::transfers::Entry;
 use crate::readiness::Verdict;
+use crate::transfers::Entry;
 use crate::transfers::model::Transfer;
 
 #[derive(Clone, Debug, Serialize, TS)]
@@ -18,5 +18,9 @@ pub(crate) fn take_due(entry: &mut Entry, current: &Transfer) -> Option<ReadyNot
         return None;
     }
     entry.record.notify_when_ready = false;
-    Some(ReadyNotice { id: current.id.clone(), title_id: current.title_id.clone(), name: current.name.clone() })
+    Some(ReadyNotice {
+        id: current.id.clone(),
+        title_id: current.title_id.clone(),
+        name: current.name.clone(),
+    })
 }

@@ -61,5 +61,9 @@ pub async fn start(config: Config) -> anyhow::Result<Server> {
             tracing::error!(%error, "server stopped");
         }
     });
-    Ok(Server { addr, background: context.background, http })
+    Ok(Server {
+        addr,
+        background: context.background,
+        http,
+    })
 }

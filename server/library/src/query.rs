@@ -14,7 +14,11 @@ impl<S: Send + Sync> FromRequestParts<S> for Params {
     type Rejection = AppError;
 
     async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, AppError> {
-        let pairs = parts.uri.query().map(|query| form_urlencoded::parse(query.as_bytes()).into_owned().collect()).unwrap_or_default();
+        let pairs = parts
+            .uri
+            .query()
+            .map(|query| form_urlencoded::parse(query.as_bytes()).into_owned().collect())
+            .unwrap_or_default();
         Ok(Self(pairs))
     }
 }

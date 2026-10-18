@@ -35,7 +35,9 @@ const FALLBACK_TRACKERS: [&str; 5] = [
 pub async fn start(folder: &Path, listen_port: Option<u16>, download_dir: &Path, limits: LimitsConfig) -> anyhow::Result<Arc<Session>> {
     let options = SessionOptions {
         fastresume: true,
-        persistence: Some(SessionPersistenceConfig::Json { folder: Some(session_folder(folder)) }),
+        persistence: Some(SessionPersistenceConfig::Json {
+            folder: Some(session_folder(folder)),
+        }),
         dht: listen_port.map(|_| DhtSessionConfig {
             persistence: Some(DhtPersistenceConfig {
                 dump_interval: Some(DHT_DUMP_INTERVAL),

@@ -29,12 +29,27 @@ fn text(path: &Path) -> String {
 pub fn absolute(value: &str) -> AppResult<PathBuf> {
     let path: PathBuf = Path::new(value.trim()).components().collect();
     let clean = path.is_absolute() && !path.components().any(|part| matches!(part, Component::ParentDir | Component::CurDir));
-    if clean { Ok(path) } else { Err(AppError::bad_request("Enter a full folder path, such as D:\\Movies.")) }
+    if clean {
+        Ok(path)
+    } else {
+        Err(AppError::bad_request("Enter a full folder path, such as D:\\Movies."))
+    }
 }
 
 fn drives() -> FolderListing {
-    let folders = volume::drives().into_iter().map(|drive| FolderEntry { name: text(&drive), path: text(&drive) }).collect();
-    FolderListing { path: None, parent: None, folders, free_bytes: None }
+    let folders = volume::drives()
+        .into_iter()
+        .map(|drive| FolderEntry {
+            name: text(&drive),
+            path: text(&drive),
+        })
+        .collect();
+    FolderListing {
+        path: None,
+        parent: None,
+        folders,
+        free_bytes: None,
+    }
 }
 
 fn folders_in(path: &Path) -> AppResult<Vec<FolderEntry>> {
@@ -46,14 +61,19 @@ fn folders_in(path: &Path) -> AppResult<Vec<FolderEntry>> {
         .filter_map(Result::ok)
         .filter(|entry| entry.file_type().is_ok_and(|kind| kind.is_dir()))
         .filter(|entry| !volume::is_hidden(&entry.path()))
-        .map(|entry| FolderEntry { name: entry.file_name().to_string_lossy().into_owned(), path: text(&entry.path()) })
+        .map(|entry| FolderEntry {
+            name: entry.file_name().to_string_lossy().into_owned(),
+            path: text(&entry.path()),
+        })
         .collect();
     folders.sort_by_key(|folder| folder.name.to_lowercase());
     Ok(folders)
 }
 
 pub fn browse(requested: Option<&str>) -> AppResult<FolderListing> {
-    let Some(value) = requested.filter(|value| !value.trim().is_empty()) else { return Ok(drives()) };
+    let Some(value) = requested.filter(|value| !value.trim().is_empty()) else {
+        return Ok(drives());
+    };
     let path = absolute(value)?;
     let folders = folders_in(&path)?;
     Ok(FolderListing {

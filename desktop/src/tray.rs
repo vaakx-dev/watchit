@@ -12,8 +12,7 @@ const QUIT: &str = "quit";
 
 pub fn create(app: &AppHandle) -> anyhow::Result<()> {
     let open = MenuItem::with_id(app, OPEN, "Open Watchit", true, None::<&str>)?;
-    let start_with_windows =
-        CheckMenuItem::with_id(app, AUTOSTART, "Start with Windows", true, autostart::is_enabled(app), None::<&str>)?;
+    let start_with_windows = CheckMenuItem::with_id(app, AUTOSTART, "Start with Windows", true, autostart::is_enabled(app), None::<&str>)?;
     let check_updates = MenuItem::with_id(app, UPDATES, "Check for updates", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, QUIT, "Quit", true, None::<&str>)?;
     let separator = PredefinedMenuItem::separator(app)?;
@@ -33,7 +32,12 @@ pub fn create(app: &AppHandle) -> anyhow::Result<()> {
 }
 
 fn on_tray_event(tray: &tauri::tray::TrayIcon, event: TrayIconEvent) {
-    if let TrayIconEvent::Click { button: MouseButton::Left, button_state: MouseButtonState::Up, .. } = event {
+    if let TrayIconEvent::Click {
+        button: MouseButton::Left,
+        button_state: MouseButtonState::Up,
+        ..
+    } = event
+    {
         window::show(tray.app_handle());
     }
 }

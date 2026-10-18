@@ -12,9 +12,11 @@ pub struct Tools {
 
 impl Tools {
     pub fn in_dir(dir: &Path) -> Self {
-        Self { ffmpeg: dir.join("ffmpeg.exe"), ffprobe: dir.join("ffprobe.exe") }
+        Self {
+            ffmpeg: dir.join("ffmpeg.exe"),
+            ffprobe: dir.join("ffprobe.exe"),
+        }
     }
-
 
     pub fn ffmpeg(&self) -> Command {
         quiet(&self.ffmpeg)

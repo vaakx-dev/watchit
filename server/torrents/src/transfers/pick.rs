@@ -24,7 +24,9 @@ impl Context<'_> {
             return None;
         }
         match &self.series {
-            Some(_) => self.episode_of(file).or_else(|| (explicit && self.title.is_episode()).then(|| self.title.to_string())),
+            Some(_) => self
+                .episode_of(file)
+                .or_else(|| (explicit && self.title.is_episode()).then(|| self.title.to_string())),
             None => Some(self.title.to_string()),
         }
     }
@@ -39,7 +41,12 @@ fn main_file(available: &[MetadataFile]) -> Option<&MetadataFile> {
 }
 
 fn record(file: &MetadataFile, title_id: Option<String>) -> FileRecord {
-    FileRecord { index: file.index, name: file.path.clone(), size_bytes: file.size_bytes, title_id }
+    FileRecord {
+        index: file.index,
+        name: file.path.clone(),
+        size_bytes: file.size_bytes,
+        title_id,
+    }
 }
 
 fn with_subtitles(mut chosen: Vec<FileRecord>, available: &[MetadataFile], torrent_name: &str) -> Vec<FileRecord> {
@@ -71,7 +78,10 @@ fn pick_files(pick: &Pick, available: &[MetadataFile], torrent_name: &str) -> Ve
             .filter(|file| indexes.contains(&file.index))
             .map(|file| record(file, context.title_of(file, true)))
             .collect(),
-        Choice::Main => main_file(available).map(|file| record(file, context.title_of(file, true))).into_iter().collect(),
+        Choice::Main => main_file(available)
+            .map(|file| record(file, context.title_of(file, true)))
+            .into_iter()
+            .collect(),
         Choice::All => {
             let main = main_file(available).map(|file| file.index);
             available

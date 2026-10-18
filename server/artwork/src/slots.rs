@@ -36,7 +36,10 @@ impl Slots {
             None
         };
         let download = self.downloads.clone().acquire_owned().await.expect("download slots stay open");
-        Slot { _download: download, _background: reserved }
+        Slot {
+            _download: download,
+            _background: reserved,
+        }
     }
 
     pub async fn encode(&self) -> OwnedSemaphorePermit {

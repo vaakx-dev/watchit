@@ -12,14 +12,21 @@ fn primary(code: &str) -> &str {
 
 impl Quality {
     pub fn admits(&self, candidate: &Candidate) -> bool {
-        let too_large = self.max_size_bytes.zip(candidate.result.size_bytes).is_some_and(|(limit, size)| size > limit);
+        let too_large = self
+            .max_size_bytes
+            .zip(candidate.result.size_bytes)
+            .is_some_and(|(limit, size)| size > limit);
         !(too_large || (self.hide_cam && candidate.traits.cam))
     }
 
     pub fn resolution_rank(&self, resolution: Option<Resolution>) -> u8 {
         let Some(resolution) = resolution else { return UNKNOWN_RESOLUTION };
         let (found, wanted) = (resolution as u8, self.resolution as u8);
-        if found >= wanted { found - wanted } else { ABOVE_PREFERRED + wanted - found }
+        if found >= wanted {
+            found - wanted
+        } else {
+            ABOVE_PREFERRED + wanted - found
+        }
     }
 
     pub fn avoids(&self, candidate: &Candidate) -> bool {
@@ -41,6 +48,10 @@ impl Quality {
         let spoken = &candidate.result.languages;
         let assumed = [ASSUMED_LANGUAGE.to_owned()];
         let spoken = if spoken.is_empty() { &assumed[..] } else { &spoken[..] };
-        spoken.iter().any(|language| self.languages.iter().any(|wanted| primary(wanted).eq_ignore_ascii_case(primary(language))))
+        spoken.iter().any(|language| {
+            self.languages
+                .iter()
+                .any(|wanted| primary(wanted).eq_ignore_ascii_case(primary(language)))
+        })
     }
 }

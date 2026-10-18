@@ -29,7 +29,10 @@ impl Attribution {
         let folder = context.paths.folder("attribution").map_err(AppError::internal)?;
         prepare(&folder).map_err(AppError::internal)?;
         let (sender, receiver) = mpsc::unbounded_channel();
-        let archive = Archive { db: context.db.clone(), folder };
+        let archive = Archive {
+            db: context.db.clone(),
+            folder,
+        };
         let stopping = context.background.stopping();
         context.background.spawn(archive.run(receiver, artwork.subscribe(), stopping));
         Ok(Self { sender })
@@ -110,7 +113,15 @@ fn record_title(db: &Db, folder: &std::path::Path, id: &str) -> AppResult<()> {
             record.title_ids.push(title.entry.id.clone());
             record.title_ids.sort();
         }
-        let same = |credit: &records::Credit| records::Credit { retrieved_at: None, ..credit.clone() } == records::Credit { retrieved_at: None, ..image.credit.clone() };
+        let same = |credit: &records::Credit| {
+            records::Credit {
+                retrieved_at: None,
+                ..credit.clone()
+            } == records::Credit {
+                retrieved_at: None,
+                ..image.credit.clone()
+            }
+        };
         match record.credits.iter_mut().find(|credit| same(credit)) {
             Some(credit) => credit.retrieved_at = image.credit.retrieved_at.clone().or(credit.retrieved_at.take()),
             None => record.credits.push(image.credit.clone()),
@@ -137,7 +148,9 @@ fn record_title(db: &Db, folder: &std::path::Path, id: &str) -> AppResult<()> {
 
 fn record_fetch(folder: &std::path::Path, event: &Fetched) -> AppResult<()> {
     let path = folder.join("images").join(format!("{}.json", event.key));
-    let Some(mut record) = read_json::<ImageRecord>(&path)? else { return Ok(()) };
+    let Some(mut record) = read_json::<ImageRecord>(&path)? else {
+        return Ok(());
+    };
     let retrieved_at = iso(event.fetched_at);
     let mut changed = false;
     for credit in record.credits.iter_mut().filter(|credit| credit.source.is_some()) {

@@ -7,10 +7,9 @@ use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM};
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows::Win32::UI::Input::KeyboardAndMouse::{TME_LEAVE, TME_NONCLIENT, TRACKMOUSEEVENT, TrackMouseEvent};
 use windows::Win32::UI::WindowsAndMessaging::{
-    CreateWindowExW, DefWindowProcW, GetParent, HTMAXBUTTON, HWND_TOP, IDC_ARROW, IsZoomed, LoadCursorW, RegisterClassExW,
-    SWP_ASYNCWINDOWPOS, SWP_HIDEWINDOW, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, SWP_SHOWWINDOW, SetWindowPos,
-    WINDOW_EX_STYLE, WM_NCHITTEST, WM_NCLBUTTONDBLCLK, WM_NCLBUTTONDOWN, WM_NCLBUTTONUP, WM_NCMOUSELEAVE, WM_NCMOUSEMOVE,
-    WNDCLASSEXW, WS_CHILD, WS_CLIPSIBLINGS,
+    CreateWindowExW, DefWindowProcW, GetParent, HTMAXBUTTON, HWND_TOP, IDC_ARROW, IsZoomed, LoadCursorW, RegisterClassExW, SWP_ASYNCWINDOWPOS,
+    SWP_HIDEWINDOW, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, SWP_SHOWWINDOW, SetWindowPos, WINDOW_EX_STYLE, WM_NCHITTEST,
+    WM_NCLBUTTONDBLCLK, WM_NCLBUTTONDOWN, WM_NCLBUTTONUP, WM_NCMOUSELEAVE, WM_NCMOUSEMOVE, WNDCLASSEXW, WS_CHILD, WS_CLIPSIBLINGS,
 };
 use windows::core::w;
 
@@ -38,7 +37,11 @@ fn toggle_maximized(button: HWND) {
     let (Some(window), Ok(parent)) = (WINDOW.get(), unsafe { GetParent(button) }) else {
         return;
     };
-    let toggled = if unsafe { IsZoomed(parent) }.as_bool() { window.unmaximize() } else { window.maximize() };
+    let toggled = if unsafe { IsZoomed(parent) }.as_bool() {
+        window.unmaximize()
+    } else {
+        window.maximize()
+    };
     if let Err(error) = toggled {
         eprintln!("title bar: cannot toggle maximize: {error}");
     }
@@ -93,7 +96,20 @@ pub fn create(window: &Window) -> anyhow::Result<()> {
     };
     unsafe { RegisterClassExW(&class) };
     let button = unsafe {
-        CreateWindowExW(WINDOW_EX_STYLE::default(), class_name, None, WS_CHILD | WS_CLIPSIBLINGS, 0, 0, 0, 0, Some(parent), None, Some(instance), None)?
+        CreateWindowExW(
+            WINDOW_EX_STYLE::default(),
+            class_name,
+            None,
+            WS_CHILD | WS_CLIPSIBLINGS,
+            0,
+            0,
+            0,
+            0,
+            Some(parent),
+            None,
+            Some(instance),
+            None,
+        )?
     };
     BUTTON.store(button.0 as isize, Ordering::Relaxed);
     WINDOW.set(window.clone()).ok();
@@ -106,7 +122,15 @@ pub fn maximize_button_area(area: Option<Area>) -> Result<(), String> {
     let flags = SWP_ASYNCWINDOWPOS | SWP_NOACTIVATE;
     let placed = match area {
         Some(area) => unsafe {
-            SetWindowPos(button, Some(HWND_TOP), area.x.round() as i32, area.y.round() as i32, area.width.round() as i32, area.height.round() as i32, flags | SWP_SHOWWINDOW)
+            SetWindowPos(
+                button,
+                Some(HWND_TOP),
+                area.x.round() as i32,
+                area.y.round() as i32,
+                area.width.round() as i32,
+                area.height.round() as i32,
+                flags | SWP_SHOWWINDOW,
+            )
         },
         None => {
             HOVERED.store(false, Ordering::Relaxed);

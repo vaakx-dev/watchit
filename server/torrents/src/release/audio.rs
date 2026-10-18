@@ -8,7 +8,10 @@ struct Format {
 }
 
 fn format(name: &'static str, pattern: &str) -> Format {
-    Format { name, pattern: Regex::new(pattern).expect("valid audio regex") }
+    Format {
+        name,
+        pattern: Regex::new(pattern).expect("valid audio regex"),
+    }
 }
 
 static FORMATS: LazyLock<Vec<Format>> = LazyLock::new(|| {
@@ -28,13 +31,15 @@ static FORMATS: LazyLock<Vec<Format>> = LazyLock::new(|| {
 });
 
 static ATMOS: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?i)\batmos\b").expect("valid atmos regex"));
-static CHANNELS: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?:^|[^\d.])([1-9])[ .]([01])(?:ch)?(?:[^\d.]|$)").expect("valid channels regex"));
+static CHANNELS: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?:^|[^\d.])([1-9])[ .]([01])(?:ch)?(?:[^\d.]|$)").expect("valid channels regex"));
 
 pub fn audio(text: &str) -> Option<String> {
     let codec = FORMATS.iter().find(|format| format.pattern.is_match(text)).map(|format| format.name);
     let atmos = ATMOS.is_match(text);
     let channels = CHANNELS.captures(text).map(|found| format!("{}.{}", &found[1], &found[2]));
-    let parts: Vec<String> = [codec.map(str::to_owned), channels, atmos.then(|| "Atmos".to_owned())].into_iter().flatten().collect();
+    let parts: Vec<String> = [codec.map(str::to_owned), channels, atmos.then(|| "Atmos".to_owned())]
+        .into_iter()
+        .flatten()
+        .collect();
     (!parts.is_empty()).then(|| parts.join(" "))
 }

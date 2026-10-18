@@ -18,7 +18,14 @@ pub struct AvatarImage {
 
 pub fn get(conn: &Connection, profile: i64) -> AppResult<Option<AvatarImage>> {
     let mut query = conn.prepare_cached("SELECT image, updated_at FROM profile_avatars WHERE profile_id = ?")?;
-    Ok(query.query_row([profile], |row| Ok(AvatarImage { image: row.get(0)?, updated_at: row.get(1)? })).optional()?)
+    Ok(query
+        .query_row([profile], |row| {
+            Ok(AvatarImage {
+                image: row.get(0)?,
+                updated_at: row.get(1)?,
+            })
+        })
+        .optional()?)
 }
 
 pub fn put(conn: &Connection, profile: i64, image: &[u8]) -> AppResult<()> {

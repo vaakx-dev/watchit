@@ -9,9 +9,9 @@ use crate::clock::iso;
 use crate::model::{EpisodesResponse, Freshness, MediaKind, NavigationResponse, RelatedTitles, TitleResult};
 use crate::routes::params::{Params, title_id};
 use crate::service::Catalog;
+use crate::store::episodes;
 use crate::store::record::{Record, detail_fresh, load};
 use crate::store::titles::{stored, view};
-use crate::store::episodes;
 
 fn not_imported() -> AppError {
     AppError::not_found("This title has not been imported into the local catalog.")
@@ -88,7 +88,10 @@ pub(crate) async fn episode_list(
                 return Err(AppError::bad_request("Episodes are only available for a series."));
             }
             let page = episodes::page(conn, &inner.artwork, &id, page, inner.metadata.ms())?;
-            Ok(EpisodesResponse { page, imports: inner.sync.episodes(conn, &id)? })
+            Ok(EpisodesResponse {
+                page,
+                imports: inner.sync.episodes(conn, &id)?,
+            })
         }
     });
     Ok(Json(response.await?))
@@ -111,7 +114,10 @@ pub(crate) async fn navigation(
             }
             let navigation = episodes::navigation(conn, &inner.artwork, &id, season, page, inner.metadata.ms())?
                 .ok_or_else(|| AppError::not_found("This episode has no local navigation."))?;
-            Ok(NavigationResponse { navigation, imports: inner.sync.title(conn, &id)? })
+            Ok(NavigationResponse {
+                navigation,
+                imports: inner.sync.title(conn, &id)?,
+            })
         }
     });
     Ok(Json(response.await?))

@@ -1,8 +1,8 @@
 use rusqlite::{Connection, OptionalExtension, params};
 use watchit_core::AppResult;
 
-use watchit_catalog::SavedPosition;
 use crate::clock::now_iso;
+use watchit_catalog::SavedPosition;
 
 pub const TABLE: &str = "
   CREATE TABLE IF NOT EXISTS watch_progress (
@@ -18,7 +18,12 @@ pub const TABLE: &str = "
 pub fn get(conn: &Connection, profile: i64, id: &str) -> AppResult<Option<SavedPosition>> {
     let found = conn
         .prepare_cached("SELECT position_seconds, duration_seconds FROM watch_progress WHERE profile_id = ?1 AND id = ?2")?
-        .query_row(params![profile, id], |row| Ok(SavedPosition { position_seconds: row.get(0)?, duration_seconds: row.get(1)? }))
+        .query_row(params![profile, id], |row| {
+            Ok(SavedPosition {
+                position_seconds: row.get(0)?,
+                duration_seconds: row.get(1)?,
+            })
+        })
         .optional()?;
     Ok(found)
 }
@@ -34,6 +39,7 @@ pub fn put(conn: &Connection, profile: i64, id: &str, position: f64, duration: f
 }
 
 pub fn forget(conn: &Connection, profile: i64, id: &str) -> AppResult<()> {
-    conn.prepare_cached("DELETE FROM watch_progress WHERE profile_id = ?1 AND id = ?2")?.execute(params![profile, id])?;
+    conn.prepare_cached("DELETE FROM watch_progress WHERE profile_id = ?1 AND id = ?2")?
+        .execute(params![profile, id])?;
     Ok(())
 }

@@ -11,7 +11,10 @@ pub struct TorrentSources {
 
 impl TorrentSources {
     pub fn new(torrents: Torrents, addr: SocketAddr) -> Self {
-        Self { torrents, origin: format!("http://127.0.0.1:{}", addr.port()) }
+        Self {
+            torrents,
+            origin: format!("http://127.0.0.1:{}", addr.port()),
+        }
     }
 }
 
@@ -29,7 +32,13 @@ impl SourceResolver for TorrentSources {
     fn files<'a>(&'a self, info_hash: &'a str) -> FilesFuture<'a> {
         Box::pin(async move {
             let files = self.torrents.files(info_hash).await?;
-            Ok(files.into_iter().map(|file| SourceFile { index: file.index as u32, path: file.path }).collect())
+            Ok(files
+                .into_iter()
+                .map(|file| SourceFile {
+                    index: file.index as u32,
+                    path: file.path,
+                })
+                .collect())
         })
     }
 }

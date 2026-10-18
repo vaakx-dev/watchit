@@ -37,6 +37,9 @@ impl Titles for CatalogTitles {
         let catalog = self.catalog.clone();
         let ids = vec![title_id.to_owned()];
         let (entries, _) = self.db.run(move |conn| catalog.entries(conn, &ids)).await.ok()?;
-        entries.into_iter().next().map(|entry| TitleName { title: entry.title, year: entry.year })
+        entries.into_iter().next().map(|entry| TitleName {
+            title: entry.title,
+            year: entry.year,
+        })
     }
 }

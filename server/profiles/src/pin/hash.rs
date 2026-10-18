@@ -24,7 +24,10 @@ fn derive(pin: &Pin, salt: &[u8]) -> [u8; KEY_LENGTH] {
 impl PinHash {
     pub fn new(pin: &Pin) -> Self {
         let salt = rand::random::<[u8; SALT_LENGTH]>();
-        Self { salt: salt.to_vec(), hash: derive(pin, &salt).to_vec() }
+        Self {
+            salt: salt.to_vec(),
+            hash: derive(pin, &salt).to_vec(),
+        }
     }
 
     pub fn matches(&self, pin: &Pin) -> bool {

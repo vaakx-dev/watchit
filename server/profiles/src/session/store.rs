@@ -35,7 +35,10 @@ pub fn create(conn: &Connection, profile: i64) -> AppResult<String> {
 pub fn profile(conn: &Connection, token: &str) -> AppResult<Option<i64>> {
     let hash = token_hash(token);
     let mut query = conn.prepare_cached("SELECT profile_id, last_used_at FROM sessions WHERE token_hash = ?")?;
-    let Some((profile, last_used_at)) = query.query_row([&hash], |row| Ok((row.get::<_, i64>(0)?, row.get::<_, i64>(1)?))).optional()? else {
+    let Some((profile, last_used_at)) = query
+        .query_row([&hash], |row| Ok((row.get::<_, i64>(0)?, row.get::<_, i64>(1)?)))
+        .optional()?
+    else {
         return Ok(None);
     };
     let now = now_ms();
@@ -51,6 +54,9 @@ pub fn delete(conn: &Connection, token: &str) -> AppResult<()> {
 }
 
 pub fn revoke(conn: &Connection, profile: i64, keep: Option<&str>) -> AppResult<()> {
-    conn.execute("DELETE FROM sessions WHERE profile_id = ? AND token_hash IS NOT ?", params![profile, keep.map(token_hash)])?;
+    conn.execute(
+        "DELETE FROM sessions WHERE profile_id = ? AND token_hash IS NOT ?",
+        params![profile, keep.map(token_hash)],
+    )?;
     Ok(())
 }

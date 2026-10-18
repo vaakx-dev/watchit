@@ -30,7 +30,9 @@ impl Fields {
     }
 
     pub fn strings(&self, key: &str) -> Option<Vec<String>> {
-        self.value(key).and_then(Value::as_array).map(|values| values.iter().filter_map(Value::as_str).map(str::to_owned).collect())
+        self.value(key)
+            .and_then(Value::as_array)
+            .map(|values| values.iter().filter_map(Value::as_str).map(str::to_owned).collect())
     }
 
     pub fn coordinate(&self, key: &str) -> Option<Option<i64>> {

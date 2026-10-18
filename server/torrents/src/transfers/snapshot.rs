@@ -23,7 +23,11 @@ fn state(entry: &Entry, progress: &Progress) -> State {
 
 fn error(entry: &Entry, progress: &Progress, state: State) -> Option<String> {
     match state {
-        State::Error => progress.stats.as_ref().and_then(|stats| stats.error.clone()).or_else(|| entry.record.error.clone()),
+        State::Error => progress
+            .stats
+            .as_ref()
+            .and_then(|stats| stats.error.clone())
+            .or_else(|| entry.record.error.clone()),
         State::Queued => entry.slot.waiting().map(str::to_owned).or_else(|| entry.file_error.clone()),
         _ => entry.file_error.clone(),
     }
@@ -31,7 +35,15 @@ fn error(entry: &Entry, progress: &Progress, state: State) -> Option<String> {
 
 pub fn snapshot(entry: &Entry) -> Transfer {
     if let Some(moving) = &entry.relocation {
-        return Transfer { state: State::Moving, error: None, download_bps: 0, upload_bps: 0, peers: 0, eta_seconds: None, ..moving.before.clone() };
+        return Transfer {
+            state: State::Moving,
+            error: None,
+            download_bps: 0,
+            upload_bps: 0,
+            peers: 0,
+            eta_seconds: None,
+            ..moving.before.clone()
+        };
     }
     let progress = entry.progress();
     let state = state(entry, &progress);

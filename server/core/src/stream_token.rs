@@ -43,7 +43,11 @@ impl<'a> Claims<'a> {
         let mut parts = text.splitn(3, '.');
         let profile = parts.next()?.parse().ok()?;
         let expires = parts.next()?.parse().ok()?;
-        Some(Self { profile, expires, prefix: parts.next()? })
+        Some(Self {
+            profile,
+            expires,
+            prefix: parts.next()?,
+        })
     }
 }
 
@@ -68,7 +72,12 @@ impl StreamTokens {
     }
 
     pub fn mint(&self, profile: i64, prefix: &str) -> String {
-        let claims = Claims { profile, expires: now() + LIFETIME.as_secs(), prefix }.encode();
+        let claims = Claims {
+            profile,
+            expires: now() + LIFETIME.as_secs(),
+            prefix,
+        }
+        .encode();
         let signature = self.signer(&claims).finalize().into_bytes();
         format!("{}.{}", URL_SAFE_NO_PAD.encode(&claims), URL_SAFE_NO_PAD.encode(signature))
     }

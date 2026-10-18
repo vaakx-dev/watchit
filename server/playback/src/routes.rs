@@ -25,7 +25,11 @@ pub fn router(playback: Arc<Playback>) -> Router {
         .with_state(playback)
 }
 
-async fn create(State(playback): State<Arc<Playback>>, viewer: Viewer, JsonBody(request): JsonBody<CreateSession>) -> AppResult<Json<PlaybackSession>> {
+async fn create(
+    State(playback): State<Arc<Playback>>,
+    viewer: Viewer,
+    JsonBody(request): JsonBody<CreateSession>,
+) -> AppResult<Json<PlaybackSession>> {
     playback.create(&viewer, request).await.map(Json)
 }
 
@@ -36,7 +40,14 @@ async fn remove(State(playback): State<Arc<Playback>>, viewer: Viewer, UrlPath(i
 
 async fn playlist(State(playback): State<Arc<Playback>>, UrlPath(id): UrlPath<String>) -> AppResult<Response> {
     let body = playback.playlist(&id)?;
-    Ok(([(header::CONTENT_TYPE, "application/vnd.apple.mpegurl"), (header::CACHE_CONTROL, "no-cache")], body).into_response())
+    Ok((
+        [
+            (header::CONTENT_TYPE, "application/vnd.apple.mpegurl"),
+            (header::CACHE_CONTROL, "no-cache"),
+        ],
+        body,
+    )
+        .into_response())
 }
 
 async fn init(State(playback): State<Arc<Playback>>, UrlPath(id): UrlPath<String>) -> AppResult<Response> {
@@ -58,7 +69,9 @@ async fn subtitle(State(playback): State<Arc<Playback>>, UrlPath((id, track)): U
 }
 
 fn numbered(name: &str, extension: &str) -> AppResult<u32> {
-    name.strip_suffix(extension).and_then(|number| number.parse().ok()).ok_or_else(|| AppError::not_found("Not found."))
+    name.strip_suffix(extension)
+        .and_then(|number| number.parse().ok())
+        .ok_or_else(|| AppError::not_found("Not found."))
 }
 
 async fn file_response(path: &Path, content_type: &'static str) -> AppResult<Response> {
@@ -68,6 +81,10 @@ async fn file_response(path: &Path, content_type: &'static str) -> AppResult<Res
 }
 
 fn stream_response(file: tokio::fs::File, length: u64, content_type: &'static str) -> Response {
-    let headers = [(header::CONTENT_TYPE, content_type.to_owned()), (header::CONTENT_LENGTH, length.to_string()), (header::CACHE_CONTROL, "no-cache".to_owned())];
+    let headers = [
+        (header::CONTENT_TYPE, content_type.to_owned()),
+        (header::CONTENT_LENGTH, length.to_string()),
+        (header::CACHE_CONTROL, "no-cache".to_owned()),
+    ];
     (headers, Body::from_stream(ReaderStream::new(file))).into_response()
 }

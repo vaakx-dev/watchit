@@ -89,7 +89,17 @@ fn store(conn: &Connection, profile: i64, id: &str, series_id: Option<&str>, mar
          ON CONFLICT(profile_id, id) DO UPDATE SET series_id = excluded.series_id, rating = excluded.rating, status = excluded.status,
            favorite = excluded.favorite, recommended = excluded.recommended, saved = excluded.saved, opened_at = excluded.opened_at",
     )?
-    .execute(params![profile, id, series_id, marks.rating, marks.status, marks.favorite, marks.recommended, marks.saved, marks.opened_at])?;
+    .execute(params![
+        profile,
+        id,
+        series_id,
+        marks.rating,
+        marks.status,
+        marks.favorite,
+        marks.recommended,
+        marks.saved,
+        marks.opened_at
+    ])?;
     Ok(())
 }
 
@@ -101,7 +111,9 @@ fn stamp_status(conn: &Connection, profile: i64, id: &str, status: Option<Status
                  ON CONFLICT(profile_id, id) DO UPDATE SET changed_at = excluded.changed_at",
             )?
             .execute(params![profile, id, now_iso()])?,
-        None => conn.prepare_cached("DELETE FROM library_status_times WHERE profile_id = ?1 AND id = ?2")?.execute(params![profile, id])?,
+        None => conn
+            .prepare_cached("DELETE FROM library_status_times WHERE profile_id = ?1 AND id = ?2")?
+            .execute(params![profile, id])?,
     };
     Ok(())
 }
@@ -119,7 +131,11 @@ pub fn apply(conn: &mut Connection, profile: i64, id: &str, title: &TitleRef, pa
     let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
     let previous = load(&tx, profile, id)?.unwrap_or_default();
     let next = previous.clone().patched(patch);
-    let series_id = if title.kind == MediaKind::Episode { title.series_id.as_deref() } else { None };
+    let series_id = if title.kind == MediaKind::Episode {
+        title.series_id.as_deref()
+    } else {
+        None
+    };
     store(&tx, profile, id, series_id, &next)?;
     if next.status != previous.status {
         stamp_status(&tx, profile, id, next.status)?;
@@ -160,7 +176,7 @@ pub fn all(conn: &Connection, profile: i64) -> AppResult<BTreeMap<String, Person
                 id,
                 rating: row.get(1)?,
                 status: row.get(2)?,
-      
+
                 favorite: row.get(3)?,
                 recommended: row.get(4)?,
                 saved: row.get(5)?,

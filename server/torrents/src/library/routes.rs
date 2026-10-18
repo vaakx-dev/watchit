@@ -17,5 +17,7 @@ pub struct LocalFiles {
 pub async fn files(State(torrents): State<Torrents>, Path(title_id): Path<String>) -> AppResult<Json<LocalFiles>> {
     let title = TitleId::parse(&title_id)?.to_string();
     let transfers = torrents.transfers().await?;
-    Ok(Json(LocalFiles { files: local_files(&transfers, &title) }))
+    Ok(Json(LocalFiles {
+        files: local_files(&transfers, &title),
+    }))
 }

@@ -16,12 +16,22 @@ pub struct Subtitles {
 
 impl Subtitles {
     pub fn new(tools: Tools, directory: PathBuf) -> Self {
-        Self { tools, directory, extractions: Mutex::new(HashMap::new()) }
+        Self {
+            tools,
+            directory,
+            extractions: Mutex::new(HashMap::new()),
+        }
     }
 
     pub async fn webvtt(&self, source: &SourceRef, input: &SourceInput, stream: u32) -> AppResult<PathBuf> {
         let path = self.directory.join(format!("{}-{}-{stream}.vtt", source.info_hash, source.file_index));
-        let extraction = self.extractions.lock().unwrap_or_else(|poisoned| poisoned.into_inner()).entry(path.clone()).or_default().clone();
+        let extraction = self
+            .extractions
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .entry(path.clone())
+            .or_default()
+            .clone();
         extraction.get_or_try_init(|| self.extract(input, stream, path)).await.cloned()
     }
 
@@ -34,7 +44,20 @@ impl Subtitles {
         let output = self
             .tools
             .ffmpeg()
-            .args(["-hide_banner", "-v", "error", "-i", &input.ffmpeg_input(), "-map", &format!("0:{stream}"), "-c:s", "webvtt", "-f", "webvtt", "-y"])
+            .args([
+                "-hide_banner",
+                "-v",
+                "error",
+                "-i",
+                &input.ffmpeg_input(),
+                "-map",
+                &format!("0:{stream}"),
+                "-c:s",
+                "webvtt",
+                "-f",
+                "webvtt",
+                "-y",
+            ])
             .arg(&partial)
             .output()
             .await

@@ -23,7 +23,9 @@ const COLUMNS: &str = "id, name, created_at, is_admin, avatar_seed,
 
 fn avatar(id: i64, seed: i64, version: Option<i64>) -> Avatar {
     match version {
-        Some(version) => Avatar::Image { url: format!("/api/profiles/{id}/avatar?v={version}") },
+        Some(version) => Avatar::Image {
+            url: format!("/api/profiles/{id}/avatar?v={version}"),
+        },
         None => Avatar::Eyes { seed },
     }
 }
@@ -57,7 +59,14 @@ pub fn existing(conn: &Connection, id: i64) -> AppResult<Profile> {
 
 pub fn viewer(conn: &Connection, id: i64) -> AppResult<Option<Viewer>> {
     let mut query = conn.prepare_cached("SELECT is_admin FROM profiles WHERE id = ?")?;
-    Ok(query.query_row([id], |row| Ok(Viewer { profile: id, admin: row.get(0)? })).optional()?)
+    Ok(query
+        .query_row([id], |row| {
+            Ok(Viewer {
+                profile: id,
+                admin: row.get(0)?,
+            })
+        })
+        .optional()?)
 }
 
 fn available_name(conn: &Connection, name: &str, except: Option<i64>) -> AppResult<String> {
@@ -67,7 +76,9 @@ fn available_name(conn: &Connection, name: &str, except: Option<i64>) -> AppResu
         return Err(AppError::bad_request(format!("Profile names are 1 to {NAME_LIMIT} characters.")));
     }
     let wanted = trimmed.to_lowercase();
-    let taken = list(conn)?.into_iter().find(|profile| Some(profile.id) != except && profile.name.to_lowercase() == wanted);
+    let taken = list(conn)?
+        .into_iter()
+        .find(|profile| Some(profile.id) != except && profile.name.to_lowercase() == wanted);
     match taken {
         Some(profile) => Err(AppError::bad_request(format!("A profile named \"{}\" already exists.", profile.name))),
         None => Ok(trimmed.to_owned()),
@@ -83,7 +94,10 @@ pub fn create(conn: &mut Connection, name: &str) -> AppResult<Profile> {
     let first = list(&tx)?.is_empty();
     let name = available_name(&tx, name, None)?;
     let created_at = Utc::now().to_rfc3339_opts(SecondsFormat::Millis, true);
-    tx.execute("INSERT INTO profiles (name, created_at, is_admin) VALUES (?, ?, ?)", params![name, created_at, first])?;
+    tx.execute(
+        "INSERT INTO profiles (name, created_at, is_admin) VALUES (?, ?, ?)",
+        params![name, created_at, first],
+    )?;
     let profile = existing(&tx, tx.last_insert_rowid())?;
     tx.commit()?;
     Ok(profile)
@@ -93,7 +107,10 @@ pub fn update(conn: &mut Connection, id: i64, patch: &ProfilePatch) -> AppResult
     let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
     let profile = existing(&tx, id)?;
     if let Some(name) = &patch.name {
-        tx.execute("UPDATE profiles SET name = ? WHERE id = ?", params![available_name(&tx, name, Some(id))?, id])?;
+        tx.execute(
+            "UPDATE profiles SET name = ? WHERE id = ?",
+            params![available_name(&tx, name, Some(id))?, id],
+        )?;
     }
     if patch.is_admin == Some(false) && only_admin(&tx, &profile)? {
         return Err(AppError::bad_request("Make another profile an admin first. There must always be one."));
@@ -110,13 +127,18 @@ pub fn delete(conn: &mut Connection, id: i64, confirm: &str) -> AppResult<Vec<Pr
     let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
     let profile = existing(&tx, id)?;
     if confirm != profile.name {
-        return Err(AppError::bad_request(format!("Confirm by sending the profile name \"{}\".", profile.name)));
+        return Err(AppError::bad_request(format!(
+            "Confirm by sending the profile name \"{}\".",
+            profile.name
+        )));
     }
     if list(&tx)?.len() == 1 {
         return Err(AppError::bad_request("The last profile cannot be deleted."));
     }
     if only_admin(&tx, &profile)? {
-        return Err(AppError::bad_request("The only admin cannot be deleted. Make another profile an admin first."));
+        return Err(AppError::bad_request(
+            "The only admin cannot be deleted. Make another profile an admin first.",
+        ));
     }
     tx.execute("DELETE FROM profiles WHERE id = ?", [id])?;
     pin::forget(&tx, id)?;

@@ -62,16 +62,26 @@ impl Transfers {
                 resolved.await;
             }
         });
-        waiting.await.map_err(|_| AppError::new(StatusCode::GATEWAY_TIMEOUT, "Torrent metadata did not arrive in time.").retry_after(5))?
+        waiting
+            .await
+            .map_err(|_| AppError::new(StatusCode::GATEWAY_TIMEOUT, "Torrent metadata did not arrive in time.").retry_after(5))?
     }
 
     pub fn select_file(&self, info_hash: &str, index: usize, handle: &Handle) -> AppResult<MetadataFile> {
         let available = engine::files_of(handle).map_err(engine_error)?;
-        let file = available.into_iter().find(|file| file.index == index).ok_or_else(|| AppError::not_found("File not found in torrent."))?;
+        let file = available
+            .into_iter()
+            .find(|file| file.index == index)
+            .ok_or_else(|| AppError::not_found("File not found in torrent."))?;
         let mut entries = self.entries();
         let entry = entries.get_mut(info_hash).ok_or_else(|| AppError::not_found("Transfer not found."))?;
         if !entry.files.iter().any(|known| known.index == index) {
-            entry.files.push(FileRecord { index, name: file.path.clone(), size_bytes: file.size_bytes, title_id: None });
+            entry.files.push(FileRecord {
+                index,
+                name: file.path.clone(),
+                size_bytes: file.size_bytes,
+                title_id: None,
+            });
             entry.files.sort_by_key(|known| known.index);
         }
         entry.record.last_used_at = now();
@@ -86,7 +96,14 @@ impl Transfers {
         if let Some(entry) = self.entries().get_mut(info_hash) {
             entry.readers += 1;
         }
-        Ok((file.path, file.size_bytes, ReaderGuard { transfers: Arc::clone(self), info_hash: info_hash.to_owned() }))
+        Ok((
+            file.path,
+            file.size_bytes,
+            ReaderGuard {
+                transfers: Arc::clone(self),
+                info_hash: info_hash.to_owned(),
+            },
+        ))
     }
 
     pub fn disk_path(&self, handle: &Handle, index: usize) -> AppResult<PathBuf> {
@@ -105,11 +122,23 @@ impl Transfers {
         let handle = self.ready_handle(info_hash).await?;
         let (name, len, guard) = self.start_reading(info_hash, index, &handle)?;
         if self.complete_file(info_hash, index) {
-            let file = tokio::fs::File::open(self.finished_path(info_hash, &handle, index)?).await.map_err(AppError::internal)?;
-            return Ok(OpenedFile { name, len, reader: Box::new(file), guard });
+            let file = tokio::fs::File::open(self.finished_path(info_hash, &handle, index)?)
+                .await
+                .map_err(AppError::internal)?;
+            return Ok(OpenedFile {
+                name,
+                len,
+                reader: Box::new(file),
+                guard,
+            });
         }
         handle.wait_until_initialized().await.map_err(engine_error)?;
         let stream = handle.clone().stream(index).await.map_err(engine_error)?;
-        Ok(OpenedFile { name, len, reader: Box::new(stream), guard })
+        Ok(OpenedFile {
+            name,
+            len,
+            reader: Box::new(stream),
+            guard,
+        })
     }
 }

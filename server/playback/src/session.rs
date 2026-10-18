@@ -37,8 +37,27 @@ pub struct SessionParts {
 impl Session {
     pub fn new(parts: SessionParts) -> Self {
         let response = describe(&parts);
-        let SessionParts { id, owner, source, input, job, token, external, .. } = parts;
-        Self { id, owner, source, input, token, external, response, job, last_access: Mutex::new(Instant::now()) }
+        let SessionParts {
+            id,
+            owner,
+            source,
+            input,
+            job,
+            token,
+            external,
+            ..
+        } = parts;
+        Self {
+            id,
+            owner,
+            source,
+            input,
+            token,
+            external,
+            response,
+            job,
+            last_access: Mutex::new(Instant::now()),
+        }
     }
 
     pub fn touch(&self) {
@@ -52,7 +71,16 @@ impl Session {
 }
 
 fn describe(parts: &SessionParts) -> PlaybackSession {
-    let SessionParts { id, media, mode, token, direct_url, converts_subtitles, external, .. } = parts;
+    let SessionParts {
+        id,
+        media,
+        mode,
+        token,
+        direct_url,
+        converts_subtitles,
+        external,
+        ..
+    } = parts;
     let prefix = session_prefix(id);
     let (protocol, url) = match mode {
         Mode::Direct => (Protocol::File, direct_url.clone()),
@@ -64,11 +92,23 @@ fn describe(parts: &SessionParts) -> PlaybackSession {
         protocol,
         url,
         duration_seconds: media.duration,
-        video: media.video.as_ref().map(|video| VideoInfo { codec: video.codec.clone(), width: video.width, height: video.height, hdr: video.hdr_label().map(str::to_owned) }),
+        video: media.video.as_ref().map(|video| VideoInfo {
+            codec: video.codec.clone(),
+            width: video.width,
+            height: video.height,
+            hdr: video.hdr_label().map(str::to_owned),
+        }),
         audio_tracks: media
             .audio
             .iter()
-            .map(|audio| AudioTrack { index: audio.index, language: audio.language.clone(), title: audio.title.clone(), codec: audio.codec.clone(), channels: audio.channels, default: audio.default })
+            .map(|audio| AudioTrack {
+                index: audio.index,
+                language: audio.language.clone(),
+                title: audio.title.clone(),
+                codec: audio.codec.clone(),
+                channels: audio.channels,
+                default: audio.default,
+            })
             .collect(),
         subtitle_tracks: media
             .subtitles
@@ -79,7 +119,8 @@ fn describe(parts: &SessionParts) -> PlaybackSession {
                 title: subtitle.title.clone(),
                 codec: subtitle.codec.clone(),
                 default: subtitle.default,
-                url: (*converts_subtitles && subtitle.kind == SubtitleKind::Text).then(|| tokenized(&format!("{prefix}subtitles/{}.vtt", subtitle.index), token)),
+                url: (*converts_subtitles && subtitle.kind == SubtitleKind::Text)
+                    .then(|| tokenized(&format!("{prefix}subtitles/{}.vtt", subtitle.index), token)),
                 external: false,
             })
             .chain(external.iter().map(|subtitle| SubtitleTrack {
@@ -88,7 +129,11 @@ fn describe(parts: &SessionParts) -> PlaybackSession {
                 title: Some(subtitle.title.clone()),
                 codec: subtitle.codec.to_owned(),
                 default: false,
-                url: Some(if *converts_subtitles { tokenized(&format!("{prefix}subtitles/{}.vtt", subtitle.index), token) } else { subtitle.input.ffmpeg_input() }),
+                url: Some(if *converts_subtitles {
+                    tokenized(&format!("{prefix}subtitles/{}.vtt", subtitle.index), token)
+                } else {
+                    subtitle.input.ffmpeg_input()
+                }),
                 external: true,
             }))
             .collect(),

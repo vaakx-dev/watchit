@@ -100,7 +100,10 @@ impl Transfers {
     }
 
     pub async fn persist(&self, info_hash: &str) -> AppResult<()> {
-        let saved = self.entries().get(info_hash).map(|entry| (entry.record.clone(), entry.files.clone(), entry.queue_rank));
+        let saved = self
+            .entries()
+            .get(info_hash)
+            .map(|entry| (entry.record.clone(), entry.files.clone(), entry.queue_rank));
         let Some((record, files, rank)) = saved else { return Ok(()) };
         self.db
             .run(move |conn| {

@@ -15,12 +15,21 @@ enum Done {
 
 fn place(file: &Relocation) -> io::Result<Done> {
     if file.to.exists() {
-        return Err(io::Error::new(io::ErrorKind::AlreadyExists, format!("{} already exists", file.to.display())));
+        return Err(io::Error::new(
+            io::ErrorKind::AlreadyExists,
+            format!("{} already exists", file.to.display()),
+        ));
     }
-    let parent = file.to.parent().ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "destination has no folder"))?;
+    let parent = file
+        .to
+        .parent()
+        .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "destination has no folder"))?;
     std::fs::create_dir_all(parent)?;
     let copy = !same_volume(&file.from, parent);
-    let relocation = Relocation { from: file.from.clone(), to: file.to.clone() };
+    let relocation = Relocation {
+        from: file.from.clone(),
+        to: file.to.clone(),
+    };
     if copy {
         std::fs::copy(&file.from, &file.to)?;
         Ok(Done::Copied(relocation))

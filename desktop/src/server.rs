@@ -42,7 +42,9 @@ pub fn start(app: &AppHandle) -> anyhow::Result<u16> {
         ffmpeg_dir: tools::ffmpeg_dir(),
     }))?;
     let port = server.addr().port();
-    app.manage(EmbeddedServer { server: Mutex::new(Some(server)) });
+    app.manage(EmbeddedServer {
+        server: Mutex::new(Some(server)),
+    });
     Ok(port)
 }
 

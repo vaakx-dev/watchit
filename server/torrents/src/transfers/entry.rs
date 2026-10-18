@@ -8,9 +8,9 @@ use super::engine_view::EngineView;
 use super::model::Transfer;
 use super::record::{FileRecord, Record};
 use crate::engine::Handle;
+use crate::locations::{LibraryLink, Moving};
 use crate::queue::Slot;
 use crate::readiness::Tracker;
-use crate::locations::{LibraryLink, Moving};
 
 pub struct Entry {
     pub record: Record,
@@ -81,8 +81,11 @@ impl Entry {
     pub fn progress(&self) -> Progress {
         let stats = self.engine.as_ref().map(|engine| Arc::clone(&engine.stats));
         let have = stats.as_ref().map(|stats| stats.file_progress.as_slice()).unwrap_or_default();
-        let per_file: Vec<(usize, u64)> =
-            self.files.iter().map(|file| (file.index, have.get(file.index).copied().unwrap_or(0).min(file.size_bytes))).collect();
+        let per_file: Vec<(usize, u64)> = self
+            .files
+            .iter()
+            .map(|file| (file.index, have.get(file.index).copied().unwrap_or(0).min(file.size_bytes)))
+            .collect();
         Progress {
             size_bytes: self.files.iter().map(|file| file.size_bytes).sum(),
             downloaded_bytes: per_file.iter().map(|(_, bytes)| bytes).sum(),
@@ -92,7 +95,9 @@ impl Entry {
     }
 
     pub fn file_complete(&self, index: usize) -> bool {
-        let Some(file) = self.files.iter().find(|file| file.index == index) else { return false };
+        let Some(file) = self.files.iter().find(|file| file.index == index) else {
+            return false;
+        };
         self.engine
             .as_ref()
             .and_then(|engine| engine.stats.file_progress.get(index).copied())
