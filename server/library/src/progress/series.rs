@@ -2,6 +2,7 @@ use rusqlite::{Connection, OptionalExtension, params};
 use watchit_catalog::{Catalog, EpisodeEntry, SeriesProgress};
 use watchit_core::AppResult;
 
+use super::store::get;
 use crate::ids::episode_position;
 
 struct Opened {
@@ -58,6 +59,7 @@ pub fn series_progress(conn: &Connection, catalog: &Catalog, profile: i64, serie
             None => catalog.next_episode(conn, series_id, None)?,
         },
     };
+    let resume = next.as_ref().map(|next| get(conn, profile, &next.entry.id)).transpose()?.flatten();
     let opened_at = last.as_ref().and(opened.map(|opened| opened.opened_at));
-    Ok(SeriesProgress { last, next, opened_at })
+    Ok(SeriesProgress { last, next, resume, opened_at })
 }

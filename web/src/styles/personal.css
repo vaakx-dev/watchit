@@ -16,11 +16,11 @@
 .status-eye[data-status="none"] .eye-badge { color: var(--t1); }
 .status-trigger { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; }
 .status-trigger:hover:not(:disabled) { background: var(--s2); }
-.status-trigger.labelled { width: auto; gap: 7px; height: 38px; padding: 0 12px 0 10px; border-radius: var(--radius-button); background: rgb(255 255 255 / .12); font-size: var(--type-card); font-weight: 600; white-space: nowrap; }
-.status-trigger.labelled[data-status] { background: color-mix(in srgb, var(--status) 16%, transparent); }
-.status-trigger.labelled:hover:not(:disabled) { background: rgb(255 255 255 / .18); }
-.status-trigger.labelled .eye { width: 22px; height: 22px; }
-.status-trigger.labelled .lucide-chevron-down { width: 13px; height: 13px; color: var(--t2); }
+.status-trigger.labelled { flex-direction: column; gap: 6px; width: auto; min-width: 64px; height: auto; padding: 6px 4px; border-radius: var(--radius-button); color: var(--t2); font-size: 11.5px; font-weight: 500; white-space: nowrap; }
+.status-trigger.labelled[data-status] { color: var(--status); font-weight: 600; }
+.status-trigger.labelled:hover:not(:disabled) { background: var(--s1); }
+.status-trigger.labelled .eye { width: 24px; height: 24px; }
+.status-trigger.labelled .status-eye[data-status="none"] { color: var(--t1); }
 .status-menu { position: fixed; inset: auto; margin: 0; width: 248px; max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain; padding: 6px; border: 1px solid var(--line); border-radius: var(--radius-panel); background: var(--s1); color: var(--t1); box-shadow: 0 12px 32px rgb(0 0 0 / .5); }
 .status-menu::backdrop { background: transparent; }
 .status-options { display: grid; gap: 2px; }

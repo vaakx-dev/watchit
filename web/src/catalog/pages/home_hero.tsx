@@ -42,10 +42,11 @@ export function TrendingHero({ library }: { library: Library }) {
 
   return <div className="trending-hero" onPointerEnter={() => set_held(true)} onPointerLeave={() => set_held(false)}
     onFocus={() => set_held(true)} onBlur={release}>
-    <Hero key={pick.id} title={resource.data.title} progress={resource.data.progress} reason={<Reason pick={pick} />} library={library} />
-    {picks.length > 1 && <div className="hero-picks" role="group" aria-label="Trending picks">
-      {picks.map((item, position) => <button type="button" key={item.id} aria-label={item.title} aria-pressed={position === index}
-        onClick={() => show(position)} />)}
-    </div>}
+    <Hero key={pick.id} title={resource.data.title} progress={resource.data.progress} reason={<Reason pick={pick} />} library={library}>
+      {picks.length > 1 && <div className="hero-picks" role="group" aria-label="Trending picks">
+        {picks.map((item, position) => <button type="button" key={item.id} aria-label={item.title} aria-pressed={position === index}
+          onClick={() => show(position)} />)}
+      </div>}
+    </Hero>
   </div>;
 }

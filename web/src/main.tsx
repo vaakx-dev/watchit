@@ -17,7 +17,7 @@ import './ui/filters/filters.css';
 import './ui/sheet/sheet.css';
 import './ui/near_end.css';
 import './discover/discover.css';
-import './styles/title.css';
+import './catalog/title/title.css';
 import './styles/playback.css';
 import './playback/player/player.css';
 import './styles/personal.css';

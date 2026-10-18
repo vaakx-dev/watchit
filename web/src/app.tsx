@@ -4,7 +4,7 @@ import { use_history_shortcuts } from './navigation/use_history_shortcuts';
 import { framed } from './title_bar/frame';
 import { Collection } from './catalog/pages/collection';
 import { DiscoverPage } from './discover/discover_page';
-import { TitlePage, TitleSkeleton } from './catalog/pages/title';
+import { TitlePage, TitleSkeleton } from './catalog/title/title_page';
 import { Home } from './catalog/pages/home';
 import { CatalogStatus } from './catalog/components/status';
 import { use_title } from './catalog/api';

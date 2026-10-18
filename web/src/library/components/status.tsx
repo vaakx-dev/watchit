@@ -1,6 +1,5 @@
 import { useId, useImperativeHandle, useLayoutEffect, useRef, useState, type Ref } from 'react';
 import type { CatalogEntry } from '../../catalog/types';
-import { ChevronDown } from 'lucide-react';
 import { menu_step, popover_position } from '../menu';
 import { STATUS_LABELS } from '../status_labels';
 import type { Status } from '../types';
@@ -15,7 +14,7 @@ const ITEMS = '.status-option, .flag-switch';
 
 function trigger_text(status: Status | null, favorite: boolean) {
   if (status) return STATUS_LABELS[status];
-  return favorite ? 'Favourite' : 'Add status';
+  return favorite ? 'Favourite' : 'Status';
 }
 
 export function StatusControls({ title, library, labelled = false, ref }: { title: CatalogEntry; library: Library; labelled?: boolean; ref?: Ref<StatusMenuHandle> }) {
@@ -78,9 +77,7 @@ export function StatusControls({ title, library, labelled = false, ref }: { titl
         event.preventDefault();
         if (menu.current?.matches(':popover-open')) close();
         else show();
-      }}><StatusEye status={status} favorite={favorite} recommended={recommended} />{labelled && <>
-        <span>{trigger_text(status, favorite)}</span><ChevronDown />
-      </>}</button>
+      }}><StatusEye status={status} favorite={favorite} recommended={recommended} />{labelled && <span>{trigger_text(status, favorite)}</span>}</button>
     <div id={id} ref={menu} className="status-menu" popover="auto" role="dialog" aria-label={`Watch status for ${title.title}`}
       onToggle={event => set_open(event.newState === 'open')}
       onKeyDown={event => {

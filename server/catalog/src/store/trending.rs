@@ -6,7 +6,7 @@ use watchit_core::AppResult;
 use crate::clock::{DAY_MS, day, now_ms};
 use crate::model::{CatalogKind, TrendingEntry, TrendingPage};
 use crate::store::browse::{IdFilter, kind_condition, trending_column};
-use crate::store::entry::{ENTRY_COLUMNS, EntryRow, PAGE_SIZE, images, offset};
+use crate::store::entry::{ENTRY_COLUMNS, ENTRY_WIDTH, EntryRow, PAGE_SIZE, images, offset};
 
 const HISTORY_DAYS: i64 = 30;
 
@@ -39,7 +39,7 @@ pub(crate) fn page(conn: &Connection, artwork: &Artwork, kind: CatalogKind, page
     );
     let mut statement = conn.prepare_cached(&sql)?;
     let mut rows: Vec<(EntryRow, i64)> = statement
-        .query_map(rusqlite::params_from_iter(parameters), |row| Ok((EntryRow::read(row)?, row.get(11)?)))?
+        .query_map(rusqlite::params_from_iter(parameters), |row| Ok((EntryRow::read(row)?, row.get(ENTRY_WIDTH)?)))?
         .collect::<rusqlite::Result<_>>()?;
     let has_next = rows.len() > PAGE_SIZE;
     rows.truncate(PAGE_SIZE);

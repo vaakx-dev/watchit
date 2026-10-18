@@ -20,7 +20,12 @@ function details(entry: CatalogEntry, meta: CardMeta) {
   return parts.filter(Boolean).join(' · ');
 }
 
-export const Card = memo(function Card({ entry, library, meta = 'kind' }: { entry: CatalogEntry; library: Library; meta?: CardMeta }) {
+export const Card = memo(function Card({ entry, library, meta = 'kind', position }: {
+  entry: CatalogEntry;
+  library: Library;
+  meta?: CardMeta;
+  position?: number;
+}) {
   const status = useRef<StatusMenuHandle>(null);
   const markable = entry.kind !== 'episode';
   const press = use_long_press(() => status.current?.open());
@@ -31,7 +36,7 @@ export const Card = memo(function Card({ entry, library, meta = 'kind' }: { entr
         <Artwork src={entry.artwork} label={entry.title} />
         {markable && <CardBadge entry={library.entries[entry.id]} />}
       </div>
-      <h3>{entry.title}</h3>
+      <h3>{position !== undefined && `${position} · `}{entry.title}</h3>
       <p className="card-meta">{details(entry, meta)}</p>
     </a>
     {markable && <div className="card-actions">

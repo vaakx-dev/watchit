@@ -17,6 +17,7 @@ export type { ImageCredit } from '../generated/catalog/ImageCredit';
 export type { ImportStatus } from '../generated/catalog/ImportStatus';
 export type { MediaKind } from '../generated/catalog/MediaKind';
 export type { RelatedTitles } from '../generated/catalog/RelatedTitles';
+export type { SavedPosition } from '../generated/catalog/SavedPosition';
 export type { Title } from '../generated/catalog/Title';
 export type { TitleResult } from '../generated/catalog/TitleResult';
 export type { Trailer } from '../generated/catalog/Trailer';

@@ -14,10 +14,10 @@ export function TrailerAction({ title, trailers }: { title: string; trailers: re
   function close() { dialog.current?.close(); }
 
   return <>
-    <button type="button" className="button secondary" aria-haspopup="dialog" onClick={() => {
+    <button type="button" className="title-action" aria-haspopup="dialog" onClick={() => {
       set_playing(first.id);
       dialog.current?.showModal();
-    }}><Film />Trailer</button>
+    }}><Film /><span>Trailer</span></button>
     <dialog ref={dialog} className="trailer-dialog" aria-label={`${title} trailer`} onClose={() => set_playing(null)}
       onClick={event => { if (event.target === event.currentTarget) close(); }}>
       <div className="trailer-panel">

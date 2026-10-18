@@ -3,8 +3,9 @@
 @keyframes hero-in { from { opacity: 0; } }
 .hero-reason { margin-bottom: var(--space-2); color: var(--t2); font-size: var(--type-card); }
 .hero-reason strong { color: var(--t1); font-weight: 700; }
-.hero-picks { position: absolute; right: var(--gutter); bottom: 40px; display: flex; gap: 4px; }
-.hero-picks button { display: flex; align-items: center; width: 28px; height: 24px; }
+.hero-picks { display: flex; gap: 5px; margin-top: var(--space-3); }
+.hero-picks button { display: flex; align-items: center; width: 16px; height: 16px; }
+.hero-picks button[aria-pressed="true"] { width: 24px; }
 .hero-picks button::before { content: ''; width: 100%; height: 3px; border-radius: 2px; background: rgb(255 255 255 / .28); }
 .hero-picks button:hover::before { background: var(--t2); }
 .hero-picks button[aria-pressed="true"]::before { background: var(--t1); }
@@ -13,10 +14,7 @@
 .continue-card { position: relative; min-width: 0; }
 .continue-image { position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--radius-still); background: var(--s1); }
 .continue-image .artwork { position: absolute; inset: 0; }
-.continue-play { position: absolute; right: 8px; bottom: 8px; }
-.continue-image:hover .continue-play { background: var(--t1); color: var(--bg); }
-.continue-status { aspect-ratio: 16 / 9; }
-.continue-card h3 { margin-top: 7px; font-size: var(--type-card); font-weight: 600; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.continue-card h3 { margin-top: 5px; font-size: var(--type-card); font-weight: 600; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .continue-card h3 a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .continue-card .card-meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -25,7 +23,6 @@
 }
 
 @media (max-width: 640px) {
-  .trending-hero .hero-actions > .primary { flex: 1 0 100%; }
-  .hero-picks { position: static; padding: var(--space-3) var(--gutter) 0; }
+  .hero-picks { margin-top: 10px; }
   .shelf-row > .continue-card { width: 190px; }
 }
