@@ -1,11 +1,12 @@
 import { useEffect, useSyncExternalStore } from 'react';
-import { TITLE_ID } from '../catalog/identity';
+import { IMDB_ID, TITLE_ID } from '../catalog/identity';
 import type { CatalogKind } from '../catalog/types';
 import { SHELVES, type Shelf } from '../library/types';
 import { discover_href, parse_discover, type DiscoverQuery } from './discover';
 
 export type Route =
-  | { view: 'tonight' | 'rankings' | 'downloads' | 'profiles' | 'missing' }
+  | { view: 'tonight' | 'rankings' | 'profiles' | 'missing' }
+  | { view: 'downloads'; show: string | null }
   | { view: 'settings'; section: string | null }
   | { view: 'discover'; query: DiscoverQuery }
   | { view: 'mine'; shelf: Shelf }
@@ -51,7 +52,10 @@ export function parse_route(hash: string): Route {
   if (target) return parse_route(target);
   const { pathname, params } = split(hash);
   if (pathname === '/') return { view: 'tonight' };
-  for (const view of ['rankings', 'downloads', 'profiles'] as const) if (pathname === `/${view}`) return { view };
+  for (const view of ['rankings', 'profiles'] as const) if (pathname === `/${view}`) return { view };
+  const downloads = /^\/downloads(?:\/([^/]+))?$/.exec(pathname);
+  const show = downloads?.[1];
+  if (downloads && (!show || IMDB_ID.test(show))) return { view: 'downloads', show: show ?? null };
   const settings = /^\/settings(?:\/([a-z]+))?$/.exec(pathname);
   if (settings) return { view: 'settings', section: settings[1] ?? null };
   if (pathname === '/discover') return { view: 'discover', query: parse_discover(params) };

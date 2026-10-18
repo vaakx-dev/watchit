@@ -2,7 +2,7 @@ import { scroll_to_top } from './navigation/scroll';
 import { useEffect, useRef } from 'react';
 import { use_history_shortcuts } from './navigation/use_history_shortcuts';
 import { framed } from './title_bar/frame';
-import { Collection } from './catalog/pages/collection';
+import { DiscoverPage } from './discover/discover_page';
 import { SearchPage } from './search/search_page';
 import { TitlePage, TitleSkeleton } from './catalog/pages/title';
 import { Home } from './catalog/pages/home';
@@ -36,7 +36,7 @@ export function App({ profile, profiles, on_profiles_changed }: Props) {
   const result = resource.status === 'ready' ? resource.data : undefined;
   const title = result?.title;
   const name = title?.title;
-  const route_key = 'id' in route ? `${route.view}/${route.id}` : route.view === 'settings' ? `settings/${route.section}` : route.view;
+  const route_key = 'id' in route ? `${route.view}/${route.id}` : route.view === 'settings' ? `settings/${route.section}` : route.view === 'downloads' ? `downloads/${route.show ?? ''}` : route.view;
   const searching = route.view === 'search';
   const watching = route.view === 'watch' && title !== undefined && title.kind !== 'series';
 
@@ -56,7 +56,7 @@ export function App({ profile, profiles, on_profiles_changed }: Props) {
     <main id="main-content" ref={main} tabIndex={-1}>
       {library.error && <div className="library-notice" role="alert"><p>Your library request failed: {library.error} Changes are not confirmed until the server saves them.</p><button className="button secondary small" disabled={library.pending || library.loading} onClick={library.retry}>Reload library</button></div>}
       {route.view === 'tonight' && <Home library={library} />}
-      {route.view === 'discover' && <Collection key={route_key} query={route.query} library={library} />}
+      {route.view === 'discover' && <DiscoverPage query={route.query} library={library} />}
       {route.view === 'search' && <SearchPage query={route.query} library={library} />}
       {route.view === 'mine' && <MyShows shelf={route.shelf} library={library} />}
       {route.view === 'rankings' && <Rankings />}
@@ -64,7 +64,7 @@ export function App({ profile, profiles, on_profiles_changed }: Props) {
       {watching && result && <WatchPage key={result.title.id} result={result} library={library} />}
       {'id' in route && !title && (route.view === 'title' && !failed
         ? <TitleSkeleton /> : <CatalogStatus error={failed && resource.status === 'error' ? resource.error : undefined} retry={retry} />)}
-      {route.view === 'downloads' && <DownloadsPage />}
+      {route.view === 'downloads' && <DownloadsPage show={route.show} />}
       {route.view === 'settings' && <SettingsPage section={route.section} profile={profile} profiles={profiles} on_profiles_changed={on_profiles_changed} />}
       {route.view === 'profiles' && <div className="page-gutter"><ProfilePicker profiles={profiles} current={profile} on_changed={on_profiles_changed} /></div>}
       {route.view === 'missing' && <div className="not-found"><EmptyState title="That page is not in the catalog."><a className="button primary" href="#/">Back to Tonight</a></EmptyState></div>}

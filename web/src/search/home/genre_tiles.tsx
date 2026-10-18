@@ -1,6 +1,6 @@
 import { use_catalog } from '../../catalog/api';
+import { genre_color } from '../../discover/genres/genre_colors';
 import { discover_href } from '../../navigation/discover';
-import { hue } from '../../ui/hue';
 
 export function GenreTiles() {
   const { resource } = use_catalog({ kind: 'all', sort: 'trending' });
@@ -9,10 +9,9 @@ export function GenreTiles() {
 
   return <section className="search-section" aria-labelledby="search-browse">
     <div className="search-heading"><h2 id="search-browse">Browse</h2></div>
-    <ul className="genre-tiles">
-      {genres.map(genre => <li key={genre.id}>
-        <a href={discover_href({ genre: genre.id })} style={{ backgroundColor: `hsl(${hue(genre.id)} 34% 17%)` }}>{genre.label}</a>
-      </li>)}
-    </ul>
+    <div className="genre-tiles">
+      {genres.map(genre => <a key={genre.id} className="genre-tile" href={discover_href({ genre: genre.id })}
+        style={{ backgroundColor: genre_color(genre.id) }}>{genre.label}</a>)}
+    </div>
   </section>;
 }

@@ -35,7 +35,7 @@ pub(crate) fn canonical_ids(id: &str) -> Vec<&str> {
 
 fn canonical_label(id: &str) -> Option<&'static str> {
     Some(match id {
-        "science-fiction" => "Science Fiction",
+        "science-fiction" => "Sci-Fi",
         "fantasy" => "Fantasy",
         "action" => "Action",
         "adventure" => "Adventure",
