@@ -6683,7 +6683,7 @@ dependencies = [
 
 [[package]]
 name = "watchit-artwork"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "axum",
  "fast_image_resize",
@@ -6708,7 +6708,7 @@ dependencies = [
 
 [[package]]
 name = "watchit-catalog"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "axum",
  "chrono",
@@ -6728,7 +6728,7 @@ dependencies = [
 
 [[package]]
 name = "watchit-core"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "axum",
  "base64 0.23.1",
@@ -6747,7 +6747,7 @@ dependencies = [
 
 [[package]]
 name = "watchit-desktop"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "anyhow",
  "cc",
@@ -6767,7 +6767,7 @@ dependencies = [
 
 [[package]]
 name = "watchit-library"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "axum",
  "chrono",
@@ -6782,7 +6782,7 @@ dependencies = [
 
 [[package]]
 name = "watchit-playback"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "axum",
  "reqwest 0.12.28",
@@ -6798,7 +6798,7 @@ dependencies = [
 
 [[package]]
 name = "watchit-profiles"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "axum",
  "base64 0.23.1",
@@ -6820,7 +6820,7 @@ dependencies = [
 
 [[package]]
 name = "watchit-remote"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "axum",
  "if-addrs",
@@ -6834,7 +6834,7 @@ dependencies = [
 
 [[package]]
 name = "watchit-server"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -6860,7 +6860,7 @@ dependencies = [
 
 [[package]]
 name = "watchit-torrents"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "anyhow",
  "async-trait",
