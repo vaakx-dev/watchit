@@ -1,0 +1,14 @@
+.filter-chip { display: inline-flex; flex: none; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: var(--radius-full); background: var(--s2); color: var(--t2); font-size: var(--type-card); font-weight: 500; white-space: nowrap; }
+.filter-chip:hover { color: var(--t1); }
+.filter-chip[data-set] { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); font-weight: 600; }
+.filter-chip .lucide { width: 13px; height: 13px; }
+.filter-chip .lucide-chevron-down { opacity: .8; }
+.filter-chip.clearable { gap: 0; padding: 0; }
+.filter-chip.clearable > button { display: inline-flex; align-items: center; height: 100%; border-radius: var(--radius-full); }
+.filter-chip.clearable > button:first-child { padding: 0 4px 0 12px; }
+.filter-chip.clearable > button:last-child { padding: 0 12px 0 4px; }
+.filter-chip.clearable > button:focus-visible { outline-offset: -2px; }
+
+.filter-switch > .segmented { display: flex; gap: 0; padding: 3px; border-radius: var(--radius-full); background: var(--s1); }
+.filter-switch > .segmented > button { flex: 1; justify-content: center; padding: 6px 12px; border-radius: var(--radius-full); font-size: var(--type-card); }
+.filter-switch > .segmented > button[aria-pressed="true"] { font-weight: 700; }

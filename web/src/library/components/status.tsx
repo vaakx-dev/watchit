@@ -1,4 +1,4 @@
-import { useId, useLayoutEffect, useRef, useState } from 'react';
+import { useId, useImperativeHandle, useLayoutEffect, useRef, useState, type Ref } from 'react';
 import type { CatalogEntry } from '../../catalog/types';
 import { ChevronDown } from 'lucide-react';
 import { menu_step, popover_position } from '../menu';
@@ -7,8 +7,10 @@ import type { Status } from '../types';
 import type { Library } from '../use_library';
 import { StatusEye } from './eye';
 import { StatusMenu } from './status_menu';
+import { SHEET_QUERY } from '../../ui/sheet/sheet';
 
-const SHEET = '(max-width: 640px), (pointer: coarse)';
+export type StatusMenuHandle = { open: () => void };
+
 const ITEMS = '.status-option, .flag-switch';
 
 function trigger_text(status: Status | null, favorite: boolean) {
@@ -16,7 +18,7 @@ function trigger_text(status: Status | null, favorite: boolean) {
   return favorite ? 'Favourite' : 'Add status';
 }
 
-export function StatusControls({ title, library, labelled = false }: { title: CatalogEntry; library: Library; labelled?: boolean }) {
+export function StatusControls({ title, library, labelled = false, ref }: { title: CatalogEntry; library: Library; labelled?: boolean; ref?: Ref<StatusMenuHandle> }) {
   const id = useId();
   const trigger = useRef<HTMLButtonElement>(null);
   const menu = useRef<HTMLDivElement>(null);
@@ -50,11 +52,13 @@ export function StatusControls({ title, library, labelled = false }: { title: Ca
     };
   }, [open]);
 
+  useImperativeHandle(ref, () => ({ open: show }));
+
   function show() {
     const panel = menu.current;
-    if (!panel) return;
+    if (!panel || !library.ready) return;
     panel.removeAttribute('style');
-    panel.dataset.layout = window.matchMedia(SHEET).matches ? 'sheet' : 'popover';
+    panel.dataset.layout = window.matchMedia(SHEET_QUERY).matches ? 'sheet' : 'popover';
     panel.showPopover();
     set_open(true);
   }

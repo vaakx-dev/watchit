@@ -12,13 +12,12 @@ it('leaves defaults out of the link', () => {
 });
 
 it('round-trips every filter through the link', () => {
-  const query = { kind: 'series', sort: 'top_rated', genre: 'science-fiction', hide: ['watched', 'dropped'], page: 3 } as const;
-  const href = discover_href({ ...query, hide: [...query.hide] });
-  expect(href).toBe('#/discover?type=series&sort=top_rated&genre=science-fiction&hide=watched,dropped&page=3');
+  const query = { kind: 'series', sort: 'top_rated', genre: 'science-fiction', hide_watched: false } as const;
+  const href = discover_href(query);
+  expect(href).toBe('#/discover?type=series&sort=top_rated&genre=science-fiction&watched=show');
   expect(parse(href)).toEqual(query);
 });
 
 it('ignores unknown values', () => {
-  expect(parse('#/discover?type=books&sort=random&hide=want,dropped&page=-2')).toEqual({ ...DISCOVER_DEFAULTS, hide: ['dropped'] });
-  expect(parse('#/discover?page=1.5').page).toBe(1);
+  expect(parse('#/discover?type=books&sort=random&watched=maybe')).toEqual(DISCOVER_DEFAULTS);
 });
