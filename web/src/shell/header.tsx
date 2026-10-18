@@ -1,5 +1,5 @@
 import { Settings } from 'lucide-react';
-import type { Route } from '../navigation/route';
+import { section, type Route } from '../navigation/route';
 import { ProfileAvatar } from '../profiles/avatar';
 import type { Profile } from '../profiles/types';
 import { framed } from '../title_bar/frame';
@@ -18,7 +18,7 @@ export function Header({ route, profile }: { route: Route; profile: Profile }) {
       <a href="#/" aria-label="Watchit, Tonight"><Brand /></a>
       <nav aria-label="Main navigation">
         {[TONIGHT, DISCOVER, MINE, RANKINGS, DOWNLOADS].map(item => <a key={item.view} href={item.href}
-          aria-current={route.view === item.view ? 'page' : undefined}>{item.label}</a>)}
+          aria-current={section(route) === item.view ? 'page' : undefined}>{item.label}</a>)}
       </nav>
       <SearchField query={searching ? route.query : null} />
       <a className="icon-button ghost" href="#/settings" aria-label="Settings" title="Settings"

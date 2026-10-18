@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
-use watchit_catalog::CatalogKind;
+use watchit_catalog::{CatalogEntry, CatalogKind};
 
 use crate::present::required;
 use crate::rating::Rating;
@@ -35,4 +35,11 @@ pub struct Rankings {
 pub struct RankingMove {
     #[serde(deserialize_with = "required")]
     pub before: Option<String>,
+}
+
+#[derive(Serialize, TS)]
+#[ts(export_to = "library/")]
+pub struct UnratedTitles {
+    pub kind: CatalogKind,
+    pub titles: Vec<CatalogEntry>,
 }

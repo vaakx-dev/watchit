@@ -3,7 +3,7 @@ use axum::extract::State;
 use watchit_core::{AppResult, JsonBody, Viewer};
 
 use super::store;
-use super::types::{RankingMove, Rankings};
+use super::types::{RankingMove, Rankings, UnratedTitles};
 use crate::Library;
 use crate::ids::{TitleId, title_id};
 use crate::query::Params;
@@ -12,6 +12,12 @@ pub async fn show(State(library): State<Library>, viewer: Viewer, params: Params
     let kind = params.kind()?;
     let catalog = library.catalog.clone();
     library.db.run(move |conn| store::rankings(conn, &catalog, viewer.profile, kind)).await.map(Json)
+}
+
+pub async fn unrated(State(library): State<Library>, viewer: Viewer, params: Params) -> AppResult<Json<UnratedTitles>> {
+    let kind = params.kind()?;
+    let catalog = library.catalog.clone();
+    library.db.run(move |conn| store::unrated(conn, &catalog, viewer.profile, kind)).await.map(Json)
 }
 
 pub async fn place(

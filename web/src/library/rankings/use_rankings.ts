@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { use_resource } from '../catalog/api';
-import { request } from '../catalog/client';
-import { remember } from '../cache/responses';
-import type { CatalogKind } from '../catalog/types';
-import { create_queue } from './queue';
+import { use_resource } from '../../catalog/api';
+import { request } from '../../catalog/client';
+import { remember } from '../../cache/responses';
+import type { CatalogKind } from '../../catalog/types';
+import { create_queue } from '../queue';
 import * as moves from './ranking_moves';
-import type { Rankings } from './types';
+import type { Rankings } from '../types';
 
 export function use_rankings(kind: CatalogKind) {
   const url = `/api/rankings?kind=${kind}`;

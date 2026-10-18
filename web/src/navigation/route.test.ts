@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest';
 import { DISCOVER_DEFAULTS } from './discover';
+import { RANKINGS_DEFAULTS } from './rankings';
 import { legacy_target, parse_route, search_route } from './route';
 
 it('parses canonical title links and search terms', () => {
@@ -17,7 +18,7 @@ it('parses the main destinations and their filters', () => {
   expect(parse_route('#/mine?status=paused')).toEqual({ view: 'mine', shelf: 'paused' });
   expect(parse_route('#/mine?status=favorite')).toEqual({ view: 'mine', shelf: 'favorite' });
   expect(parse_route('#/mine?view=recent')).toEqual({ view: 'mine', shelf: 'recent' });
-  expect(parse_route('#/rankings')).toEqual({ view: 'rankings' });
+  expect(parse_route('#/rankings')).toEqual({ view: 'rankings', query: RANKINGS_DEFAULTS });
   expect(parse_route('#/settings')).toEqual({ view: 'settings', section: null });
   expect(parse_route('#/profiles')).toEqual({ view: 'profiles' });
 });

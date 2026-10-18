@@ -1,8 +1,9 @@
+import { GripVertical } from 'lucide-react';
 import { useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { Artwork } from '../../catalog/components/artwork';
-import { StatusEye } from '../components/eye';
-import { before_of, move, step, type Move } from '../ranking_moves';
 import type { RankedItem, Rankings } from '../types';
+import { PODIUM_SIZE } from './podium';
+import { before_of, move, step, type Move } from './ranking_moves';
 import { Stars } from './stars';
 
 type Drag = Move & { origin: string | null };
@@ -13,7 +14,7 @@ function target(rankings: Rankings, id: string, rows: Map<string, HTMLElement>, 
   const tier = rankings.tiers.find(candidate => candidate.items.some(item => item.title.id === id));
   for (const item of tier?.items ?? []) {
     const rect = item.title.id === id ? undefined : rows.get(item.title.id)?.getBoundingClientRect();
-    if (rect && y < rect.top + rect.height / 2) return item.title.id;
+    if (rect && rect.height && y < rect.top + rect.height / 2) return item.title.id;
   }
   return null;
 }
@@ -75,10 +76,10 @@ export function RankedList({ rankings, reorder }: { rankings: Rankings; reorder:
   }
 
   return <>
-    <p className="ranking-hint" id={hint}>Drag a handle, or focus it and press ↑ or ↓, to reorder titles that share a rating.</p>
+    <p className="sr-only" id={hint}>Press up or down to move it among titles with the same rating.</p>
     <ol className="ranked-list">
       {shown.tiers.flatMap(tier => tier.items.map(item => <li className="ranked-row" key={item.title.id}
-        data-dragging={drag?.id === item.title.id}
+        data-dragging={drag?.id === item.title.id} data-podium={item.rank <= PODIUM_SIZE}
         ref={node => {
           if (node) rows.current.set(item.title.id, node);
           return () => { rows.current.delete(item.title.id); };
@@ -87,12 +88,7 @@ export function RankedList({ rankings, reorder }: { rankings: Rankings; reorder:
         <a className="ranked-poster" href={`#/title/${item.title.id}`} tabIndex={-1} aria-hidden="true"><Artwork src={item.title.artwork} label={item.title.title} /></a>
         <div className="ranked-copy">
           <h3><a href={`#/title/${item.title.id}`}>{item.title.title}</a></h3>
-          <p>
-            <Stars value={tier.rating} />
-            <StatusEye status={item.entry.status} favorite={item.entry.favorite} recommended={item.entry.recommended} />
-            {item.entry.favorite && <span className="sr-only">Favourite</span>}
-            {item.entry.recommended && <span className="sr-only">Recommended</span>}
-          </p>
+          <Stars value={tier.rating} />
         </div>
         <button type="button" className="ranked-handle" disabled={tier.items.length < 2}
           aria-label={`Move ${item.title.title}, number ${item.rank}`} aria-describedby={hint}
@@ -100,7 +96,7 @@ export function RankedList({ rankings, reorder }: { rankings: Rankings; reorder:
           onPointerMove={event => follow(item, event)}
           onPointerUp={() => drop(item)}
           onPointerCancel={() => set_drag(null)}
-          onKeyDown={event => nudge(item, event)} />
+          onKeyDown={event => nudge(item, event)}><GripVertical /></button>
       </li>))}
     </ol>
     <p className="sr-only" aria-live="polite">{announcement}</p>

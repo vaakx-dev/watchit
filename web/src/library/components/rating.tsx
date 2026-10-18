@@ -3,11 +3,13 @@ import { Star } from 'lucide-react';
 import { at, step } from '../rating';
 import type { Rating } from '../types';
 
-export function RatingControl({ value, on_change, disabled = false, title }: {
+export function RatingControl({ value, on_change, disabled = false, title, caption, commit_on_enter = false }: {
   value: Rating | null;
   on_change: (value: Rating | null) => Promise<boolean>;
   disabled?: boolean;
   title: string;
+  caption?: (value: Rating | null) => string;
+  commit_on_enter?: boolean;
 }) {
   const [draft, set_draft] = useState<Rating | null | undefined>();
   const dragging = useRef(false);
@@ -29,18 +31,25 @@ export function RatingControl({ value, on_change, disabled = false, title }: {
     set_draft(undefined);
   }
 
-  return <div className="rating-control">
+  return <div className={caption ? 'rating-control captioned' : 'rating-control'}>
     <div className="rating-input" role="slider" tabIndex={disabled ? -1 : 0} aria-label={`Rating for ${title}`}
       aria-valuemin={0} aria-valuemax={5} aria-valuenow={displayed ?? 0}
       aria-valuetext={displayed === null ? 'Not rated' : `${displayed} out of 5 stars`} aria-disabled={disabled}
       title="Rate in half-star steps. Arrow keys adjust; Delete clears."
       onKeyDown={event => {
         if (disabled || dragging.current) return;
-        const next = step(value, event.key);
+        if (commit_on_enter && (event.key === 'Enter' || event.key === ' ')) {
+          event.preventDefault();
+          if (draft !== undefined) commit(draft);
+          return;
+        }
+        const next = step(commit_on_enter ? displayed : value, event.key);
         if (next === undefined) return;
         event.preventDefault();
-        void commit(next);
+        if (commit_on_enter) set_draft(next);
+        else commit(next);
       }}
+      onBlur={() => { if (!dragging.current) set_draft(undefined); }}
       onPointerDown={event => {
         if (disabled || !event.isPrimary || event.button !== 0) return;
         event.preventDefault();
@@ -68,6 +77,7 @@ export function RatingControl({ value, on_change, disabled = false, title }: {
         </span>)}
       </span>
     </div>
-    {displayed !== null && <span className="rating-value" aria-hidden="true">{displayed}</span>}
+    {caption ? <span className="rating-caption" aria-hidden="true">{caption(displayed)}</span>
+      : displayed !== null && <span className="rating-value" aria-hidden="true">{displayed}</span>}
   </div>;
 }

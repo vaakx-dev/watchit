@@ -10,7 +10,8 @@ import { use_title } from './catalog/api';
 import { ReadyNotifications } from './downloads/notify/ready_notifications';
 import { DownloadsPage } from './downloads/downloads_page';
 import { MyShows } from './library/pages/my_shows';
-import { Rankings } from './library/pages/rankings';
+import { QuickRatePage } from './library/rankings/rate/quick_rate_page';
+import { RankingsPage } from './library/rankings/rankings_page';
 import { use_library } from './library/use_library';
 import { use_library_refresh } from './library/use_library_refresh';
 import { use_route } from './navigation/route';
@@ -57,7 +58,8 @@ export function App({ profile, profiles, on_profiles_changed }: Props) {
       {route.view === 'tonight' && <Home library={library} />}
       {(route.view === 'discover' || route.view === 'search') && <Collection key={route_key} route={route} library={library} />}
       {route.view === 'mine' && <MyShows shelf={route.shelf} library={library} />}
-      {route.view === 'rankings' && <Rankings />}
+      {route.view === 'rankings' && <RankingsPage query={route.query} library={library} />}
+      {route.view === 'rate' && <QuickRatePage query={route.query} library={library} />}
       {(route.view === 'title' || (route.view === 'watch' && title?.kind === 'series')) && result && <TitlePage key={result.title.id} result={result} library={library} />}
       {watching && result && <WatchPage key={result.title.id} result={result} library={library} />}
       {'id' in route && !title && (route.view === 'title' && !failed

@@ -62,6 +62,7 @@ pub fn router(library: Library) -> Router {
         .route("/api/library/{id}/seasons/{season}", patch(seasons::update))
         .route("/api/library/{id}/playback", patch(playback_source::update))
         .route("/api/rankings", get(rankings::show))
+        .route("/api/rankings/unrated", get(rankings::unrated))
         .route("/api/rankings/{id}", patch(rankings::place))
         .route("/api/progress/{id}", put(progress::save).delete(progress::clear))
         .with_state(library)
@@ -76,6 +77,7 @@ pub fn export_types(config: &Config) -> Result<(), ExportError> {
     shelves::ContinuePage::export_all(config)?;
     rankings::Rankings::export_all(config)?;
     rankings::RankingMove::export_all(config)?;
+    rankings::UnratedTitles::export_all(config)?;
     playback_source::PlaybackPreference::export_all(config)?;
     playback_source::SourcePatch::export_all(config)?;
     progress::ProgressSaved::export_all(config)?;

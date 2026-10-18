@@ -63,6 +63,9 @@ main { flex: 1 1 auto; min-width: 0; min-height: 0; overflow-y: auto; }
 .chips > button { height: 28px; padding: 0 11px; border-radius: var(--radius-full); background: var(--s2); color: var(--t2); font-size: var(--type-meta); }
 .chips > button:hover { color: var(--t1); }
 .chips > button[aria-pressed="true"] { background: var(--t1); color: #000; }
+.pills > button { padding: 5px 9px; border-radius: var(--radius-full); color: var(--t2); font-size: var(--type-card); }
+.pills > button:hover { color: var(--t1); }
+.pills > button[aria-pressed="true"] { background: var(--s3); color: var(--t1); font-weight: 700; }
 .segmented { display: inline-flex; gap: 2px; padding: 3px; border-radius: 9px; background: var(--s1); }
 .segmented > button { padding: 5px 12px; border-radius: 7px; color: var(--t2); font-size: var(--type-meta); }
 .segmented > button[aria-pressed="true"] { background: var(--s3); color: var(--t1); }

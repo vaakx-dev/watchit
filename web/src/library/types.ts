@@ -13,6 +13,7 @@ export type { RankedItem } from '../generated/library/RankedItem';
 export type { RankingTier } from '../generated/library/RankingTier';
 export type { Rankings } from '../generated/library/Rankings';
 export type { SeasonWatched } from '../generated/library/SeasonWatched';
+export type { UnratedTitles } from '../generated/library/UnratedTitles';
 export type { SeriesProgress } from '../generated/catalog/SeriesProgress';
 export type { Rating, Status };
 

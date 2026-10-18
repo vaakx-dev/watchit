@@ -1,4 +1,4 @@
-import type { RankedItem, Rankings } from './types';
+import type { RankedItem, Rankings } from '../types';
 
 export type Move = { id: string; before: string | null };
 export type PendingMove = Move & { sequence: number };

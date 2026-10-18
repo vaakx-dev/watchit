@@ -2,11 +2,11 @@ use rusqlite::{Connection, OptionalExtension, TransactionBehavior, params};
 use watchit_catalog::{Catalog, CatalogKind};
 use watchit_core::{AppError, AppResult};
 
-use super::types::{RankedItem, RankingTier, Rankings};
+use super::types::{RankedItem, RankingTier, Rankings, UnratedTitles};
 use crate::query::kind_condition;
 use crate::rating::Rating;
 use crate::shelves::build_items;
-use crate::titles::{LIBRARY_TITLES, LibraryRow, RANKING_ORDER};
+use crate::titles::{LIBRARY_TITLES, LibraryRow, RANKING_ORDER, RECENT_ORDER};
 
 fn tier(conn: &Connection, profile: i64, rating: Rating, except: &str) -> AppResult<Vec<String>> {
     let sql = format!("{LIBRARY_TITLES} SELECT id FROM lib WHERE rating = ?2 AND id <> ?3 ORDER BY {RANKING_ORDER}");
@@ -73,4 +73,14 @@ pub fn rankings(conn: &Connection, catalog: &Catalog, profile: i64, kind: Catalo
         tier.items.push(RankedItem { item, rank: index + 1, position });
     }
     Ok(Rankings { kind, tiers })
+}
+
+pub fn unrated(conn: &Connection, catalog: &Catalog, profile: i64, kind: CatalogKind) -> AppResult<UnratedTitles> {
+    let sql = format!(
+        "{LIBRARY_TITLES} SELECT id FROM lib WHERE status = 'watched' AND rating IS NULL AND {} ORDER BY {RECENT_ORDER}",
+        kind_condition(kind)
+    );
+    let ids: Vec<String> = conn.prepare_cached(&sql)?.query_map([profile], |row| row.get(0))?.collect::<rusqlite::Result<_>>()?;
+    let (titles, _) = catalog.entries(conn, &ids)?;
+    Ok(UnratedTitles { kind, titles })
 }

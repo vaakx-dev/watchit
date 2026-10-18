@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { accept, before_of, confirm, enqueue, move, reject, shown, step, type RankingState } from './ranking_moves';
-import type { RankedItem, Rankings } from './types';
+import type { RankedItem, Rankings } from '../types';
 
 function item(id: string, rank: number, position: number): RankedItem {
   return {
