@@ -1,23 +1,18 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { GridSkeleton } from '../../catalog/components/skeleton';
 import { CatalogStatus } from '../../catalog/components/status';
 import type { CatalogKind } from '../../catalog/types';
 import { discover_route } from '../../navigation/route';
-import { scroll_to_top } from '../../navigation/scroll';
 import { EmptyState } from '../../ui/empty_state';
+import { NearEnd } from '../../ui/near_end';
 import { plural } from '../pages/kinds';
-import type { LibraryPage, LibrarySort, Shelf } from '../types';
+import type { LibraryPage, LibraryQuery, LibrarySort, Shelf } from '../types';
 import type { Library } from '../use_library';
 import { use_library_titles } from '../use_library_titles';
-import { LibraryCard } from './library_card';
-import { LibraryRow } from './library_row';
 import { ShelfPills } from './shelf_pills';
+import { Loading, NextShelfPage, ShelfItems } from './shelf_items';
 import { SHELF_LABELS, default_sort, default_view, type View } from './shelves';
 import { Tools } from './tools';
 import './my_shows.css';
-
-const PAGE_SIZE = 24;
 
 const EMPTY: Record<Shelf, { title: string; next: string }> = {
   want: { title: 'Nothing in Want', next: 'Choose Want from a title’s eye menu to line it up for later.' },
@@ -42,66 +37,49 @@ function Empty({ shelf, kind, show_all }: { shelf: Shelf; kind: CatalogKind; sho
   </EmptyState>;
 }
 
-function ListSkeleton() {
-  return <div role="status" aria-label="Loading titles">
-    <ul className="myshows-list" aria-hidden="true">{Array.from({ length: 6 }, (_, index) => <li className="myshows-row" key={index}>
-      <div className="myshows-poster skeleton-block" /><div className="myshows-copy"><span className="skeleton-line" /><span className="skeleton-line" /></div>
-    </li>)}</ul>
+function Results({ first, query, view, library, show_all }: {
+  first: LibraryPage | undefined;
+  query: Omit<LibraryQuery, 'page'>;
+  view: View;
+  library: Library;
+  show_all: () => void;
+}) {
+  const [pages, set_pages] = useState(1);
+  const more = () => set_pages(count => count + 1);
+  const className = view === 'grid' ? 'myshows-grid' : 'myshows-list';
+  if (!first) return <div className={className} role="status" aria-label="Loading titles"><Loading view={view} /></div>;
+  if (!first.items.length) return <Empty shelf={query.shelf} kind={query.kind} show_all={show_all} />;
+
+  return <div className={className}>
+    <ShelfItems items={first.items} shelf={query.shelf} view={view} library={library} />
+    {pages === 1 && first.has_next && <NearEnd on_reach={more} />}
+    {Array.from({ length: pages - 1 }, (_, index) => <NextShelfPage key={index + 2} query={{ ...query, page: index + 2 }}
+      view={view} last={index + 2 === pages} library={library} on_more={more} />)}
   </div>;
-}
-
-function Titles({ data, shelf, view, library }: { data: LibraryPage; shelf: Shelf; view: View; library: Library }) {
-  if (view === 'grid') return <ul className="myshows-grid">
-    {data.items.map(item => <LibraryCard key={item.title.id} item={item} shelf={shelf} library={library} />)}
-  </ul>;
-  return <ul className="myshows-list">{data.items.map(item => <LibraryRow key={item.title.id} item={item} shelf={shelf} library={library} />)}</ul>;
-}
-
-function fresh(shelf: Shelf) {
-  return { shelf, sort: default_sort(shelf), page: 1 };
 }
 
 export function MyShows({ shelf, library }: { shelf: Shelf; library: Library }) {
   const [kind, set_kind] = useState<CatalogKind>('all');
+  const [sorts, set_sorts] = useState<Partial<Record<Shelf, LibrarySort>>>({});
   const [views, set_views] = useState<Partial<Record<Shelf, View>>>({});
-  const [browse, set_browse] = useState(() => fresh(shelf));
-  const current = browse.shelf === shelf ? browse : fresh(shelf);
+  const sort = sorts[shelf] ?? default_sort(shelf);
   const view = views[shelf] ?? default_view(shelf);
-  const { resource, retry } = use_library_titles({ shelf, kind, sort: current.sort, page: current.page }, library);
-  const data = resource.status === 'ready' ? resource.data : undefined;
-  const [counts, set_counts] = useState(data?.counts);
-  if (data && data.counts !== counts) set_counts(data.counts);
-
-  function change_kind(next: CatalogKind) {
-    set_kind(next);
-    set_browse({ ...current, page: 1 });
-  }
-
-  function change_sort(sort: LibrarySort) {
-    set_browse({ ...current, sort, page: 1 });
-  }
-
-  function change_page(page: number) {
-    set_browse({ ...current, page });
-    scroll_to_top();
-  }
+  const query = { shelf, kind, sort };
+  const { resource, retry } = use_library_titles({ ...query, page: 1 }, library);
+  const first = resource.status === 'ready' ? resource.data : undefined;
+  const [counts, set_counts] = useState(first?.counts);
+  if (first && first.counts !== counts) set_counts(first.counts);
 
   return <section className="myshows page-gutter" aria-labelledby="page-title">
     <h1 className="sr-only" id="page-title">My shows</h1>
     <ShelfPills shelf={shelf} counts={counts} />
-    <Tools kind={kind} sort={current.sort} view={view} on_kind={change_kind} on_sort={change_sort}
+    <Tools kind={kind} sort={sort} sort_set={sort !== default_sort(shelf)} view={view} on_kind={set_kind}
+      on_sort={next => set_sorts({ ...sorts, [shelf]: next })}
       on_view={next => set_views({ ...views, [shelf]: next })} />
     <div className="myshows-body">
-      {resource.status === 'error' && <CatalogStatus error={resource.error} retry={retry} />}
-      {resource.status !== 'error' && !data && (view === 'grid' ? <GridSkeleton /> : <ListSkeleton />)}
-      {data && (data.items.length
-        ? <Titles data={data} shelf={shelf} view={view} library={library} />
-        : <Empty shelf={shelf} kind={kind} show_all={() => change_kind('all')} />)}
-      {data && (current.page > 1 || data.has_next) && <nav className="pagination" aria-label={`${SHELF_LABELS[shelf]} pages`}>
-        <button className="button secondary" disabled={current.page === 1} onClick={() => change_page(current.page - 1)}><ChevronLeft />Previous</button>
-        <span aria-live="polite">Page {data.page} of {Math.max(1, Math.ceil(data.total / PAGE_SIZE))}</span>
-        <button className="button secondary" disabled={!data.has_next} onClick={() => change_page(current.page + 1)}>Next<ChevronRight /></button>
-      </nav>}
+      {resource.status === 'error'
+        ? <CatalogStatus error={resource.error} retry={retry} />
+        : <Results key={`${shelf}:${kind}:${sort}`} first={first} query={query} view={view} library={library} show_all={() => set_kind('all')} />}
     </div>
   </section>;
 }

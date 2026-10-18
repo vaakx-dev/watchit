@@ -1,7 +1,7 @@
 import { useId } from 'react';
 import { SectionHeader } from '../../ui/section_header';
 
-function CardSkeleton() {
+export function CardSkeleton() {
   return <div className="title-card" aria-hidden="true">
     <div className="card-image skeleton-block" />
     <span className="skeleton-line skeleton-card-title" />

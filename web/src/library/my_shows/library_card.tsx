@@ -22,7 +22,7 @@ export function LibraryCard({ item, shelf, library }: { item: LibraryItem; shelf
   const menu = use_status_menu(title, library);
   const press = use_long_press(menu.show);
 
-  return <li className="myshows-card" {...press}>
+  return <article className="myshows-card" {...press}>
     <a className="card-link" href={`#/title/${title.id}`} title={title.title}>
       <div className="card-image"><Artwork src={title.artwork} label={title.title} /></div>
       <h3>{title.title}</h3>
@@ -30,5 +30,5 @@ export function LibraryCard({ item, shelf, library }: { item: LibraryItem; shelf
     {shelf === 'watched' ? <CardRating title={title} library={library} /> : <p className="card-meta">{length_line(item)}</p>}
     <div className="myshows-card-more"><StatusMore menu={menu} title={title.title} /></div>
     {menu.panel}
-  </li>;
+  </article>;
 }

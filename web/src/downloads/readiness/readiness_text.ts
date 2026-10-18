@@ -1,13 +1,10 @@
 import type { Readiness } from '../../torrents/types';
+import { duration_text } from './duration_text';
 
 function wait_text(seconds: number) {
   if (seconds < 60) return 'under a minute';
-  const minutes = Math.round(seconds / 60);
-  if (minutes < 60) return `about ${minutes} min`;
-  const hours = Math.floor(minutes / 60);
-  if (hours >= 24) return 'over a day';
-  const rest = minutes % 60;
-  return rest ? `about ${hours} h ${rest} min` : `about ${hours} h`;
+  if (seconds >= 86400) return 'over a day';
+  return `about ${duration_text(seconds)}`;
 }
 
 export function readiness_text(readiness: Readiness) {

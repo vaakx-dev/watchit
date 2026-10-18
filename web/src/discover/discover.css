@@ -1,0 +1,26 @@
+.discover { padding-bottom: var(--space-6); }
+.discover-bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: var(--space-2); margin: 0 calc(var(--gutter) * -1); padding: 14px var(--gutter); background: var(--bg); }
+.discover-bar .filter-switch { flex: none; width: 300px; }
+.discover-chips { display: flex; gap: var(--space-2); min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.discover-chips::-webkit-scrollbar { display: none; }
+.discover-count { flex: none; margin-left: auto; font-size: var(--type-meta); color: var(--t3); }
+.discover-summary { display: none; justify-content: space-between; gap: var(--space-3); margin-bottom: 10px; font-size: var(--type-meta); color: var(--t3); }
+.discover .title-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--space-4) 14px; }
+.results-retry { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-3); padding: var(--space-5) 0; font-size: var(--type-card); color: var(--t2); }
+
+.genre-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+.genre-sheet[data-layout="popover"] { width: 440px; }
+.genre-sheet[data-layout="popover"] .genre-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.genre-tile { position: relative; display: flex; align-items: flex-end; height: 50px; padding: 8px 10px; border-radius: var(--radius-button); text-align: left; font-size: var(--type-card); font-weight: 700; line-height: 1.2; }
+.genre-tile:hover { filter: brightness(1.18); }
+.genre-tile[aria-pressed="true"] { outline: 2px solid var(--t1); outline-offset: -2px; }
+.genre-tile .lucide { position: absolute; top: 6px; right: 8px; width: 14px; height: 14px; }
+.sort-sheet[data-layout="popover"] { width: 220px; }
+
+@media (max-width: 760px) {
+  .discover-bar { flex-direction: column; align-items: stretch; margin-bottom: var(--space-3); padding: 2px var(--gutter) 10px; border-bottom: 1px solid var(--rule); }
+  .discover-bar .filter-switch { width: auto; }
+  .discover-count { display: none; }
+  .discover-summary { display: flex; }
+  .discover .title-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3) 10px; }
+}

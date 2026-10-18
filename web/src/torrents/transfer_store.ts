@@ -27,7 +27,7 @@ export function upsert_transfer(transfer: Transfer) {
   publish({ transfers: [...others, transfer].sort((a, b) => b.added_at - a.added_at) });
 }
 
-export function update_speed(speed: SpeedStatus) {
+function update_speed(speed: SpeedStatus) {
   publish({ speed });
 }
 

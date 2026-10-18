@@ -1,48 +1,47 @@
 import { useRef, type MouseEvent, type PointerEvent } from 'react';
 
-const HOLD_MS = 500;
-const SLOP_PX = 10;
-
-function in_popover(event: MouseEvent) {
-  return event.target instanceof Element && event.target.closest('[popover]') !== null;
-}
+const DELAY_MS = 450;
+const SLOP = 10;
 
 export function use_long_press(on_press: () => void) {
   const timer = useRef<number | undefined>(undefined);
-  const start = useRef<{ x: number; y: number } | null>(null);
+  const start = useRef({ x: 0, y: 0 });
+  const held = useRef(false);
   const fired = useRef(false);
 
   function cancel() {
     window.clearTimeout(timer.current);
-    start.current = null;
+    timer.current = undefined;
   }
 
-  function fire() {
+  function release() {
     cancel();
-    fired.current = true;
-    on_press();
+    if (!held.current) return;
+    held.current = false;
+    window.setTimeout(on_press);
   }
 
   return {
-    onPointerDown(event: PointerEvent) {
+    onPointerDown(event: PointerEvent<HTMLElement>) {
+      if (event.pointerType === 'mouse') return;
       fired.current = false;
-      if (event.pointerType !== 'touch' || !event.isPrimary || in_popover(event)) return;
       start.current = { x: event.clientX, y: event.clientY };
-      timer.current = window.setTimeout(fire, HOLD_MS);
+      timer.current = window.setTimeout(() => {
+        timer.current = undefined;
+        held.current = true;
+        fired.current = true;
+        navigator.vibrate?.(10);
+      }, DELAY_MS);
     },
-    onPointerMove(event: PointerEvent) {
-      if (start.current && Math.hypot(event.clientX - start.current.x, event.clientY - start.current.y) > SLOP_PX) cancel();
+    onPointerMove(event: PointerEvent<HTMLElement>) {
+      if (timer.current !== undefined && Math.hypot(event.clientX - start.current.x, event.clientY - start.current.y) > SLOP) cancel();
     },
-    onPointerUp: cancel,
-    onPointerCancel: cancel,
-    onContextMenu(event: MouseEvent) {
-      if (in_popover(event)) return;
-      event.preventDefault();
-      if (fired.current) return;
-      if (start.current) fire();
-      else on_press();
+    onPointerUp: release,
+    onPointerCancel: release,
+    onContextMenu(event: MouseEvent<HTMLElement>) {
+      if (timer.current !== undefined || fired.current) event.preventDefault();
     },
-    onClickCapture(event: MouseEvent) {
+    onClickCapture(event: MouseEvent<HTMLElement>) {
       if (!fired.current) return;
       fired.current = false;
       event.preventDefault();

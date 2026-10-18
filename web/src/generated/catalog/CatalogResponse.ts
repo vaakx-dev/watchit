@@ -5,4 +5,4 @@ import type { Freshness } from "./Freshness";
 import type { GenreOption } from "./GenreOption";
 import type { ImportStatus } from "./ImportStatus";
 
-export type CatalogResponse = { imports: ImportStatus, items: Array<CatalogEntry>, page: number, has_next: boolean, genres: Array<GenreOption>, freshness: Freshness, artwork_status: ArtworkStatus, };
+export type CatalogResponse = { imports: ImportStatus, items: Array<CatalogEntry>, page: number, has_next: boolean, total: number, genres: Array<GenreOption>, freshness: Freshness, artwork_status: ArtworkStatus, };

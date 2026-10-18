@@ -4,11 +4,11 @@ import { menu_step, popover_position } from '../menu';
 import { STATUS_LABELS } from '../status_labels';
 import type { Library } from '../use_library';
 import { StatusMenu } from './status_menu';
+import { SHEET_QUERY } from '../../ui/sheet/sheet';
 
-const SHEET = '(max-width: 640px), (pointer: coarse)';
 const ITEMS = '.status-option, .flag-switch';
 
-export type StatusMenuHandle = ReturnType<typeof use_status_menu>;
+export type StatusMenuControl = ReturnType<typeof use_status_menu>;
 
 export function use_status_menu(title: CatalogEntry, library: Library) {
   const id = useId();
@@ -48,7 +48,7 @@ export function use_status_menu(title: CatalogEntry, library: Library) {
     const panel = menu.current;
     if (!panel || !library.ready || panel.matches(':popover-open')) return;
     panel.removeAttribute('style');
-    panel.dataset.layout = window.matchMedia(SHEET).matches ? 'sheet' : 'popover';
+    panel.dataset.layout = window.matchMedia(SHEET_QUERY).matches ? 'sheet' : 'popover';
     panel.showPopover();
     set_open(true);
   }

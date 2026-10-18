@@ -8,15 +8,11 @@
 .myshows-tool .lucide-chevron-down { width: 13px; height: 13px; margin-left: -2px; }
 .myshows-body { padding: 6px 0 var(--space-7); }
 
-.sort-menu { position: fixed; inset: auto; margin: 0; width: 200px; padding: 6px; border: 1px solid var(--line); border-radius: var(--radius-panel); background: var(--s1); color: var(--t1); box-shadow: 0 12px 32px rgb(0 0 0 / .5); }
-.sort-menu::backdrop { background: transparent; }
-.sort-menu button { display: flex; align-items: center; width: 100%; min-height: 38px; padding: 0 10px; border-radius: var(--radius-button); font-size: 14px; font-weight: 500; text-align: left; }
-.sort-menu button:hover, .sort-menu button:focus-visible { background: var(--s2); outline: none; }
-.sort-menu button[aria-checked="true"] { font-weight: 700; }
-.sort-menu .lucide { width: 16px; height: 16px; margin-left: auto; visibility: hidden; }
-.sort-menu [aria-checked="true"] .lucide { visibility: visible; }
+.myshows-tool[data-set] { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
+.myshows-sort-sheet[data-layout="popover"] { width: 220px; }
+.myshows-retry { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-3); padding: var(--space-5) 0; font-size: var(--type-card); color: var(--t2); }
 
-.myshows-list { display: grid; grid-template-columns: minmax(0, 1fr); column-gap: var(--space-6); margin: 0; padding: 0; list-style: none; }
+.myshows-list { display: grid; grid-template-columns: minmax(0, 1fr); column-gap: var(--space-6); }
 .myshows-row { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); padding: 9px 0; -webkit-touch-callout: none; }
 .myshows-poster { position: relative; display: block; aspect-ratio: 2 / 3; overflow: hidden; border-radius: var(--radius-still); background: var(--s1); }
 .myshows-poster .artwork { position: absolute; inset: 0; }
@@ -38,7 +34,7 @@
 .icon-button.status-more { color: var(--t3); }
 .icon-button.status-more:hover:not(:disabled) { color: var(--t1); }
 
-.myshows-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--space-5) 14px; margin: 6px 0 0; padding: 0; list-style: none; }
+.myshows-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--space-5) 14px; margin-top: 6px; }
 .myshows-card { position: relative; min-width: 0; -webkit-touch-callout: none; }
 .myshows-card h3 { margin-top: 5px; font-size: 12.5px; font-weight: 600; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .myshows-card .card-link:hover h3 { text-decoration: underline; text-underline-offset: 3px; }

@@ -1,0 +1,19 @@
+.cache-line { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-top: 1px solid var(--rule); color: var(--t2); font-size: var(--type-card); }
+.cache-line strong { color: var(--t1); font-weight: 600; }
+
+.cache-dialog { width: min(480px, calc(100vw - 2 * var(--gutter))); max-height: min(640px, 88dvh); padding: var(--space-5); border: 0; border-radius: var(--radius-panel); background: var(--s1); color: var(--t1); box-shadow: 0 24px 64px rgb(0 0 0 / .6); }
+.cache-dialog[open] { display: flex; flex-direction: column; gap: var(--space-3); }
+.cache-dialog::backdrop { background: rgb(0 0 0 / .7); }
+.cache-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+.cache-head h2 { font-size: var(--type-section); font-weight: 700; }
+.cache-head p { margin-top: 2px; color: var(--t2); font-size: var(--type-card); }
+.cached-list { min-height: 0; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
+.cached-row { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto auto; align-items: center; gap: var(--space-3); padding: 7px 0; }
+.cached-copy { display: grid; gap: 3px; min-width: 0; }
+.cached-copy strong { overflow: hidden; font-size: 14px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.cached-copy span { color: var(--t2); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.cache-foot { display: flex; justify-content: flex-end; }
+
+@media (max-width: 760px) {
+  .cache-dialog { width: 100%; max-width: 520px; margin: auto auto 0; padding: var(--space-4) var(--space-4) calc(18px + env(safe-area-inset-bottom)); border-radius: 16px 16px 0 0; }
+}

@@ -31,7 +31,7 @@ export function LibraryRow({ item, shelf, library }: { item: LibraryItem; shelf:
   const action = shelf === 'watched' || shelf === 'dropped' ? null : play_action(item);
   const note = progress ? progress.note : added_line(item);
 
-  return <li className="myshows-row" data-status={menu.status ?? undefined} data-more={progress ? 'hover' : undefined} {...press}>
+  return <article className="myshows-row" data-status={menu.status ?? undefined} data-more={progress ? 'hover' : undefined} {...press}>
     <a className="myshows-poster" href={href} tabIndex={-1} aria-hidden="true"><Artwork src={title.artwork} label={title.title} /></a>
     <div className="myshows-copy">
       <h3><a href={href}>{title.title}</a></h3>
@@ -48,5 +48,5 @@ export function LibraryRow({ item, shelf, library }: { item: LibraryItem; shelf:
       <StatusMore menu={menu} title={title.title} />
     </div>
     {menu.panel}
-  </li>;
+  </article>;
 }
