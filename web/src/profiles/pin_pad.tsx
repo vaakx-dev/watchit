@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { HttpError } from '../catalog/client';
 import { Delete } from 'lucide-react';
+import { error_message, HttpError } from '../catalog/client';
 import { sign_in } from './api';
 import { ProfileAvatar } from './avatar';
 import { start_session } from './session';
 import { PIN_LENGTH, type Profile } from './types';
-import { error_message } from './use_action';
+import { NO_ANSWER } from './use_action';
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
@@ -44,7 +44,7 @@ export function PinPad({ profile, on_cancel }: { profile: Profile; on_cancel: ()
         set_locked_until(Date.now() + (cause.retry_after ?? 30) * 1000);
         return;
       }
-      set_message(error_message(cause));
+      set_message(error_message(cause, NO_ANSWER));
       if (cause instanceof HttpError && cause.status === 403) set_wrong(count => count + 1);
     }
   }

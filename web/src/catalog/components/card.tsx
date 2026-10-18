@@ -5,18 +5,13 @@ import type { Library } from '../../library/use_library';
 import { use_long_press } from '../../ui/use_long_press';
 import { Artwork } from './artwork';
 import { CardBadge } from './card_badge';
+import { full_kind_label } from '../kinds';
 import type { CatalogEntry } from '../types';
 
 export type CardMeta = 'kind' | 'rating';
 
-function kind_label({ kind, anime }: CatalogEntry) {
-  if (kind === 'episode') return '';
-  if (anime) return kind === 'movie' ? 'Anime movie' : 'Anime series';
-  return kind === 'movie' ? 'Movie' : 'Series';
-}
-
 function details(entry: CatalogEntry, meta: CardMeta) {
-  const parts = meta === 'kind' ? [kind_label(entry), entry.year] : [entry.year, entry.imdb_rating?.toFixed(1)];
+  const parts = meta === 'kind' ? [full_kind_label(entry), entry.year] : [entry.year, entry.imdb_rating?.toFixed(1)];
   return parts.filter(Boolean).join(' · ');
 }
 

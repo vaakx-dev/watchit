@@ -1,10 +1,7 @@
 import { remember, responses } from '../../cache/responses';
 import { send } from '../../catalog/client';
-import type { TitleResult } from '../../catalog/types';
-import type { SavedPosition } from '../../generated/catalog/SavedPosition';
+import type { SavedPosition, TitleResult } from '../../catalog/types';
 import type { ProgressSaved } from '../../generated/library/ProgressSaved';
-
-export type { SavedPosition };
 
 export async function save_position(title_id: string, position: SavedPosition) {
   const saved = await send<ProgressSaved>(`/api/progress/${encodeURIComponent(title_id)}`, 'PUT', position, { keepalive: true });

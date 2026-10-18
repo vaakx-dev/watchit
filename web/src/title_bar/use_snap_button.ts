@@ -1,6 +1,6 @@
+import { useEffect, useState, type RefObject } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
-import { useEffect, useState, type RefObject } from 'react';
 
 type Area = { x: number; y: number; width: number; height: number };
 type Pointer = 'hover' | 'press' | 'leave';

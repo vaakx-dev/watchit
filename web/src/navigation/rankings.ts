@@ -1,17 +1,16 @@
+import { parse_kind } from '../catalog/kinds';
 import type { CatalogKind } from '../catalog/types';
 
-export const RANKING_LAYOUTS = ['ranked', 'tiers'] as const;
+const RANKING_LAYOUTS = ['ranked', 'tiers'] as const;
 export type RankingLayout = typeof RANKING_LAYOUTS[number];
 
 export type RankingsQuery = { kind: CatalogKind; layout: RankingLayout };
 
 export const RANKINGS_DEFAULTS: RankingsQuery = { kind: 'all', layout: 'ranked' };
 
-const KINDS: readonly CatalogKind[] = ['movie', 'series', 'anime'];
-
 export function parse_rankings(params: URLSearchParams): RankingsQuery {
   return {
-    kind: KINDS.find(kind => kind === params.get('type')) ?? RANKINGS_DEFAULTS.kind,
+    kind: parse_kind(params.get('type')) ?? RANKINGS_DEFAULTS.kind,
     layout: RANKING_LAYOUTS.find(layout => layout === params.get('layout')) ?? RANKINGS_DEFAULTS.layout,
   };
 }

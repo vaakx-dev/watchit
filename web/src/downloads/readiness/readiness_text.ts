@@ -1,5 +1,5 @@
+import { duration_text } from '../../catalog/format';
 import type { Readiness } from '../../torrents/types';
-import { duration_text } from './duration_text';
 
 function wait_text(seconds: number) {
   if (seconds < 60) return 'under a minute';

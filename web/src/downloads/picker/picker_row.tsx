@@ -1,28 +1,19 @@
 import { ArrowDownToLine, Check } from 'lucide-react';
-import { bytes, percent } from '../../torrents/format';
-import { language_name } from '../../torrents/filters/language_name';
+import { percent } from '../../torrents/format';
 import { resolution_label } from '../../torrents/quality';
+import { result_details } from '../../torrents/result_details';
 import { use_transfers } from '../../torrents/transfer_store';
 import type { TorrentResult } from '../../torrents/types';
 import { ReadinessNote } from '../readiness/readiness_note';
 
 type Props = { result: TorrentResult; season: boolean; disabled: boolean; on_download: () => void };
 
-function seeders(count: number | null) {
-  return count === null ? null : `${count.toLocaleString()} ${count === 1 ? 'seeder' : 'seeders'}`;
-}
-
 export function PickerRow({ result, season, disabled, on_download }: Props) {
   const { transfers } = use_transfers();
   const transfer = transfers.find(item => item.info_hash === result.info_hash);
   const downloading = transfer?.kind === 'download';
   const details = [
-    seeders(result.seeders),
-    result.size_bytes !== null && bytes(result.size_bytes),
-    result.video_codec,
-    result.audio,
-    result.site,
-    result.languages.map(language_name).join(' / '),
+    ...result_details(result),
     downloading && (transfer.progress >= 1 ? 'Downloaded' : `Downloading ${percent(transfer.progress)}`),
   ].filter(Boolean);
   const label = downloading ? 'Already in downloads' : 'Download this source';

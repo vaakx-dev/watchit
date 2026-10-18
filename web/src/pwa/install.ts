@@ -1,5 +1,5 @@
-import { isTauri } from '@tauri-apps/api/core';
 import { useSyncExternalStore } from 'react';
+import { isTauri } from '@tauri-apps/api/core';
 
 type InstallPrompt = Event & { prompt: () => Promise<void> };
 export type InstallState = 'installed' | 'available' | 'manual' | 'insecure' | 'desktop';

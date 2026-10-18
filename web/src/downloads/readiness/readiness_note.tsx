@@ -3,7 +3,7 @@ import type { Transfer } from '../../torrents/types';
 import { readiness_text } from './readiness_text';
 import './readiness.css';
 
-export function shows_readiness(transfer: Transfer) {
+function shows_readiness(transfer: Transfer) {
   const { state } = transfer.readiness;
   if (transfer.state === 'seeding' || transfer.state === 'completed' || transfer.state === 'error') return false;
   return state === 'ready' || state === 'waiting';

@@ -1,7 +1,7 @@
 import type { RankedItem, Rankings } from '../types';
 
 export type Move = { id: string; before: string | null };
-export type PendingMove = Move & { sequence: number };
+type PendingMove = Move & { sequence: number };
 export type RankingState = { confirmed: Rankings | null; pending: readonly PendingMove[]; error: string | null };
 
 function renumber(rankings: Rankings): Rankings {

@@ -3,7 +3,7 @@ import type { Transfer } from '../../torrents/types';
 import { DownloadRow, type Reorder } from '../row/download_row';
 import { Poster } from '../row/poster';
 import { present, StatusText } from '../row/status_text';
-import { use_quality, use_transfer_title, watch_href } from '../titles';
+import { use_quality, use_transfer_title } from '../titles';
 import { ProgressRing } from './progress_ring';
 import { QueueNumber } from '../queue/queue_number';
 import { meta_lines, narrow_parts, wide_parts } from './status_parts';
@@ -26,7 +26,7 @@ export function DownloadingRow({ transfer, place, reorder }: { transfer: Transfe
     meta={meta_lines(transfer).map(line => <span key={line}>{line}</span>)}
     progress={transfer.state === 'queued' || transfer.state === 'error' ? undefined : transfer}
     trailing={run => {
-      if (transfer.readiness.state === 'ready' && transfer.state !== 'error') return <a className="button primary small download-watch" href={watch_href(transfer.title_id)}>Watch</a>;
+      if (transfer.readiness.state === 'ready' && transfer.state !== 'error') return <a className="button primary small download-watch" href={`#/watch/${transfer.title_id}`}>Watch</a>;
       if (transfer.state === 'queued' && place !== null) return <QueueNumber place={place} />;
       return <ProgressRing transfer={transfer} name={label} run={run} />;
     }}

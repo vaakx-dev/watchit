@@ -1,8 +1,8 @@
+import { KIND_LABELS, plural } from '../catalog/kinds';
 import type { CatalogKind, CatalogSort } from '../catalog/types';
 import { DISCOVER_DEFAULTS, type DiscoverQuery } from '../navigation/discover';
 
-const KIND_NAMES: Record<CatalogKind, string> = { all: 'All titles', movie: 'Movies', series: 'Series', anime: 'Anime' };
-const KIND_NOUNS: Record<CatalogKind, string> = { all: 'titles', movie: 'movies', series: 'series', anime: 'anime' };
+const KIND_NAMES: Record<CatalogKind, string> = { ...KIND_LABELS, all: 'All titles' };
 const SORT_PHRASES: Record<CatalogSort, string> = { relevance: 'best match', trending: 'trending', top_rated: 'top rated', newest: 'newest', title: 'A–Z' };
 
 export function narrowed({ kind, sort, genre }: DiscoverQuery) {
@@ -10,7 +10,7 @@ export function narrowed({ kind, sort, genre }: DiscoverQuery) {
 }
 
 export function summary({ kind, sort }: DiscoverQuery, genre: string) {
-  const subject = genre ? `${genre} ${KIND_NOUNS[kind]}` : KIND_NAMES[kind];
+  const subject = genre ? `${genre} ${plural(kind)}` : KIND_NAMES[kind];
   return `${subject} · ${SORT_PHRASES[sort]}`;
 }
 

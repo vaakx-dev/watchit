@@ -2,12 +2,12 @@ import { Trophy } from 'lucide-react';
 import { Choices, type Choice } from '../../ui/choices';
 import { EmptyState } from '../../ui/empty_state';
 import { CatalogStatus } from '../../catalog/components/status';
+import { KIND_CHOICES, plural } from '../../catalog/kinds';
 import type { CatalogKind } from '../../catalog/types';
 import { discover_route } from '../../navigation/route';
 import { rankings_href, rate_href, type RankingLayout, type RankingsQuery } from '../../navigation/rankings';
 import type { Rating } from '../types';
 import type { Library } from '../use_library';
-import { KINDS, plural } from '../pages/kinds';
 import { Podium } from './podium';
 import { RankedList } from './ranked_list';
 import { RankingTiers } from './ranking_tiers';
@@ -63,7 +63,7 @@ function Ranking({ query, library }: { query: RankingsQuery; library: Library })
         <div className="filter-switch">
           <Choices look="segmented" label="Layout" options={LAYOUTS} value={query.layout} on_change={layout => change({ layout })} />
         </div>
-        <Choices look="quiet" label="Type" options={KINDS} value={query.kind} on_change={kind => change({ kind })} />
+        <Choices look="quiet" label="Type" options={KIND_CHOICES} value={query.kind} on_change={kind => change({ kind })} />
       </div>
       {unrated.titles && unrated.titles.length > 0 && <RatePrompt titles={unrated.titles} rate={rate} />}
       {body()}

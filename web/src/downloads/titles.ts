@@ -1,4 +1,5 @@
 import { use_resource } from '../catalog/api';
+import { episode_code } from '../catalog/episodes';
 import type { TitleResult } from '../catalog/types';
 import { local_files_url } from '../torrents/api';
 import type { LocalFile, Transfer } from '../torrents/types';
@@ -24,18 +25,18 @@ function episode_label(transfer: Transfer) {
   if (!only) return null;
   const seasons = new Set(ids.map(id => episode_number(id).season));
   const [season] = seasons;
-  if (ids.length === 1) return `S${season} E${episode_number(only).episode}`;
+  if (ids.length === 1) return episode_code(episode_number(only));
   return seasons.size === 1 ? `S${season} · ${ids.length} episodes` : `${ids.length} episodes`;
 }
 
-export function use_title(id: string) {
+export function use_title_details(id: string) {
   const { resource } = use_resource<TitleResult>(`/api/titles/${encodeURIComponent(id)}`);
   return resource.status === 'ready' ? resource.data.title : null;
 }
 
 export function use_transfer_title(transfer: Transfer) {
   const id = series_id(transfer.title_id);
-  const title = use_title(id);
+  const title = use_title_details(id);
   return { id, title, name: title?.title ?? transfer.name, episode: episode_label(transfer) };
 }
 
@@ -44,8 +45,4 @@ export function use_quality(transfer: Transfer) {
   const file = resource.status === 'ready' ? resource.data.files.find(item => item.info_hash === transfer.info_hash) : undefined;
   if (!file?.resolution) return null;
   return file.hdr.length ? `${file.resolution} HDR` : file.resolution;
-}
-
-export function watch_href(title_id: string) {
-  return `#/watch/${title_id}`;
 }

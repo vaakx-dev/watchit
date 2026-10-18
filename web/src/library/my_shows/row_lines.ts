@@ -1,8 +1,9 @@
 import { episode_code, season_label } from '../../catalog/episodes';
+import { duration_text } from '../../catalog/format';
+import { kind_label } from '../../catalog/kinds';
+import type { SavedPosition } from '../../catalog/types';
 import { opened_ago } from '../opened';
-import type { SavedPosition } from '../../generated/catalog/SavedPosition';
 import type { LibraryItem } from '../types';
-import { kind_label } from '../pages/kinds';
 
 export type Action = { href: string; label: string; name: string };
 
@@ -12,10 +13,7 @@ function runtime(minutes: number) {
 }
 
 function time_left({ position_seconds, duration_seconds }: SavedPosition) {
-  const minutes = Math.max(1, Math.round((duration_seconds - position_seconds) / 60));
-  const hours = Math.floor(minutes / 60);
-  const rest = minutes % 60;
-  return `${[hours ? `${hours} h` : '', rest || !hours ? `${rest} min` : ''].filter(Boolean).join(' ')} left`;
+  return `${duration_text(duration_seconds - position_seconds)} left`;
 }
 
 export function length_line({ title, minutes, seasons }: LibraryItem) {

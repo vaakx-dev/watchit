@@ -7,7 +7,7 @@ import { notify_permission } from './permission';
 
 const HEADING = 'Ready to watch';
 
-export function watch_hash(title_id: string) {
+function watch_hash(title_id: string) {
   return `#/watch/${title_id}`;
 }
 

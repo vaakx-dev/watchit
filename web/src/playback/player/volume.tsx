@@ -1,5 +1,5 @@
-import { Volume1, Volume2, VolumeX } from 'lucide-react';
 import type { CSSProperties } from 'react';
+import { Volume1, Volume2, VolumeX } from 'lucide-react';
 import { PlayerButton } from './player_button';
 
 function VolumeIcon({ level }: { level: number }) {

@@ -3,6 +3,7 @@ import { Search, X } from 'lucide-react';
 import { awaiting_items, use_catalog } from '../../catalog/api';
 import { Card } from '../../catalog/components/card';
 import { CatalogStatus } from '../../catalog/components/status';
+import { KIND_LABELS } from '../../catalog/kinds';
 import type { CatalogEntry, CatalogKind, CatalogPage, CatalogSort } from '../../catalog/types';
 import type { Library } from '../../library/use_library';
 import { EmptyState } from '../../ui/empty_state';
@@ -13,10 +14,10 @@ import { ResultRow } from './result_row';
 import { ResultsSkeleton } from './results_skeleton';
 import { TopResult } from './top_result';
 
-export const SEARCH_SORTS: readonly CatalogSort[] = ['relevance', 'top_rated', 'newest', 'title'];
+const SEARCH_SORTS: readonly CatalogSort[] = ['relevance', 'top_rated', 'newest', 'title'];
 export const SEARCH_DEFAULTS: TitleFilters = { kind: 'all', sort: 'relevance', genre: '', hide: [] };
 
-const GRID_TITLES: Record<CatalogKind, string> = { all: 'Movies & shows', movie: 'Movies', series: 'Series', anime: 'Anime' };
+const GRID_TITLES: Record<CatalogKind, string> = { ...KIND_LABELS, all: 'Movies & shows' };
 
 type Props = { query: string; filters: TitleFilters; compact: boolean; library: Library; on_change: FilterChange };
 

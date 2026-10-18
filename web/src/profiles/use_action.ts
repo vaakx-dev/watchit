@@ -1,8 +1,7 @@
 import { useState } from 'react';
+import { error_message } from '../catalog/client';
 
-export function error_message(cause: unknown): string {
-  return cause instanceof Error ? cause.message : 'The server did not answer. Try again.';
-}
+export const NO_ANSWER = 'The server did not answer. Try again.';
 
 export function use_action() {
   const [pending, set_pending] = useState(false);
@@ -16,7 +15,7 @@ export function use_action() {
       set_pending(false);
       after(result);
     } catch (cause) {
-      set_error(error_message(cause));
+      set_error(error_message(cause, NO_ANSWER));
       set_pending(false);
     }
   }

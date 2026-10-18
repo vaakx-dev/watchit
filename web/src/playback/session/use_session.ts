@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { error_message } from '../../catalog/client';
 import { client_profile } from '../engine/client_profile';
 import { close_session, open_session } from './api';
 import type { FileSource, PlaybackSession, SessionTracks } from './types';
@@ -23,7 +24,7 @@ export function use_session(title_id: string, source: FileSource | null, start: 
         else set_opened({ request, session, error: null });
       })
       .catch((cause: unknown) => {
-        if (!controller.signal.aborted) set_opened({ request, session: null, error: cause instanceof Error ? cause.message : 'The server did not respond.' });
+        if (!controller.signal.aborted) set_opened({ request, session: null, error: error_message(cause) });
       });
     return () => {
       controller.abort();

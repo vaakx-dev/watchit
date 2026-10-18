@@ -1,8 +1,8 @@
 import { useId, useRef, useState } from 'react';
+import { KIND_CHOICES } from '../../catalog/kinds';
 import type { CatalogSort, GenreOption } from '../../catalog/types';
 import { GenreMenu } from '../../discover/genres/genre_menu';
 import { SortMenu } from '../../discover/sort_menu';
-import { KINDS } from '../../library/pages/kinds';
 import { Choices } from '../../ui/choices';
 import { ToggleChip } from '../../ui/filters/filter_chips';
 import { FiltersSheet } from './filters_sheet';
@@ -37,7 +37,7 @@ function FiltersChip({ filters, defaults, ...sheet }: Omit<Props, 'compact'>) {
 export function FilterBar({ compact, ...props }: Props) {
   const { filters, defaults, sorts, genres, on_change } = props;
   return <div className="filter-bar">
-    <Choices label="Type" options={KINDS} value={filters.kind} on_change={kind => on_change({ kind })} />
+    <Choices label="Type" options={KIND_CHOICES} value={filters.kind} on_change={kind => on_change({ kind })} />
     {compact ? <FiltersChip {...props} /> : <div className="filter-menus">
       <SortMenu sorts={sorts} value={filters.sort} fallback={defaults.sort} on_change={sort => on_change({ sort })} />
       <GenreMenu genres={genres} value={filters.genre} on_change={genre => on_change({ genre })} />

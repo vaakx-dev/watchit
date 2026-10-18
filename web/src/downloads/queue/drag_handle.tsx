@@ -1,7 +1,7 @@
 import type { KeyboardEvent, PointerEvent } from 'react';
 import { GripVertical } from 'lucide-react';
 
-export type DragEvents = {
+type DragEvents = {
   onPointerDown: (event: PointerEvent<HTMLElement>) => void;
   onPointerMove: (event: PointerEvent<HTMLElement>) => void;
   onPointerUp: () => void;

@@ -1,6 +1,6 @@
+import { useRef } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Copy, Minus, Square, X } from 'lucide-react';
-import { useRef } from 'react';
 import { use_snap_button } from './use_snap_button';
 import { use_window_state } from './use_window_state';
 

@@ -1,9 +1,10 @@
 import { useSyncExternalStore } from 'react';
+import { error_message } from '../catalog/client';
 import { list_transfers } from './api';
 import { read_events } from './event_stream';
 import type { Disk, ReadyEvent, SpeedStatus, Transfer } from './types';
 
-export type TransferSnapshot = { transfers: Transfer[]; disks: Disk[]; speed: SpeedStatus | null; live: boolean; error: string | null };
+type TransferSnapshot = { transfers: Transfer[]; disks: Disk[]; speed: SpeedStatus | null; live: boolean; error: string | null };
 
 const RECONNECT_MS = 3000;
 const DISK_REFRESH_MS = 10000;
@@ -16,10 +17,6 @@ let stop: (() => void) | null = null;
 function publish(next: Partial<TransferSnapshot>) {
   snapshot = { ...snapshot, ...next };
   for (const listener of listeners) listener();
-}
-
-function message(cause: unknown) {
-  return cause instanceof Error ? cause.message : 'The server did not respond.';
 }
 
 export function upsert_transfer(transfer: Transfer) {
@@ -61,9 +58,9 @@ function connect() {
   const open = () => {
     read_events('/api/transfers/events', () => {
       publish({ live: true });
-      refresh(signal).catch(cause => { if (!signal.aborted) publish({ error: message(cause) }); });
+      refresh(signal).catch(cause => { if (!signal.aborted) publish({ error: error_message(cause) }); });
     }, event => on_event(event.name, event.data), signal)
-      .catch(cause => { if (!signal.aborted) publish({ error: message(cause) }); })
+      .catch(cause => { if (!signal.aborted) publish({ error: error_message(cause) }); })
       .finally(() => {
         if (signal.aborted) return;
         publish({ live: false });

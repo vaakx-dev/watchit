@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { error_message } from '../../catalog/client';
 import { delete_transfer } from '../../torrents/api';
 import { remove_transfer } from '../../torrents/transfer_store';
 import type { Transfer } from '../../torrents/types';
@@ -26,7 +27,7 @@ export function DeleteDialog({ deletion, on_close }: { deletion: Deletion; on_cl
       await delete_downloads(deletion.transfers);
       dialog.current?.close();
     } catch (cause) {
-      set_error(cause instanceof Error ? cause.message : 'The server did not respond.');
+      set_error(error_message(cause));
       set_pending(false);
     }
   }

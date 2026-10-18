@@ -1,10 +1,11 @@
 import { useEffect, useRef } from 'react';
+import { typing } from '../../ui/typing';
 
 const SEEK_SECONDS = 10;
 const SHORT_SEEK_SECONDS = 3;
 const VOLUME_STEP = 5;
 
-export type ShortcutActions = {
+type ShortcutActions = {
   toggle_play: () => void;
   seek_by: (seconds: number) => void;
   seek_to: (fraction: number) => void;
@@ -17,10 +18,6 @@ export type ShortcutActions = {
   escape: () => void;
   activity: () => void;
 };
-
-function typing(target: EventTarget | null) {
-  return target instanceof HTMLElement && (target.isContentEditable || target.closest('input, textarea, select') !== null);
-}
 
 function pressing(target: EventTarget | null, key: string) {
   return (key === ' ' || key === 'Enter') && target instanceof HTMLElement && target.closest('button, a, [role="menuitemradio"]') !== null;

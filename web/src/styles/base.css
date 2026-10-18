@@ -95,7 +95,6 @@ main { flex: 1 1 auto; min-width: 0; min-height: 0; overflow-y: auto; }
 .empty-state .button { margin-top: var(--space-2); }
 .not-found { min-height: 65vh; }
 
-.back-link, .external-link { display: inline-flex; align-items: center; gap: 6px; color: var(--t2); font-size: var(--type-card); font-weight: 500; }
-.back-link:hover, .external-link:hover { color: var(--t1); }
+.back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--t2); font-size: var(--type-card); font-weight: 500; }
+.back-link:hover { color: var(--t1); }
 .back-link .lucide { width: 15px; height: 15px; }
-.external-link { text-decoration: underline; text-underline-offset: 4px; }

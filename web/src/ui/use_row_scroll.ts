@@ -5,7 +5,7 @@ const FRICTION = 0.95;
 const MIN_SPEED = 0.02;
 const LINE_HEIGHT = 16;
 
-export function useRowScroll(row: RefObject<HTMLElement | null>) {
+export function use_row_scroll(row: RefObject<HTMLElement | null>) {
   useEffect(() => {
     const element = row.current;
     if (!element) return;

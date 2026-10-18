@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { error_message } from '../../catalog/client';
 import { read_settings, save_settings } from '../../torrents/api';
 import type { TorrentSettings } from '../../torrents/types';
 import { use_saving } from '../controls/use_saving';
@@ -15,7 +16,7 @@ export function use_torrent_settings() {
     set_error(null);
     read_settings(controller.signal)
       .then(loaded => { current.current = loaded; set_settings(loaded); })
-      .catch((cause: unknown) => { if (!controller.signal.aborted) set_error(cause instanceof Error ? cause.message : 'The server did not respond.'); });
+      .catch((cause: unknown) => { if (!controller.signal.aborted) set_error(error_message(cause)); });
     return () => controller.abort();
   }, [attempt]);
 

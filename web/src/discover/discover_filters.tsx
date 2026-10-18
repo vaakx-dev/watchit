@@ -1,18 +1,12 @@
-import { Choices, type Choice } from '../ui/choices';
+import { Choices } from '../ui/choices';
 import { ToggleChip } from '../ui/filters/filter_chips';
-import type { CatalogKind, CatalogSort, GenreOption } from '../catalog/types';
+import { KIND_CHOICES } from '../catalog/kinds';
+import type { CatalogSort, GenreOption } from '../catalog/types';
 import { DISCOVER_DEFAULTS, type DiscoverQuery } from '../navigation/discover';
 import { GenreMenu } from './genres/genre_menu';
 import { SortMenu } from './sort_menu';
 
 const SORTS: readonly CatalogSort[] = ['trending', 'top_rated', 'newest', 'title'];
-
-const KINDS: readonly Choice<CatalogKind>[] = [
-  { value: 'all', label: 'All' },
-  { value: 'movie', label: 'Movies' },
-  { value: 'series', label: 'Series' },
-  { value: 'anime', label: 'Anime' },
-];
 
 export function DiscoverFilters({ query, genres, count, on_change }: {
   query: DiscoverQuery;
@@ -22,7 +16,7 @@ export function DiscoverFilters({ query, genres, count, on_change }: {
 }) {
   return <div className="discover-bar">
     <div className="filter-switch">
-      <Choices label="Type" look="segmented" options={KINDS} value={query.kind} on_change={kind => on_change({ kind })} />
+      <Choices label="Type" look="segmented" options={KIND_CHOICES} value={query.kind} on_change={kind => on_change({ kind })} />
     </div>
     <div className="discover-chips">
       <SortMenu sorts={SORTS} value={query.sort} fallback={DISCOVER_DEFAULTS.sort} on_change={sort => on_change({ sort })} />

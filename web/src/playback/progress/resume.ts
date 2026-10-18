@@ -1,4 +1,4 @@
-import type { SavedPosition } from './api';
+import type { SavedPosition } from '../../catalog/types';
 
 const MIN_RESUME_SHARE = 0.05;
 const MAX_RESUME_SHARE = 0.9;

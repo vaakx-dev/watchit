@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { error_message } from '../../catalog/client';
 import type { Transfer } from '../../torrents/types';
 import { DragHandle } from '../queue/drag_handle';
 import { move_to, moved } from '../queue/queue_order';
@@ -25,7 +26,7 @@ export function DownloadingSection({ transfers }: { transfers: Transfer[] }) {
     set_pending(moved(transfers, from, to).map(item => item.id));
     set_failure('');
     move_to(transfer, target.queue_position ?? to)
-      .catch((cause: unknown) => set_failure(cause instanceof Error ? cause.message : 'Could not reorder.'))
+      .catch((cause: unknown) => set_failure(error_message(cause, 'Could not reorder.')))
       .finally(() => set_pending(null));
   }
 

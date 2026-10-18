@@ -1,6 +1,6 @@
+import { duration_text } from '../../catalog/format';
 import { bytes, percent, speed } from '../../torrents/format';
 import type { Transfer } from '../../torrents/types';
-import { duration_text } from '../readiness/duration_text';
 import { readiness_text } from '../readiness/readiness_text';
 import { present, type Part } from '../row/status_text';
 

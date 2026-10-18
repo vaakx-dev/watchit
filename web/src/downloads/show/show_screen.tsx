@@ -9,7 +9,7 @@ import { EmptyState } from '../../ui/empty_state';
 import { show_group, shows_by_id, type ShowGroup } from '../downloaded/library_groups';
 import { count, episode_count } from '../downloaded/show_summary';
 import { sections } from '../states';
-import { use_title } from '../titles';
+import { use_title_details } from '../titles';
 import { EpisodeRow } from './episode_row';
 
 function season_choices(show: ShowGroup, selected: number) {
@@ -34,7 +34,7 @@ function Episodes({ show, artwork }: { show: ShowGroup; artwork: string }) {
 
 export function ShowScreen({ id }: { id: string }) {
   const { transfers } = use_transfers();
-  const title = use_title(id);
+  const title = use_title_details(id);
   const list = shows_by_id(sections(transfers).downloaded).get(id);
   const show = list ? show_group(id, list) : null;
   const name = title?.title ?? list?.[0]?.name ?? '';

@@ -1,12 +1,12 @@
-import { ChevronLeft, Trophy } from 'lucide-react';
 import { useState } from 'react';
+import { ChevronLeft, Trophy } from 'lucide-react';
 import { Artwork } from '../../../catalog/components/artwork';
 import { CatalogStatus } from '../../../catalog/components/status';
+import { kind_label, plural } from '../../../catalog/kinds';
 import type { CatalogEntry } from '../../../catalog/types';
 import { rankings_href, type RankingsQuery } from '../../../navigation/rankings';
 import { EmptyState } from '../../../ui/empty_state';
 import { RatingControl } from '../../components/rating';
-import { kind_label, plural } from '../../pages/kinds';
 import type { Library } from '../../use_library';
 import { use_unrated } from '../use_unrated';
 

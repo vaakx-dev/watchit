@@ -1,9 +1,9 @@
 import { memo, useRef } from 'react';
 import { Artwork } from '../../catalog/components/artwork';
 import { ImdbScore } from '../../catalog/components/imdb_score';
+import { kind_label } from '../../catalog/kinds';
 import type { CatalogEntry } from '../../catalog/types';
 import { StatusControls, type StatusMenuHandle } from '../../library/components/status';
-import { kind_label } from '../../library/pages/kinds';
 import type { Library } from '../../library/use_library';
 import { use_long_press } from '../../ui/use_long_press';
 import { Highlight } from './highlight';

@@ -1,11 +1,4 @@
-import type { CacheSettings } from './types.ts';
-
-export const DEFAULTS = {
-  metadata_hours: 24,
-  images_days: 30,
-  max_stale_days: 7,
-  image_limit_mb: 1024,
-} satisfies CacheSettings;
+import type { CacheSettings } from './types';
 
 export const LIMITS = {
   metadata_hours: [0.25, 8760],

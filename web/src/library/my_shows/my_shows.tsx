@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { CatalogStatus } from '../../catalog/components/status';
+import { plural } from '../../catalog/kinds';
 import type { CatalogKind } from '../../catalog/types';
 import { discover_route } from '../../navigation/route';
 import { EmptyState } from '../../ui/empty_state';
 import { NearEnd } from '../../ui/near_end';
-import { plural } from '../pages/kinds';
 import type { LibraryPage, LibraryQuery, LibrarySort, Shelf } from '../types';
 import type { Library } from '../use_library';
 import { use_library_titles } from '../use_library_titles';
@@ -46,11 +46,11 @@ function Results({ first, query, view, library, show_all }: {
 }) {
   const [pages, set_pages] = useState(1);
   const more = () => set_pages(count => count + 1);
-  const className = view === 'grid' ? 'myshows-grid' : 'myshows-list';
-  if (!first) return <div className={className} role="status" aria-label="Loading titles"><Loading view={view} /></div>;
+  const list_class = view === 'grid' ? 'myshows-grid' : 'myshows-list';
+  if (!first) return <div className={list_class} role="status" aria-label="Loading titles"><Loading view={view} /></div>;
   if (!first.items.length) return <Empty shelf={query.shelf} kind={query.kind} show_all={show_all} />;
 
-  return <div className={className}>
+  return <div className={list_class}>
     <ShelfItems items={first.items} shelf={query.shelf} view={view} library={library} />
     {pages === 1 && first.has_next && <NearEnd on_reach={more} />}
     {Array.from({ length: pages - 1 }, (_, index) => <NextShelfPage key={index + 2} query={{ ...query, page: index + 2 }}

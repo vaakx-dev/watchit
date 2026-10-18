@@ -1,7 +1,7 @@
 import type { CatalogKind, CatalogSort, GenreOption } from '../../catalog/types';
 
 export const HIDDEN_STATUSES = ['watched', 'dropped'] as const;
-export type HiddenStatus = typeof HIDDEN_STATUSES[number];
+type HiddenStatus = typeof HIDDEN_STATUSES[number];
 
 export type TitleFilters = { kind: CatalogKind; sort: CatalogSort; genre: string; hide: HiddenStatus[] };
 

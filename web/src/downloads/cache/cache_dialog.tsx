@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
+import { error_message } from '../../catalog/client';
 import { update_transfer } from '../../torrents/api';
 import type { Transfer } from '../../torrents/types';
 import { delete_downloads } from '../menu/delete_dialog';
@@ -17,7 +18,7 @@ export function CacheDialog({ cached, on_close }: { cached: Transfer[]; on_close
     set_pending(true);
     set_error(null);
     work()
-      .catch((cause: unknown) => set_error(cause instanceof Error ? cause.message : 'The server did not respond.'))
+      .catch((cause: unknown) => set_error(error_message(cause)))
       .finally(() => set_pending(false));
   }
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { error_message } from '../../catalog/client';
 import type { FolderListing } from '../../torrents/types';
 import { list_folders } from './api';
 
@@ -14,7 +15,7 @@ export function use_folders(path: string | null) {
       .then(listing => set_state({ path, listing, error: null, loading: false }))
       .catch((cause: unknown) => {
         if (controller.signal.aborted) return;
-        set_state(current => ({ ...current, path, loading: false, error: cause instanceof Error ? cause.message : 'The server did not respond.' }));
+        set_state(current => ({ ...current, path, loading: false, error: error_message(cause) }));
       });
     return () => controller.abort();
   }, [path]);

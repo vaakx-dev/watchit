@@ -1,10 +1,10 @@
 import { isPermissionGranted, requestPermission } from '@tauri-apps/plugin-notification';
 import { desktop } from '../../playback/engine/mpv_bridge';
 
-export type NotifyPermission = 'granted' | 'denied' | 'prompt' | 'unsupported';
+type NotifyPermission = 'granted' | 'denied' | 'prompt' | 'unsupported';
 
-export const UNSUPPORTED_REASON = 'Notifications need the desktop app, or a browser on this computer or an https address.';
-export const DENIED_REASON = 'Notifications are blocked. Allow them for this site in your browser settings.';
+const UNSUPPORTED_REASON = 'Notifications need the desktop app, or a browser on this computer or an https address.';
+const DENIED_REASON = 'Notifications are blocked. Allow them for this site in your browser settings.';
 
 function browser_supported() {
   return window.isSecureContext && 'Notification' in window;

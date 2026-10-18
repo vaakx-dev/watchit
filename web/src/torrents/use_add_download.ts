@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { error_message } from '../catalog/client';
 import { add_transfer } from './api';
 import { upsert_transfer } from './transfer_store';
 import type { Transfer } from './types';
@@ -15,7 +16,7 @@ export function use_add_download<T extends unknown[]>(start: (...args: T) => Pro
       for (const transfer of Array.isArray(added) ? added : [added]) upsert_transfer(transfer);
       return true;
     } catch (cause) {
-      set_error(cause instanceof Error ? cause.message : 'The server did not respond.');
+      set_error(error_message(cause));
       return false;
     } finally {
       set_pending(false);

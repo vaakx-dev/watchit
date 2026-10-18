@@ -4,7 +4,7 @@ import { language_name } from './language_name';
 
 export type FacetKey = 'pack' | 'resolution' | 'hdr' | 'codec' | 'audio' | 'language' | 'site';
 
-export type FacetOption = { value: string; label: string; count: number };
+type FacetOption = { value: string; label: string; count: number };
 
 export type Facet = { key: FacetKey; label: string; options: FacetOption[] };
 

@@ -4,6 +4,7 @@ import { use_catalog } from '../../catalog/api';
 import type { CatalogQuery } from '../../catalog/types';
 import type { Library } from '../../library/use_library';
 import { NearEnd } from '../../ui/near_end';
+import { PageRetry } from '../../ui/page_retry';
 
 const LOADING_CARDS = 6;
 
@@ -16,10 +17,7 @@ export function NextPage({ query, page, last, meta, library, on_more }: {
   on_more: () => void;
 }) {
   const { resource, retry } = use_catalog({ ...query, page });
-  if (resource.status === 'error') return <div className="results-retry" role="alert">
-    <p>{resource.error}</p>
-    <button type="button" className="button secondary small" onClick={retry}>Try again</button>
-  </div>;
+  if (resource.status === 'error') return <PageRetry error={resource.error} retry={retry} />;
   if (resource.status !== 'ready') return Array.from({ length: LOADING_CARDS }, (_, index) => <CardSkeleton key={index} />);
   return <>
     {resource.data.items.map(entry => <Card entry={entry} key={entry.id} library={library} meta={meta} />)}

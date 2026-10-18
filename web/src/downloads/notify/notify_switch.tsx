@@ -1,5 +1,5 @@
-import { Bell } from 'lucide-react';
 import { useState } from 'react';
+import { Bell } from 'lucide-react';
 import { set_notify_wanted, use_notify_wanted } from './notify_choice';
 import { ask_notify_permission, permission_problem } from './permission';
 import './notify.css';

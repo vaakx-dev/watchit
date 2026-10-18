@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { error_message } from '../../catalog/client';
 import { notify_wanted } from '../../downloads/notify/notify_choice';
 import { add_transfer } from '../../torrents/api';
 import { upsert_transfer, use_transfers } from '../../torrents/transfer_store';
@@ -28,7 +29,7 @@ export function use_file_source(title_id: string, source: PlaySource) {
         if (current) set_started({ key, transfer_id: transfer.id, error: null });
       })
       .catch((cause: unknown) => {
-        if (current) set_started({ key, transfer_id: null, error: cause instanceof Error ? cause.message : 'The server did not respond.' });
+        if (current) set_started({ key, transfer_id: null, error: error_message(cause) });
       });
     return () => { current = false; };
   }, [key, title_id]);

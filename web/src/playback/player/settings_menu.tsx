@@ -1,19 +1,19 @@
-import { AudioLines, Captions, Check, ChevronLeft, ChevronRight, Layers, type LucideIcon } from 'lucide-react';
 import { useEffect, useRef } from 'react';
+import { AudioLines, Captions, Check, ChevronLeft, ChevronRight, Layers, type LucideIcon } from 'lucide-react';
 import type { TrackMenu } from './use_tracks';
 
-export type SettingsPage = 'main' | 'audio' | 'subtitles';
+export type SettingsMenuPage = 'main' | 'audio' | 'subtitles';
 
 type Props = {
-  page: SettingsPage;
+  page: SettingsMenuPage;
   audio: TrackMenu;
   subtitles: TrackMenu;
   source_label: string;
-  on_page: (page: SettingsPage | null) => void;
+  on_page: (page: SettingsMenuPage | null) => void;
   on_sources: () => void;
 };
 
-const TITLES: Record<SettingsPage, string> = { main: 'Settings', audio: 'Audio track', subtitles: 'Subtitles' };
+const TITLES: Record<SettingsMenuPage, string> = { main: 'Settings', audio: 'Audio track', subtitles: 'Subtitles' };
 
 function selected_label(menu: TrackMenu, fallback: string) {
   return menu.options.find(option => option.id === menu.selected)?.label ?? fallback;

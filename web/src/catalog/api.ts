@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { responses } from '../cache/responses';
-import { HttpError, read, request } from './client';
-export { request } from './client';
+import { error_message, HttpError, read, request } from './client';
 import type { ArtworkStatus, CatalogEntry, CatalogPage, CatalogQuery, EpisodeNavigation, EpisodePage, ImportStatus, RelatedTitles, TitleResult } from './types';
 
 const MAX_FAILURES = 3;
@@ -44,7 +43,7 @@ export function use_resource<T extends object>(url: string | null, { cache = tru
         const failures = previous.url === url ? previous.failures + 1 : 1;
         return previous.url === url && previous.resource.status === 'ready' && failures < MAX_FAILURES && !(error instanceof HttpError && error.status === 404)
           ? { ...previous, failures }
-          : { url, resource: { status: 'error', error: error instanceof Error ? error.message : 'Could not load data.', missing: error instanceof HttpError && error.status === 404 }, failures };
+          : { url, resource: { status: 'error', error: error_message(error, 'Could not load data.'), missing: error instanceof HttpError && error.status === 404 }, failures };
       });
     });
     return () => controller.abort();

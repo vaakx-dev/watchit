@@ -1,5 +1,5 @@
-import { GripVertical } from 'lucide-react';
 import { useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { GripVertical } from 'lucide-react';
 import { Artwork } from '../../catalog/components/artwork';
 import type { RankedItem, Rankings } from '../types';
 import { PODIUM_SIZE } from './podium';

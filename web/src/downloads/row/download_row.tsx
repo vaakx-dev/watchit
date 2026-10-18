@@ -1,14 +1,15 @@
-import { useRef, useState, type ReactNode } from 'react';
+import { useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import { Ellipsis, Trash2, Replace } from 'lucide-react';
+import { error_message } from '../../catalog/client';
 import type { Transfer } from '../../torrents/types';
+import { use_long_press, type Point } from '../../ui/use_long_press';
 import { ActionMenu, type MenuAction, type MenuAnchor, type MenuHeading } from '../menu/action_menu';
 import { control_actions } from '../menu/control_actions';
 import { DeleteDialog, type Deletion } from '../menu/delete_dialog';
 import { ReplaceSource } from '../menu/replace_source';
-import { use_long_press } from '../menu/use_long_press';
 import { ProgressBar } from './progress_bar';
 
-export type RowMenu = { heading: MenuHeading; controls: Transfer | null; replace: Transfer | null; deletion: Deletion };
+type RowMenu = { heading: MenuHeading; controls: Transfer | null; replace: Transfer | null; deletion: Deletion };
 export type Reorder = { handle: ReactNode; dragging: boolean };
 export type Run = (work: () => Promise<unknown>) => void;
 
@@ -28,11 +29,11 @@ export function DownloadRow({ lead, name, sub, meta, progress, trailing, menu, r
   const [anchor, set_anchor] = useState<MenuAnchor | null>(null);
   const [dialog, set_dialog] = useState<'delete' | 'replace' | null>(null);
   const [failure, set_failure] = useState<string | null>(null);
-  const press = use_long_press(({ x, y }) => set_anchor({ top: y, bottom: y, right: x }));
+  const press = use_long_press(open_at);
 
   const run: Run = work => {
     set_failure(null);
-    work().catch((cause: unknown) => set_failure(cause instanceof Error ? cause.message : 'The server did not respond.'));
+    work().catch((cause: unknown) => set_failure(error_message(cause)));
   };
 
   const actions: MenuAction[] = [
@@ -41,13 +42,22 @@ export function DownloadRow({ lead, name, sub, meta, progress, trailing, menu, r
     { label: 'Delete download', icon: Trash2, danger: true, run: () => set_dialog('delete') },
   ];
 
+  function open_at({ x, y }: Point) {
+    set_anchor({ top: y, bottom: y, right: x });
+  }
+
+  function open_from_context_menu(event: MouseEvent<HTMLElement>) {
+    event.preventDefault();
+    open_at({ x: event.clientX, y: event.clientY });
+  }
+
   function open_from_button() {
     const box = more.current?.getBoundingClientRect();
     if (box) set_anchor({ top: box.top, bottom: box.bottom, right: box.right });
   }
 
   return <li className="download-item" data-queue-row data-dragging={reorder?.dragging || undefined}>
-    <div className="download-row" {...reorder ? {} : press}>
+    <div className="download-row" {...reorder ? {} : { ...press, onContextMenu: open_from_context_menu }}>
       {lead}
       <div className="download-body">
         <p className="download-name">{name}</p>

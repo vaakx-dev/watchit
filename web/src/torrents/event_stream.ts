@@ -1,7 +1,7 @@
 import { active_session } from '../profiles/session';
 import { SESSION_HEADER } from '../profiles/types';
 
-export type StreamEvent = { name: string; data: string };
+type StreamEvent = { name: string; data: string };
 
 function parse(block: string): StreamEvent | null {
   let name = 'message';

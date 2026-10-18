@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { awaiting_update, poll_delay, use_visible } from '../catalog/api';
-import { HttpError, read, request } from '../catalog/client';
+import { error_message, HttpError, read, request } from '../catalog/client';
 import * as cache from '../cache/responses';
 import type { CatalogEntry } from '../catalog/types';
 import * as optimism from './optimism';
@@ -69,7 +69,7 @@ export function use_library() {
         needs_read.current = true;
         return;
       }
-      set_load_error(cause instanceof Error ? cause.message : 'Could not load your library.');
+      set_load_error(error_message(cause, 'Could not load your library.'));
     }).finally(() => {
       if (!controller.signal.aborted) set_loading(false);
     });
@@ -104,7 +104,7 @@ export function use_library() {
         set_load_error(null);
         return true;
       } catch (cause: unknown) {
-        const error = cause instanceof Error ? cause.message : 'Your change could not be saved.';
+        const error = error_message(cause, 'Your change could not be saved.');
         publish(optimism.reject(model.current, mutation.sequence, error));
         return false;
       }

@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import { error_message } from '../../catalog/client';
 
 export type Saving = { state: 'idle' | 'saving' | 'saved' } | { state: 'failed'; error: string };
 
@@ -14,7 +15,7 @@ export function use_saving() {
       if (run === latest.current) set_saving({ state: 'saved' });
       return result;
     } catch (cause) {
-      if (run === latest.current) set_saving({ state: 'failed', error: cause instanceof Error ? cause.message : 'Could not save.' });
+      if (run === latest.current) set_saving({ state: 'failed', error: error_message(cause, 'Could not save.') });
       throw cause;
     }
   }, []);

@@ -1,5 +1,5 @@
-import { QrCode } from 'lucide-react';
 import { useState } from 'react';
+import { QrCode } from 'lucide-react';
 import { CopyButton } from './copy_button';
 import type { Address } from './types';
 

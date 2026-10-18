@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { LIMITS } from '../../cache/policy';
 import type { CacheSettings, CacheStatus } from '../../cache/types';
-import { request, send } from '../../catalog/client';
+import { error_message, request, send } from '../../catalog/client';
 import { bytes } from '../../torrents/format';
 import { NumberInput, type NumberSpec } from '../controls/number_input';
 import { Loading, SectionFrame } from '../controls/section_frame';
@@ -40,7 +40,7 @@ export function StorageSection() {
   useEffect(() => {
     const controller = new AbortController();
     request<CacheStatus>('/api/cache', { signal: controller.signal }).then(set_status)
-      .catch((cause: unknown) => { if (!controller.signal.aborted) set_error(cause instanceof Error ? cause.message : 'The server did not respond.'); });
+      .catch((cause: unknown) => { if (!controller.signal.aborted) set_error(error_message(cause)); });
     return () => controller.abort();
   }, [attempt]);
 

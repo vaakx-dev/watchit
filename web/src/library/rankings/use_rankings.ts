@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { use_resource } from '../../catalog/api';
-import { request } from '../../catalog/client';
+import { error_message, request } from '../../catalog/client';
 import { remember } from '../../cache/responses';
 import type { CatalogKind } from '../../catalog/types';
 import { create_queue } from '../queue';
@@ -35,7 +35,7 @@ export function use_rankings(kind: CatalogKind) {
         remember(url, data);
         publish(moves.confirm(model.current, pending.sequence, data));
       } catch (cause: unknown) {
-        publish(moves.reject(model.current, pending.sequence, cause instanceof Error ? cause.message : 'The server did not answer.'));
+        publish(moves.reject(model.current, pending.sequence, error_message(cause, 'The server did not answer.')));
       }
     });
   }, [kind, url, publish]);

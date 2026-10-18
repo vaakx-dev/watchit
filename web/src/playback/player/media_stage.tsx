@@ -15,7 +15,7 @@ import { use_stall_fallback } from '../sources/use_stall_fallback';
 import { Bezel } from './bezel';
 import { ControlBar } from './control_bar';
 import { ENDING_SECONDS, EndingCard } from './ending_card';
-import type { SettingsPage } from './settings_menu';
+import type { SettingsMenuPage } from './settings_menu';
 import { stage_message } from './stage_message';
 import { StageStatus } from './stage_status';
 import { back_href, TopBar } from './top_bar';
@@ -55,7 +55,7 @@ export function MediaStage({ title, source, start, position, next, library, pane
   const playback = use_session(title.id, file, start);
   const { session } = playback;
   const { audio, subtitles, text_subtitle } = use_tracks(engine, state, playback);
-  const [menu, set_menu] = useState<SettingsPage | null>(null);
+  const [menu, set_menu] = useState<SettingsMenuPage | null>(null);
   const [bezel, set_bezel] = useState<{ paused: boolean; count: number } | null>(null);
   const [dragging, set_dragging] = useState(false);
   const [dismissed, set_dismissed] = useState(false);

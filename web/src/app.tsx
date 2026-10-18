@@ -1,5 +1,5 @@
-import { scroll_to_top } from './navigation/scroll';
 import { useEffect, useRef } from 'react';
+import { scroll_to_top } from './navigation/scroll';
 import { use_history_shortcuts } from './navigation/use_history_shortcuts';
 import { framed } from './title_bar/frame';
 import { DiscoverPage } from './discover/discover_page';

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Library } from '../library/use_library';
-import { use_media_query } from '../ui/use_media_query';
+import { COMPACT_QUERY, use_media_query } from '../ui/use_media_query';
 import type { TitleFilters } from './filters/title_filters';
 import { SearchHome } from './home/search_home';
 import { remember_search } from './recent/api';
@@ -11,7 +11,7 @@ const OPENS_TITLE = 'a[href^="#/title/"], a[href^="#/watch/"]';
 
 export function SearchPage({ query, library }: { query: string; library: Library }) {
   const [filters, set_filters] = useState(SEARCH_DEFAULTS);
-  const compact = use_media_query('(max-width: 760px)');
+  const compact = use_media_query(COMPACT_QUERY);
   const text = query.trim();
 
   return <section className="search-page page-gutter" aria-label="Search"

@@ -1,4 +1,4 @@
-import type { CatalogKind } from '../catalog/types.ts';
+import type { CatalogKind } from '../catalog/types';
 import type { Rating } from '../generated/library/Rating';
 import type { Status } from '../generated/library/Status';
 

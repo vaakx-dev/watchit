@@ -1,5 +1,5 @@
-import { invoke } from '@tauri-apps/api/core';
 import type { MouseEvent } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 
 export function open_system_menu(event: MouseEvent<HTMLElement>) {
   event.preventDefault();

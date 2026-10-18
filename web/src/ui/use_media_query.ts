@@ -1,5 +1,7 @@
 import { useCallback, useSyncExternalStore } from 'react';
 
+export const COMPACT_QUERY = '(max-width: 760px)';
+
 export function use_media_query(query: string) {
   const subscribe = useCallback((notify: () => void) => {
     const media = window.matchMedia(query);

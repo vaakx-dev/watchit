@@ -3,9 +3,9 @@ import { use_title } from '../../catalog/api';
 import { Artwork } from '../../catalog/components/artwork';
 import { ImdbScore } from '../../catalog/components/imdb_score';
 import { runtime } from '../../catalog/format';
+import { kind_label } from '../../catalog/kinds';
 import type { CatalogEntry } from '../../catalog/types';
 import { StatusControls } from '../../library/components/status';
-import { kind_label } from '../../library/pages/kinds';
 import type { Library } from '../../library/use_library';
 
 function play_href(entry: CatalogEntry, next: string | undefined) {

@@ -20,7 +20,7 @@ export type Change =
       watched: boolean;
     };
 
-export type Mutation = Change & { sequence: number };
+type Mutation = Change & { sequence: number };
 
 export type State = {
   confirmed: LibrarySnapshot;

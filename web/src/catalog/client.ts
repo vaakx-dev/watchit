@@ -59,3 +59,7 @@ export function read<T extends object>(url: string, signal?: AbortSignal): Promi
   }, { once: true });
   return entry.operation as Promise<T>;
 }
+
+export function error_message(cause: unknown, fallback = 'The server did not respond.') {
+  return cause instanceof Error ? cause.message : fallback;
+}

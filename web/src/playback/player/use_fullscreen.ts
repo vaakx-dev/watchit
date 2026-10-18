@@ -1,5 +1,5 @@
-import { getCurrentWindow } from '@tauri-apps/api/window';
 import { useCallback, useEffect, useState, type RefObject } from 'react';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { desktop } from '../engine/mpv_bridge';
 
 export function use_fullscreen(root: RefObject<HTMLElement | null>) {

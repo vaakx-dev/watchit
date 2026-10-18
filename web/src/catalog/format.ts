@@ -7,6 +7,14 @@ export function runtime(minutes: number | null) {
   return [hours ? `${hours}h` : '', remainder ? `${remainder}m` : ''].filter(Boolean).join(' ');
 }
 
+export function duration_text(seconds: number) {
+  const minutes = Math.max(1, Math.round(seconds / 60));
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  return rest ? `${hours} h ${rest} min` : `${hours} h`;
+}
+
 export function time_left({ position_seconds, duration_seconds }: SavedPosition) {
   const minutes = Math.max(1, Math.ceil((duration_seconds - position_seconds) / 60));
   return minutes < 60 ? `${minutes} min left` : `${runtime(minutes)} left`;

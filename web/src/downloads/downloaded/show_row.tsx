@@ -3,12 +3,12 @@ import { bytes } from '../../torrents/format';
 import { DownloadRow } from '../row/download_row';
 import { Poster } from '../row/poster';
 import { StatusText } from '../row/status_text';
-import { use_title } from '../titles';
+import { use_title_details } from '../titles';
 import type { ShowGroup } from './library_groups';
 import { episode_count, season_count } from './show_summary';
 
 export function ShowRow({ show }: { show: ShowGroup }) {
-  const title = use_title(show.id);
+  const title = use_title_details(show.id);
   const name = title?.title ?? show.transfers[0]?.name ?? show.id;
   const href = `#/downloads/${show.id}`;
   const episodes = episode_count(show);

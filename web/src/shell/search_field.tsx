@@ -2,12 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import { search_route } from '../navigation/route';
 import { remember_search } from '../search/recent/api';
+import { typing } from '../ui/typing';
 
 const TYPING_DELAY = 250;
-
-function typing(target: EventTarget | null) {
-  return target instanceof HTMLElement && (target.isContentEditable || target.closest('input, textarea, select') !== null);
-}
 
 export function SearchField({ query }: { query: string | null }) {
   const input = useRef<HTMLInputElement>(null);

@@ -1,7 +1,7 @@
 import { Bookmark, Compass, Download, House, Search, Trophy, type LucideIcon } from 'lucide-react';
 import type { Route } from '../navigation/route';
 
-export type Destination = { view: Route['view']; href: string; label: string; icon: LucideIcon };
+type Destination = { view: Route['view']; href: string; label: string; icon: LucideIcon };
 
 export const TONIGHT: Destination = { view: 'tonight', href: '#/', label: 'Tonight', icon: House };
 export const DISCOVER: Destination = { view: 'discover', href: '#/discover', label: 'Discover', icon: Compass };

@@ -10,7 +10,6 @@
 
 .myshows-tool[data-set] { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
 .myshows-sort-sheet[data-layout="popover"] { width: 220px; }
-.myshows-retry { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-3); padding: var(--space-5) 0; font-size: var(--type-card); color: var(--t2); }
 
 .myshows-list { display: grid; grid-template-columns: minmax(0, 1fr); column-gap: var(--space-6); }
 .myshows-row { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); padding: 9px 0; -webkit-touch-callout: none; }

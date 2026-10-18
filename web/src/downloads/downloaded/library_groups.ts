@@ -2,7 +2,7 @@ import type { Transfer } from '../../torrents/types';
 import { episode_ids, episode_number, series_id } from '../titles';
 
 export type EpisodeCopy = { id: string; season: number; episode: number; name: string; size: number; transfer: Transfer; pack: boolean };
-export type SeasonShelf = { season: number; episodes: EpisodeCopy[] };
+type SeasonShelf = { season: number; episodes: EpisodeCopy[] };
 export type ShowGroup = { id: string; seasons: SeasonShelf[]; episodes: number; size: number; transfers: Transfer[] };
 export type LibraryItem = { kind: 'movie'; transfer: Transfer; added: number } | { kind: 'show'; show: ShowGroup; added: number };
 

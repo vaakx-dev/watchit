@@ -1,5 +1,5 @@
-import { onAction } from '@tauri-apps/plugin-notification';
 import { useEffect } from 'react';
+import { onAction } from '@tauri-apps/plugin-notification';
 import { desktop } from '../../playback/engine/mpv_bridge';
 import { on_ready_event, use_transfers } from '../../torrents/transfer_store';
 import { open_player, show_ready } from './display';

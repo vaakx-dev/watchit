@@ -2,13 +2,14 @@ import { useLayoutEffect, useRef, type KeyboardEvent } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { Artwork } from '../../catalog/components/artwork';
 import { menu_step, popover_position } from '../../library/menu';
+import { COMPACT_QUERY } from '../../ui/use_media_query';
 import './menu.css';
 
 export type MenuAction = { label: string; icon: LucideIcon; danger?: boolean; run: () => void };
 export type MenuAnchor = { top: number; bottom: number; right: number };
 export type MenuHeading = { artwork: string; name: string; detail: string };
 
-const SHEET = '(max-width: 760px), (pointer: coarse)';
+const SHEET = `${COMPACT_QUERY}, (pointer: coarse)`;
 
 function place(menu: HTMLElement, anchor: MenuAnchor) {
   const size = menu.getBoundingClientRect();

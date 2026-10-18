@@ -1,12 +1,12 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useRowScroll } from '../../ui/use_row_scroll';
+import { use_row_scroll } from '../../ui/use_row_scroll';
 import { SectionHeader } from '../../ui/section_header';
 
 export function Shelf({ title, link, children }: { title: string; link?: { href: string; label: string }; children: ReactNode }) {
   const id = useId();
   const row = useRef<HTMLDivElement>(null);
-  useRowScroll(row);
+  use_row_scroll(row);
   const [edges, set_edges] = useState({ start: true, end: false });
 
   function update_edges() {

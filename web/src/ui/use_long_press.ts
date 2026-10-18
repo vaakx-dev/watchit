@@ -3,9 +3,11 @@ import { useRef, type MouseEvent, type PointerEvent } from 'react';
 const DELAY_MS = 450;
 const SLOP = 10;
 
-export function use_long_press(on_press: () => void) {
+export type Point = { x: number; y: number };
+
+export function use_long_press(on_press: (point: Point) => void) {
   const timer = useRef<number | undefined>(undefined);
-  const start = useRef({ x: 0, y: 0 });
+  const start = useRef<Point>({ x: 0, y: 0 });
   const held = useRef(false);
   const fired = useRef(false);
 
@@ -18,7 +20,8 @@ export function use_long_press(on_press: () => void) {
     cancel();
     if (!held.current) return;
     held.current = false;
-    window.setTimeout(on_press);
+    const point = start.current;
+    window.setTimeout(() => on_press(point));
   }
 
   return {

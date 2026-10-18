@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { use_resource } from '../../catalog/api';
-import { send } from '../../catalog/client';
+import { error_message, send } from '../../catalog/client';
 import { TITLE_ID } from '../../catalog/identity';
 import type { Title } from '../../catalog/types';
 import type { PlaybackPreference } from '../../library/types';
@@ -56,7 +56,7 @@ export function use_sources(title: Title, remembered: string | null) {
     set_chosen(source_key(source));
     set_save_error(null);
     send<PlaybackPreference>(`/api/library/${encodeURIComponent(title.id)}/playback`, 'PATCH', { source: preference(source) })
-      .catch((cause: unknown) => set_save_error(cause instanceof Error ? cause.message : 'The server did not respond.'));
+      .catch((cause: unknown) => set_save_error(error_message(cause)));
   }
 
   return {

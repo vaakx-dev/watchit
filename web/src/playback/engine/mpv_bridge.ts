@@ -8,7 +8,7 @@ type MpvMessage =
   | ['mpv-set-prop', [string, MpvValue]]
   | ['mpv-observe-prop', string];
 
-export type MpvEvent =
+type MpvEvent =
   | ['mpv-prop-change', { name: string; data: unknown }]
   | ['mpv-event-ended', { reason: string }];
 

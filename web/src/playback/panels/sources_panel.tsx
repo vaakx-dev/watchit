@@ -8,8 +8,8 @@ import { RunningNote } from '../../downloads/readiness/running_note';
 import { SourceRow } from './source_row';
 import { FilterPanel } from '../../torrents/filters/filter_panel';
 import { FilterToolbar } from '../../torrents/filters/filter_toolbar';
-import { language_name } from '../../torrents/filters/language_name';
 import { use_torrent_filters } from '../../torrents/filters/use_torrent_filters';
+import { result_details } from '../../torrents/result_details';
 
 function Group({ title, note, children }: { title: string; note?: ReactNode; children: ReactNode[] }) {
   return <section className="source-group" aria-label={title}>
@@ -17,10 +17,6 @@ function Group({ title, note, children }: { title: string; note?: ReactNode; chi
     {children.length > 0 && <ul>{children}</ul>}
     {note}
   </section>;
-}
-
-function seeders(count: number | null) {
-  return count === null ? null : `${count.toLocaleString()} ${count === 1 ? 'seeder' : 'seeders'}`;
 }
 
 function Row({ source, sources, title_id }: { source: PlaySource; sources: Sources; title_id: string }) {
@@ -36,7 +32,7 @@ function Row({ source, sources, title_id }: { source: PlaySource; sources: Sourc
     const { result } = source;
     return <SourceRow resolution={result.resolution} hdr={result.hdr} name={result.filename ?? result.name} current={current} on_play={play}
       note={<RunningNote info_hash={result.info_hash} />}
-      details={[seeders(result.seeders), result.size_bytes !== null && bytes(result.size_bytes), result.video_codec, result.audio, result.site, result.languages.map(language_name).join(' / ')]}
+      details={result_details(result)}
       action={<DownloadResultButton result={result} title_id={title_id} />} />;
   }
   return <li className="source-row">
