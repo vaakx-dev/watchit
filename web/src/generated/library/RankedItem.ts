@@ -4,4 +4,4 @@ import type { SavedPosition } from "../catalog/SavedPosition";
 import type { SeriesProgress } from "../catalog/SeriesProgress";
 import type { PersonalEntry } from "./PersonalEntry";
 
-export type RankedItem = { rank: number, position: number, title: CatalogEntry, entry: PersonalEntry, opened_at: string | null, progress: SeriesProgress | null, resume: SavedPosition | null, };
+export type RankedItem = { rank: number, position: number, title: CatalogEntry, entry: PersonalEntry, opened_at: string | null, progress: SeriesProgress | null, resume: SavedPosition | null, status_changed_at: string | null, minutes: number | null, seasons: number | null, season_episodes: number | null, };

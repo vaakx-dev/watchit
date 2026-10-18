@@ -63,18 +63,21 @@ main { flex: 1 1 auto; min-width: 0; min-height: 0; overflow-y: auto; }
 .chips > button { height: 28px; padding: 0 11px; border-radius: var(--radius-full); background: var(--s2); color: var(--t2); font-size: var(--type-meta); }
 .chips > button:hover { color: var(--t1); }
 .chips > button[aria-pressed="true"] { background: var(--t1); color: #000; }
-.pills > button { padding: 5px 9px; border-radius: var(--radius-full); color: var(--t2); font-size: var(--type-card); }
-.pills > button:hover { color: var(--t1); }
-.pills > button[aria-pressed="true"] { background: var(--s3); color: var(--t1); font-weight: 700; }
 .segmented { display: inline-flex; gap: 2px; padding: 3px; border-radius: 9px; background: var(--s1); }
 .segmented > button { padding: 5px 12px; border-radius: 7px; color: var(--t2); font-size: var(--type-meta); }
 .segmented > button[aria-pressed="true"] { background: var(--s3); color: var(--t1); }
-.tabs { flex-wrap: nowrap; gap: 2px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--line); }
-.tabs > button { position: relative; padding: 9px 12px 11px; color: var(--t2); font-size: var(--type-card); }
-.tabs > button:focus-visible { outline-offset: -2px; }
-.tabs > button[aria-pressed="true"] { color: var(--t1); }
-.tabs .lucide { width: 18px; height: 18px; }
-.tabs > button[aria-pressed="true"]::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: -1px; height: 2px; border-radius: 2px; background: var(--status, var(--t1)); }
+.pills { flex-wrap: nowrap; gap: var(--space-2); overflow-x: auto; scrollbar-width: none; }
+.pills > button { gap: 7px; padding: 7px 12px; border-radius: var(--radius-full); background: var(--s1); color: var(--t2); font-size: var(--type-card); line-height: 1.4; }
+.pills > button:hover { color: var(--t1); }
+.pills > button[aria-pressed="true"] { background: var(--t1); color: var(--bg); font-weight: 700; }
+.pills small { font-size: var(--type-meta); font-weight: 500; }
+.pills > button[aria-pressed="true"] small { color: #52525b; }
+.pills .eye { width: 18px; height: 18px; }
+.pills .lucide { width: 15px; height: 15px; }
+.quiet { flex-wrap: nowrap; gap: var(--space-1); }
+.quiet > button { padding: 5px 9px; border-radius: var(--radius-full); color: var(--t2); font-size: var(--type-card); line-height: 1.4; }
+.quiet > button:hover { color: var(--t1); }
+.quiet > button[aria-pressed="true"] { background: var(--s3); color: var(--t1); font-weight: 700; }
 
 .page { padding-top: var(--space-6); }
 .page-title { margin-bottom: var(--space-4); font-size: var(--type-page); font-weight: 800; line-height: 1.15; letter-spacing: -.02em; overflow-wrap: anywhere; }

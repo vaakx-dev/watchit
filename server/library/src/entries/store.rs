@@ -28,6 +28,13 @@ pub const TABLE: &str = "
   ) WITHOUT ROWID;
   CREATE INDEX IF NOT EXISTS library_entries_series ON library_entries(profile_id, series_id) WHERE series_id IS NOT NULL;
   CREATE INDEX IF NOT EXISTS library_entries_status ON library_entries(profile_id, status) WHERE status IS NOT NULL;
+  CREATE TABLE IF NOT EXISTS library_status_times (
+    profile_id INTEGER NOT NULL,
+    id TEXT NOT NULL,
+    changed_at TEXT NOT NULL,
+    PRIMARY KEY (profile_id, id),
+    FOREIGN KEY (profile_id, id) REFERENCES library_entries(profile_id, id) ON DELETE CASCADE
+  ) WITHOUT ROWID;
 ";
 
 #[derive(Clone, Default)]
@@ -86,6 +93,19 @@ fn store(conn: &Connection, profile: i64, id: &str, series_id: Option<&str>, mar
     Ok(())
 }
 
+fn stamp_status(conn: &Connection, profile: i64, id: &str, status: Option<Status>) -> AppResult<()> {
+    match status {
+        Some(_) => conn
+            .prepare_cached(
+                "INSERT INTO library_status_times (profile_id, id, changed_at) VALUES (?1, ?2, ?3)
+                 ON CONFLICT(profile_id, id) DO UPDATE SET changed_at = excluded.changed_at",
+            )?
+            .execute(params![profile, id, now_iso()])?,
+        None => conn.prepare_cached("DELETE FROM library_status_times WHERE profile_id = ?1 AND id = ?2")?.execute(params![profile, id])?,
+    };
+    Ok(())
+}
+
 pub fn drop_empty(conn: &Connection, profile: i64) -> AppResult<()> {
     conn.prepare_cached(
         "DELETE FROM library_entries WHERE profile_id = ?1 AND rating IS NULL AND status IS NULL AND favorite = 0
@@ -101,6 +121,9 @@ pub fn apply(conn: &mut Connection, profile: i64, id: &str, title: &TitleRef, pa
     let next = previous.clone().patched(patch);
     let series_id = if title.kind == MediaKind::Episode { title.series_id.as_deref() } else { None };
     store(&tx, profile, id, series_id, &next)?;
+    if next.status != previous.status {
+        stamp_status(&tx, profile, id, next.status)?;
+    }
     if title.kind != MediaKind::Episode && next.rating != previous.rating {
         rankings::rating_changed(&tx, profile, id, previous.rating, next.rating)?;
     }

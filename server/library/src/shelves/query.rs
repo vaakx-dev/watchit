@@ -6,7 +6,7 @@ use watchit_catalog::CatalogKind;
 
 use crate::query::{PAGE_SIZE, kind_condition, offset};
 use crate::status::Status;
-use crate::titles::{LIBRARY_TITLES, LibraryRow, RANKING_ORDER, RECENT_ORDER};
+use crate::titles::{ADDED_ORDER, LIBRARY_TITLES, LibraryRow, RANKING_ORDER, RECENT_ORDER};
 
 #[derive(Clone, Copy, Debug)]
 pub enum Shelf {
@@ -56,6 +56,7 @@ impl Shelf {
 #[derive(Clone, Copy, Debug)]
 pub enum LibrarySort {
     Recent,
+    Added,
     Title,
     Newest,
     Rating,
@@ -65,6 +66,7 @@ impl LibrarySort {
     pub fn parse(value: &str) -> Option<Self> {
         match value {
             "recent" => Some(Self::Recent),
+            "added" => Some(Self::Added),
             "title" => Some(Self::Title),
             "newest" => Some(Self::Newest),
             "rating" => Some(Self::Rating),
@@ -75,6 +77,7 @@ impl LibrarySort {
     fn order(self) -> &'static str {
         match self {
             Self::Recent => RECENT_ORDER,
+            Self::Added => ADDED_ORDER,
             Self::Title => "title COLLATE NOCASE, id",
             Self::Newest => "year DESC, title COLLATE NOCASE, id",
             Self::Rating => RANKING_ORDER,

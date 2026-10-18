@@ -13,6 +13,10 @@ pub struct LibraryItem {
     pub opened_at: Option<String>,
     pub progress: Option<SeriesProgress>,
     pub resume: Option<SavedPosition>,
+    pub status_changed_at: Option<String>,
+    pub minutes: Option<u32>,
+    pub seasons: Option<i64>,
+    pub season_episodes: Option<i64>,
 }
 
 #[derive(Debug, Default, Serialize, TS)]

@@ -59,6 +59,11 @@ pub(crate) fn season_ids(conn: &Connection, series_id: &str, season: i64) -> App
     Ok(rows.collect::<rusqlite::Result<_>>()?)
 }
 
+pub(crate) fn season_count(conn: &Connection, series_id: &str) -> AppResult<i64> {
+    let sql = format!("SELECT COUNT(DISTINCT titles.season) {EPISODES} AND {NUMBERED} AND titles.season > 0");
+    Ok(conn.prepare_cached(&sql)?.query_row([series_id], |row| row.get(0))?)
+}
+
 pub(crate) fn navigation(
     conn: &Connection,
     artwork: &Artwork,

@@ -10,7 +10,7 @@ import { CatalogStatus } from './catalog/components/status';
 import { use_title } from './catalog/api';
 import { ReadyNotifications } from './downloads/notify/ready_notifications';
 import { DownloadsPage } from './downloads/downloads_page';
-import { MyShows } from './library/pages/my_shows';
+import { MyShows } from './library/my_shows/my_shows';
 import { QuickRatePage } from './library/rankings/rate/quick_rate_page';
 import { RankingsPage } from './library/rankings/rankings_page';
 import { use_library } from './library/use_library';
