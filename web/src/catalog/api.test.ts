@@ -18,10 +18,10 @@ describe('catalog loading state', () => {
     expect(poll_delay(10, true)).toBe(2500);
   });
 
-  it('polls only while the page waits for items or missing artwork', () => {
+  it('polls while an import is running or artwork is missing', () => {
     const artwork_status = { pending: true, running: true, error: null };
     expect(awaiting_update({ imports }, [])).toBe(true);
-    expect(awaiting_update({ imports }, [entry])).toBe(false);
+    expect(awaiting_update({ imports }, [entry])).toBe(true);
     expect(awaiting_update({ imports: { ...imports, pending: false } }, [])).toBe(false);
     expect(awaiting_update({ artwork_status }, [entry])).toBe(true);
     expect(awaiting_update({ artwork_status }, [{ ...entry, artwork: '/art.jpg' }])).toBe(false);
