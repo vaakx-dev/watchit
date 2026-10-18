@@ -1,17 +1,4 @@
-.queue-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--rule); }
-.queue-row { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) 0; border-bottom: 1px solid var(--rule); background: var(--bg); }
-.queue-row[data-dragging] { opacity: .6; }
-.queue-handle { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 28px; height: 36px; border-radius: 6px; color: var(--t3); cursor: grab; touch-action: none; }
+.queue-number { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--s2); color: var(--t2); font-size: var(--type-meta); font-weight: 700; font-variant-numeric: tabular-nums; }
+.queue-handle { display: grid; place-items: center; width: 34px; height: 34px; border-radius: var(--radius-button); color: var(--t3); cursor: grab; touch-action: none; }
 .queue-handle:hover, .queue-handle:focus-visible { background: var(--s2); color: var(--t1); }
-.queue-row[data-dragging] .queue-handle { cursor: grabbing; }
-.queue-number { flex: none; min-width: 2ch; color: var(--t2); font-size: var(--type-meta); font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
-.queue-poster { position: relative; flex: none; width: 32px; aspect-ratio: 2 / 3; overflow: hidden; border-radius: 4px; background: var(--s1); }
-.queue-poster .artwork { position: absolute; inset: 0; }
-.queue-copy { display: grid; flex: 1; gap: 2px; min-width: 0; }
-.queue-name { display: flex; gap: var(--space-2); overflow: hidden; font-size: var(--type-card); font-weight: 600; white-space: nowrap; }
-.queue-name span { overflow: hidden; text-overflow: ellipsis; }
-.queue-actions { display: flex; flex: none; align-items: center; gap: var(--space-1); }
-
-@media (max-width: 640px) {
-  .queue-next span { display: none; }
-}
+.download-item[data-dragging] .queue-handle { cursor: grabbing; }
