@@ -3,6 +3,7 @@
 .rankings-layout:not(:has(.rate-queue)) { grid-template-columns: minmax(0, 1fr); }
 .rankings-main { min-width: 0; }
 .ranking-toolbar { display: flex; flex-direction: row-reverse; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); padding-bottom: 10px; }
+.ranking-toolbar .filter-switch { flex: none; }
 .ranking-error { width: fit-content; max-width: 100%; margin-bottom: var(--space-4); padding: var(--space-3) var(--space-4); border-radius: var(--radius-panel); background: color-mix(in srgb, var(--dropped) 14%, var(--s1)); font-size: var(--type-card); }
 .stars { --star-size: 11px; display: inline-flex; gap: 1px; vertical-align: middle; }
 
@@ -88,8 +89,6 @@ a.tier-strip:hover .tier-more { color: var(--t1); border-color: var(--t3); }
   .rankings-layout { grid-template-columns: minmax(0, 1fr); }
   .rate-queue { display: none; }
   .ranking-toolbar { flex-direction: column; align-items: stretch; gap: 14px; }
-  .ranking-toolbar .segmented { display: flex; }
-  .ranking-toolbar .segmented > button { flex: 1; padding: 6px 0; font-size: var(--type-card); }
   .rate-prompt, .podium { display: grid; }
   .ranked-row[data-podium="true"] { display: none; }
   .tier-strip { margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); }

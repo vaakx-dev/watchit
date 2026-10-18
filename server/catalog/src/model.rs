@@ -195,6 +195,7 @@ pub struct CatalogPage {
     pub items: Vec<CatalogEntry>,
     pub page: u32,
     pub has_next: bool,
+    pub total: u32,
     pub genres: Vec<GenreOption>,
     pub freshness: Freshness,
     pub artwork_status: ArtworkStatus,

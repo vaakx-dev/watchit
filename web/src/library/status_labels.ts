@@ -7,3 +7,11 @@ export const STATUS_LABELS: Record<Status, string> = {
   watched: 'Watched',
   dropped: 'Dropped',
 };
+
+export const STATUS_BADGES: Record<Status, string> = {
+  want: 'Want',
+  watching: 'Watching',
+  paused: 'Paused',
+  watched: 'Watched',
+  dropped: 'Dropped',
+};

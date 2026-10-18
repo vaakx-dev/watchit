@@ -1,31 +1,18 @@
-import type { Transfer, TransferState } from '../torrents/types';
+import type { Transfer } from '../torrents/types';
 
-export const STATE_LABELS: Record<TransferState, string> = {
-  metadata: 'Fetching details',
-  queued: 'Queued',
-  downloading: 'Downloading',
-  paused: 'Paused',
-  moving: 'Moving files',
-  seeding: 'Seeding',
-  completed: 'Completed',
-  error: 'Error',
-};
-
-export function finished(transfer: Transfer) {
+function finished(transfer: Transfer) {
   return transfer.state === 'seeding' || transfer.state === 'completed' || (transfer.progress >= 1 && transfer.state !== 'error');
 }
 
-function waiting(transfer: Transfer) {
-  return transfer.queue_position !== null && (transfer.state === 'queued' || transfer.state === 'paused');
+function queue_order(a: Transfer, b: Transfer) {
+  return (a.queue_position ?? Number.MAX_SAFE_INTEGER) - (b.queue_position ?? Number.MAX_SAFE_INTEGER) || a.added_at - b.added_at;
 }
 
 export function sections(transfers: readonly Transfer[]) {
   const downloads = transfers.filter(transfer => transfer.kind === 'download');
-  const unfinished = downloads.filter(transfer => !finished(transfer));
   return {
-    now: unfinished.filter(transfer => !waiting(transfer)),
-    up_next: unfinished.filter(waiting).sort((a, b) => (a.queue_position ?? 0) - (b.queue_position ?? 0)),
-    completed: downloads.filter(finished),
-    streams: transfers.filter(transfer => transfer.kind === 'stream'),
+    downloading: downloads.filter(transfer => !finished(transfer)).sort(queue_order),
+    downloaded: downloads.filter(finished),
+    cached: transfers.filter(transfer => transfer.kind === 'stream'),
   };
 }

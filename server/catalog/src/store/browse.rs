@@ -127,15 +127,19 @@ pub(crate) fn browse(
     if let Some(filter) = filter {
         conditions.push(filter.condition(&mut parameters));
     }
+    let filters = conditions.join(" AND ");
+    let total = conn.prepare_cached(&format!("SELECT COUNT(*) FROM titles WHERE {filters}"))?
+        .query_row(rusqlite::params_from_iter(&parameters), |row| row.get(0))?;
     parameters.push(Value::Integer(PAGE_SIZE as i64 + 1));
     parameters.push(Value::Integer(offset(query.page)));
-    let sql = format!("SELECT {ENTRY_COLUMNS} FROM titles WHERE {} ORDER BY {} LIMIT ? OFFSET ?", conditions.join(" AND "), order(query));
+    let sql = format!("SELECT {ENTRY_COLUMNS} FROM titles WHERE {filters} ORDER BY {} LIMIT ? OFFSET ?", order(query));
     let (rows, has_next) = page_rows(&mut *conn.prepare_cached(&sql)?, rusqlite::params_from_iter(parameters))?;
     let images = images(conn, artwork, &rows)?;
     Ok(CatalogPage {
         items: rows.iter().map(|row| row.entry(&images)).collect(),
         page: query.page,
         has_next,
+        total,
         genres,
         freshness: freshness(&rows, metadata_ms),
         artwork_status: images.status,

@@ -60,7 +60,9 @@ function Ranking({ query, library }: { query: RankingsQuery; library: Library })
   return <div className="rankings-layout">
     <div className="rankings-main">
       <div className="ranking-toolbar">
-        <Choices look="segmented" label="Layout" options={LAYOUTS} value={query.layout} on_change={layout => change({ layout })} />
+        <div className="filter-switch">
+          <Choices look="segmented" label="Layout" options={LAYOUTS} value={query.layout} on_change={layout => change({ layout })} />
+        </div>
         <Choices look="pills" label="Type" options={KINDS} value={query.kind} on_change={kind => change({ kind })} />
       </div>
       {unrated.titles && unrated.titles.length > 0 && <RatePrompt titles={unrated.titles} rate={rate} />}

@@ -1,6 +1,7 @@
 import { use_resource } from '../catalog/api';
 import type { TitleResult } from '../catalog/types';
-import type { Transfer } from '../torrents/types';
+import { local_files_url } from '../torrents/api';
+import type { LocalFile, Transfer } from '../torrents/types';
 
 export function series_id(title_id: string) {
   return title_id.split(':')[0] ?? title_id;
@@ -36,6 +37,13 @@ export function use_transfer_title(transfer: Transfer) {
   const id = series_id(transfer.title_id);
   const title = use_title(id);
   return { id, title, name: title?.title ?? transfer.name, episode: episode_label(transfer) };
+}
+
+export function use_quality(transfer: Transfer) {
+  const { resource } = use_resource<{ files: LocalFile[] }>(local_files_url(transfer.title_id));
+  const file = resource.status === 'ready' ? resource.data.files.find(item => item.info_hash === transfer.info_hash) : undefined;
+  if (!file?.resolution) return null;
+  return file.hdr.length ? `${file.resolution} HDR` : file.resolution;
 }
 
 export function watch_href(title_id: string) {
