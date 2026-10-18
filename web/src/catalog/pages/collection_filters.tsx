@@ -2,8 +2,15 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { Choices, type Choice } from '../../ui/choices';
 import { useRowScroll } from '../../ui/use_row_scroll';
 import { Check } from 'lucide-react';
-import { HIDDEN_STATUSES, type DiscoverQuery, type HiddenStatus } from '../../navigation/discover';
-import type { CatalogKind, CatalogSort, GenreOption } from '../types';
+import { SORT_LABELS } from '../sort_labels';
+import type { CatalogKind, CatalogQuery, CatalogSort, GenreOption } from '../types';
+
+const HIDDEN_STATUSES = ['watched', 'dropped'] as const;
+type HiddenStatus = typeof HIDDEN_STATUSES[number];
+
+export type SearchFilters = Pick<CatalogQuery, 'kind' | 'sort' | 'genre' | 'page'> & { hide: HiddenStatus[] };
+
+export const SEARCH_DEFAULTS: SearchFilters = { kind: 'all', sort: 'trending', genre: '', hide: [], page: 1 };
 
 const KINDS: readonly Choice<CatalogKind>[] = [
   { value: 'all', label: 'All' },
@@ -12,13 +19,11 @@ const KINDS: readonly Choice<CatalogKind>[] = [
   { value: 'anime', label: 'Anime' },
 ];
 
-export const SORT_LABELS: Record<CatalogSort, string> = { trending: 'Trending', top_rated: 'Top rated', newest: 'Newest', title: 'A–Z' };
-
 const SORTS: readonly Choice<CatalogSort>[] = (['trending', 'top_rated', 'newest', 'title'] as const).map(value => ({ value, label: SORT_LABELS[value] }));
 
 const HIDDEN_LABELS: Record<HiddenStatus, string> = { watched: 'Watched', dropped: 'Dropped' };
 
-type Change = (next: Partial<DiscoverQuery>) => void;
+type Change = (next: Partial<SearchFilters>) => void;
 
 function Genres({ genres, value, on_change }: { genres: readonly GenreOption[]; value: string; on_change: Change }) {
   const row = useRef<HTMLDivElement>(null);
@@ -58,7 +63,7 @@ function Hidden({ value, on_change }: { value: HiddenStatus[]; on_change: Change
   </div>;
 }
 
-export function CollectionFilters({ filters, genres, on_change }: { filters: DiscoverQuery; genres: readonly GenreOption[]; on_change: Change }) {
+export function CollectionFilters({ filters, genres, on_change }: { filters: SearchFilters; genres: readonly GenreOption[]; on_change: Change }) {
   return <div className="discover-filters">
     <span className="filter-label" aria-hidden="true">Type</span>
     <Choices label="Type" look="segmented" options={KINDS} value={filters.kind} on_change={kind => on_change({ kind })} />

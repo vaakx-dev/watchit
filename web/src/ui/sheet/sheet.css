@@ -1,0 +1,25 @@
+.sheet { position: fixed; inset: auto; margin: 0; width: 380px; max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain; padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-panel); background: var(--s1); color: var(--t1); box-shadow: 0 12px 32px rgb(0 0 0 / .5); }
+.sheet::backdrop { background: transparent; }
+.sheet-header { position: relative; display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
+.sheet-grab { flex: 1; min-width: 0; }
+.sheet-grab h2 { font-size: var(--type-section); font-weight: 700; line-height: 1.3; }
+.sheet-handle { display: none; }
+.sheet-action { color: var(--t2); font-size: var(--type-card); font-weight: 500; }
+.sheet-action:hover:not(:disabled) { color: var(--t1); }
+
+.sheet-options { display: grid; gap: 2px; }
+.sheet-option { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 42px; padding: 0 10px; border-radius: var(--radius-button); text-align: left; font-size: 14px; font-weight: 500; }
+.sheet-option:hover { background: var(--s2); }
+.sheet-option:focus-visible { outline-offset: -2px; }
+.sheet-option .lucide { width: 16px; height: 16px; margin-left: auto; visibility: hidden; }
+.sheet-option[aria-pressed="true"] { background: var(--s2); font-weight: 700; }
+.sheet-option[aria-pressed="true"] .lucide { visibility: visible; }
+
+.sheet[data-layout="sheet"] { inset: auto 0 0; width: 100%; max-width: 520px; max-height: 88dvh; margin: 0 auto; padding: 10px var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom)); border-width: 1px 0 0; border-radius: 16px 16px 0 0; transition: translate .2s ease-out; }
+.sheet[data-layout="sheet"]::backdrop { background: rgb(0 0 0 / .55); }
+.sheet[data-layout="sheet"] .sheet-header { padding-top: 14px; }
+.sheet[data-layout="sheet"] .sheet-grab { align-self: stretch; margin-top: -24px; padding-top: 24px; touch-action: none; }
+.sheet[data-layout="sheet"] .sheet-handle { display: block; position: absolute; top: 0; left: 50%; width: 36px; height: 4px; margin-left: -18px; border-radius: 2px; background: var(--s3); }
+.sheet[data-layout="sheet"] .sheet-option { min-height: 52px; font-size: var(--type-body); }
+@starting-style { .sheet[data-layout="sheet"]:popover-open { translate: 0 100%; } }
+@media (prefers-reduced-motion: reduce) { .sheet[data-layout="sheet"] { transition: none; } }

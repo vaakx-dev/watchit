@@ -1,39 +1,14 @@
-import { useRef, type PointerEvent } from 'react';
 import { Check, X } from 'lucide-react';
 import { STATUS_LABELS } from '../status_labels';
 import { STATUSES, type Status } from '../types';
 import { StatusEye } from './eye';
-
-const DISMISS_DISTANCE = 64;
+import { use_drag_dismiss } from '../../ui/sheet/use_drag_dismiss';
 
 function SheetHeader({ title, on_close }: { title: string; on_close: () => void }) {
-  const start = useRef<number | null>(null);
-
-  function sheet(event: PointerEvent<HTMLElement>) {
-    return event.currentTarget.closest<HTMLElement>('.status-menu');
-  }
-
-  function release(event: PointerEvent<HTMLElement>) {
-    if (start.current === null) return;
-    const distance = event.clientY - start.current;
-    start.current = null;
-    const panel = sheet(event);
-    panel?.style.removeProperty('transition');
-    panel?.style.removeProperty('translate');
-    if (event.type === 'pointerup' && distance > DISMISS_DISTANCE) on_close();
-  }
+  const drag = use_drag_dismiss(on_close);
 
   return <div className="status-sheet-header">
-    <div className="status-sheet-grab"
-      onPointerDown={event => {
-        start.current = event.clientY;
-        event.currentTarget.setPointerCapture(event.pointerId);
-        sheet(event)?.style.setProperty('transition', 'none');
-      }}
-      onPointerMove={event => {
-        if (start.current !== null) sheet(event)?.style.setProperty('translate', `0 ${Math.max(0, event.clientY - start.current)}px`);
-      }}
-      onPointerUp={release} onPointerCancel={release}>
+    <div className="status-sheet-grab" {...drag}>
       <span className="status-sheet-handle" aria-hidden="true" />
       <h2>{title}</h2>
     </div>
