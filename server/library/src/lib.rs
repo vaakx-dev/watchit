@@ -9,13 +9,14 @@ mod progress;
 mod query;
 mod rankings;
 mod rating;
+mod searches;
 mod seasons;
 mod shelves;
 mod status;
 mod titles;
 
 use axum::Router;
-use axum::routing::{get, patch, put};
+use axum::routing::{delete, get, patch, put};
 use ts_rs::{Config, ExportError, TS};
 use watchit_catalog::Catalog;
 use watchit_core::{AppError, AppResult, Context, Db};
@@ -50,7 +51,7 @@ impl Library {
 }
 
 fn tables() -> String {
-    [entries::TABLE, seasons::TABLE, progress::TABLE, playback_source::TABLE].concat()
+    [entries::TABLE, seasons::TABLE, progress::TABLE, playback_source::TABLE, searches::TABLE].concat()
 }
 
 pub fn router(library: Library) -> Router {
@@ -65,6 +66,8 @@ pub fn router(library: Library) -> Router {
         .route("/api/rankings/unrated", get(rankings::unrated))
         .route("/api/rankings/{id}", patch(rankings::place))
         .route("/api/progress/{id}", put(progress::save).delete(progress::clear))
+        .route("/api/searches", get(searches::list).post(searches::remember).delete(searches::clear))
+        .route("/api/searches/{query}", delete(searches::forget))
         .with_state(library)
 }
 
@@ -81,5 +84,7 @@ pub fn export_types(config: &Config) -> Result<(), ExportError> {
     playback_source::PlaybackPreference::export_all(config)?;
     playback_source::SourcePatch::export_all(config)?;
     progress::ProgressSaved::export_all(config)?;
+    searches::RecentSearches::export_all(config)?;
+    searches::NewSearch::export_all(config)?;
     progress::Reading::export_all(config)
 }

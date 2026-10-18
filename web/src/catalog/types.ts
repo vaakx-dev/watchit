@@ -23,7 +23,7 @@ export type { Trailer } from '../generated/catalog/Trailer';
 export type { TrendingEntry } from '../generated/catalog/TrendingEntry';
 
 export type TrendingKind = Exclude<CatalogKind, 'all'>;
-export const CATALOG_SORTS = ['newest', 'title', 'trending', 'top_rated'] as const;
+export const CATALOG_SORTS = ['relevance', 'newest', 'title', 'trending', 'top_rated'] as const;
 export type CatalogSort = typeof CATALOG_SORTS[number];
 
 export type CatalogPage = CatalogResponse;

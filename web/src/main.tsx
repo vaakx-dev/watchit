@@ -12,7 +12,6 @@ import './styles/icons.css';
 import './styles/shell.css';
 import './styles/catalog.css';
 import './styles/tonight.css';
-import './styles/discover.css';
 import './ui/filters/filters.css';
 import './ui/sheet/sheet.css';
 import './ui/near_end.css';

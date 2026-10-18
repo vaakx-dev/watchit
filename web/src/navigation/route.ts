@@ -16,7 +16,7 @@ export type Route =
   | { view: 'title' | 'watch'; id: string };
 
 export function search_route(query: string) {
-  return `#/search?${new URLSearchParams({ q: query })}`;
+  return query ? `#/search?${new URLSearchParams({ q: query })}` : '#/search';
 }
 
 export function discover_route(kind: CatalogKind) {

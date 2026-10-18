@@ -3,7 +3,7 @@ import { DISCOVER_DEFAULTS, type DiscoverQuery } from '../navigation/discover';
 
 const KIND_NAMES: Record<CatalogKind, string> = { all: 'All titles', movie: 'Movies', series: 'Series', anime: 'Anime' };
 const KIND_NOUNS: Record<CatalogKind, string> = { all: 'titles', movie: 'movies', series: 'series', anime: 'anime' };
-const SORT_PHRASES: Record<CatalogSort, string> = { trending: 'trending', top_rated: 'top rated', newest: 'newest', title: 'A–Z' };
+const SORT_PHRASES: Record<CatalogSort, string> = { relevance: 'best match', trending: 'trending', top_rated: 'top rated', newest: 'newest', title: 'A–Z' };
 
 export function narrowed({ kind, sort, genre }: DiscoverQuery) {
   return kind !== DISCOVER_DEFAULTS.kind || sort !== DISCOVER_DEFAULTS.sort || genre !== DISCOVER_DEFAULTS.genre;
