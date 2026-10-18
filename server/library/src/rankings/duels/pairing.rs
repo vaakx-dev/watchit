@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
-use super::elo::Duelist;
 use super::random;
+use super::ratings::Duelist;
 
 const CLOSEST: usize = 3;
 
@@ -30,7 +30,8 @@ pub fn choose(pool: &[Duelist], met: &HashSet<Meeting>) -> Option<(usize, usize)
         .filter(|&index| !met.contains(&meeting(&pool[first].id, &pool[index].id)))
         .collect();
     let mut candidates = if fresh.is_empty() { others } else { fresh };
-    candidates.sort_by_key(|&index| (pool[index].rating - pool[first].rating).abs());
+    let distance = |index: usize| (pool[index].rating - pool[first].rating).abs();
+    candidates.sort_by(|&a, &b| distance(a).total_cmp(&distance(b)));
     let second = candidates[random::below(candidates.len().min(CLOSEST))];
     Some(if random::below(2) == 0 { (first, second) } else { (second, first) })
 }

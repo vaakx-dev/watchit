@@ -1,7 +1,8 @@
 mod board;
-mod elo;
+mod fit;
 mod pairing;
 mod random;
+mod ratings;
 mod routes;
 mod store;
 mod types;
